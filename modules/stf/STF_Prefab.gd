@@ -14,20 +14,22 @@ func _get_like_types() -> Array[String]:
 	return ["prefab"]
 
 func _get_godot_type() -> String:
-	return "Node3D"
+	return "SceneTree"
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
 	var ret = Node3D.new()
 	ret.name = json_resource.get("name", "STF Prefab")
-	
+
+	ret.set_meta("stf_id", stf_id)
+	ret.set_meta("stf_name", json_resource.get("name", null))
+
 	for child_id in json_resource.get("root_nodes", []):
 		var child: Node3D = context.import(child_id, "node", ret)
 		ret.add_child(child)
 
 	__set_owner(ret, ret)
 
-	ret.set_meta("stf_id", stf_id)
-	ret.set_meta("stf_name", json_resource.get("name", null))
+	# todo animations
 
 	return ret
 

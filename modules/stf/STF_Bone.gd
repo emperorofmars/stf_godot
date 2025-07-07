@@ -27,6 +27,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var child_index = context.import(child_id, "node", context_object)
 		armature.set_bone_parent(child_index, bone_index)
 
+	# todo trs
+
 	return bone_index
 
 func _export() -> STF_ResourceExport:

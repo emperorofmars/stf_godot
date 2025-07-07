@@ -50,4 +50,4 @@ func _open_export_dialog():
 	file_export_dialog.popup_centered_ratio()
 
 func _export_dialog_action(path: String):
-	STF_Exporter.export(path, get_tree().get_edited_scene_root())
+	STF_Exporter.export(path, get_tree())

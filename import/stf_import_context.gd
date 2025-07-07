@@ -18,6 +18,7 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	if(module):
 		var ret = module._import(self, stf_id, json_resource, context_object)
 		_state.register_imported_resource(stf_id, ret)
+		# todo components if relevant and present
 		return ret
 	# scream error and fail hard
 	return null

@@ -14,12 +14,12 @@ func _get_import_flags() -> int:
 	return IMPORT_SCENE
 
 func _get_import_options(path: String):
-	return [{"name": "authoring_import", "default_value": false}]
+	add_import_option_advanced(TYPE_BOOL, "authoring_import", false)
+	add_import_option_advanced(TYPE_BOOL, "use_asset_name", false)
 
 func _get_option_visibility(path: String, for_animation: bool, option: String):
-	if(option == "authoring_import"):
-		return true
-	return false
+	return option in ["authoring_import", "use_asset_name", "nodes/root_name", "nodes/root_type", "nodes/apply_root_scale"]
+	#return true
 
 func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	print("Importing STF asset: " + path)
