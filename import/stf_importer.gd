@@ -13,8 +13,13 @@ func _get_extensions() -> PackedStringArray:
 func _get_import_flags() -> int:
 	return IMPORT_SCENE
 
-func _get_import_options(path):
-	return [{"name": "Authoring Import", "default_value": false}]
+func _get_import_options(path: String):
+	return [{"name": "authoring_import", "default_value": false}]
+
+func _get_option_visibility(path: String, for_animation: bool, option: String):
+	if(option == "authoring_import"):
+		return true
+	return false
 
 func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	print("Importing STF asset: " + path)

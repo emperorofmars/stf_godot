@@ -15,6 +15,21 @@ var _imported_resources: Dictionary[String, Variant] = {}
 func _init(stf_file: STF_File, modules: Dictionary[String, STF_Module]) -> void:
 	_stf_file = stf_file
 	_modules = modules
+	_meta = STF_Info.parse(_stf_file.json_definition)
+
+
+func get_json_resource(stf_id: String) -> Dictionary:
+	return _stf_file.json_definition["resources"][stf_id]
+
+
+func determine_module(json_resource: Dictionary, expected_kind: String = "data") -> STF_Module:
+	if(json_resource["type"] in _modules):
+		return _modules[json_resource["type"]]
+	return null # todo fallback
+
+
+func register_imported_resource(stf_id: String, resource: Variant):
+	_imported_resources[stf_id] = resource
 
 
 func get_root_id() -> String:
