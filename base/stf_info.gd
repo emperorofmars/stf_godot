@@ -1,5 +1,5 @@
 class_name STF_Info
-extends RefCounted
+extends Resource
 ## Represents the meta information of an STF file
 
 var root: String

@@ -25,11 +25,17 @@ func get_json_resource(stf_id: String) -> Dictionary:
 func determine_module(json_resource: Dictionary, expected_kind: String = "data") -> STF_Module:
 	if(json_resource["type"] in _modules):
 		return _modules[json_resource["type"]]
-	return null # todo fallback
+	else:
+		printerr("Unrecognized STF resource: %s" % json_resource["type"])
+		return null # todo fallback
 
 
 func register_imported_resource(stf_id: String, resource: Variant):
 	_imported_resources[stf_id] = resource
+
+
+func get_buffer(stf_id: String) -> PackedByteArray:
+	return _stf_file.get_buffer(_stf_file.json_definition["buffers"][stf_id]["index"])
 
 
 func get_root_id() -> String:

@@ -30,6 +30,8 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 
 	var import_state = STF_ImportState.new(stf_file, STF_Registry.get_modules_by_stf_type())
 	var import_context = STF_ImportContext.new(import_state)
-	var ret = import_context.import(import_state.get_root_id())
-	
+	var ret: Node3D = import_context.import(import_state.get_root_id())
+
+	ret.set_meta("stf_import_meta", import_state._stf_file.json_definition["stf"])
+
 	return ret

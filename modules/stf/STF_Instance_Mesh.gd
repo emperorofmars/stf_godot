@@ -1,41 +1,35 @@
-class_name STF_Prefab
+class_name STF_Instance_Mesh
 extends STF_Module
 
 func _get_stf_type() -> String:
-	return "stf.prefab"
+	return "stf.instance.mesh"
 
 func _get_priority() -> int:
 	return 0
 
 func _get_stf_kind() -> String:
-	return "data"
+	return "instance"
 
 func _get_like_types() -> Array[String]:
-	return ["prefab"]
+	return ["instance.mesh", "instance"]
 
 func _get_godot_type() -> String:
-	return "Node3D"
+	return "MeshInstance3D"
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
-	var ret = Node3D.new()
-	ret.name = json_resource.get("name", "STF Prefab")
-	
-	for child_id in json_resource.get("root_nodes", []):
-		var child: Node3D = context.import(child_id, "node", ret)
-		ret.add_child(child)
-
-	__set_owner(ret, ret)
+	var ret = MeshInstance3D.new()
+	ret.name = json_resource.get("name", "STF Instance Mesh")
 
 	ret.set_meta("stf_id", stf_id)
 	ret.set_meta("stf_name", json_resource.get("name", null))
+
+	#if("armature_instance" in json_resource):
+		#ret.skeleton = context.import(json_resource["armature_instance"])
+
+	ret.mesh = context.import(json_resource["mesh"])
 
 	return ret
 
 func _export() -> STF_ResourceExport:
 	return null
 
-
-func __set_owner(root: Node, owner: Node):
-	for child in root.get_children(true):
-		child.set_owner(owner)
-		__set_owner(child, owner)

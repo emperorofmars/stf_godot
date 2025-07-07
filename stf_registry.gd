@@ -21,19 +21,27 @@ static func unregister_module(module: STF_Module):
 
 
 static func get_default_modules() -> Array[STF_Module]:
-	return [STF_Prefab.new(), STF_Node.new()]
+	return [
+		STF_Prefab.new(),
+		STF_Node.new(),
+		STF_Instance_Armature.new(),
+		STF_Armature.new(),
+		STF_Bone.new(),
+		STF_Instance_Mesh.new(),
+		STF_Mesh.new()
+	]
 
 
 static func get_modules_by_stf_type() -> Dictionary[String, STF_Module]:
 	var ret: Dictionary[String, STF_Module] = {}
 	for module in get_default_modules():
-		ret[module.get_stf_type()] = module
+		ret[module._get_stf_type()] = module
 	# todo handle registered modules
 	return ret
 
 static func get_modules_by_godot_type() -> Dictionary[String, STF_Module]:
 	var ret: Dictionary[String, STF_Module] = {}
 	for module in _default_stf_modules:
-		ret[module.get_godot_type()] = module
+		ret[module._get_godot_type()] = module
 	# todo handle registered modules
 	return ret
