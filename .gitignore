@@ -1,0 +1,13 @@
+# Ignore everything by default
+*
+# Except directories, so they can be recursed into
+!*/
+
+# Whitelist only specific files and the stf_godot addon
+!LICENSE-MIT
+!LICENSE-APACHE2
+!.gitignore
+!.gitattributes
+!.editorconfig
+!project.godot
+!addons/stf_godot/**/*
