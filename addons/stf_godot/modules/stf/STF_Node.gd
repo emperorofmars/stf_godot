@@ -31,6 +31,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var child: Node3D = context.import(child_id, "node", context_object)
 		ret.add_child(child)
 	
+	if("trs" in json_resource):
+		ret.transform = STF_TRS_Util.parse_transform(json_resource["trs"])
+	
 	# todo trs
 	# todo parent binding
 
