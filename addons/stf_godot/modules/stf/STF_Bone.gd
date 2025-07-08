@@ -18,7 +18,7 @@ func _get_godot_type() -> String:
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
 	var armature: Skeleton3D = context_object
-	var bone_index = armature.add_bone(json_resource.get("name", "STF Node"))
+	var bone_index = armature.add_bone(json_resource.get("name", stf_id))
 
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
 	armature.set_bone_meta(bone_index, "stf_name", json_resource.get("name", null))
@@ -29,9 +29,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	for child_id in json_resource.get("children", []):
 		var child_index = context.import(child_id, "node", context_object)
+		armature.set_bone_parent(child_index, bone_index)
 		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 		armature.set_bone_pose(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
-		armature.set_bone_parent(child_index, bone_index)
 
 	return bone_index
 
