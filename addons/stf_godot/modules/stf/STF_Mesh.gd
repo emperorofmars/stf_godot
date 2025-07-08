@@ -24,6 +24,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.set_meta("stf_name", json_resource.get("name", null))
 
 	var buffer_vertices = context.get_buffer(json_resource["vertices"]).to_float32_array()
+
 	var vertices = PackedVector3Array()
 	for i in range(len(buffer_vertices) / 3):
 		vertices.push_back(Vector3(buffer_vertices[i * 3], buffer_vertices[i * 3 + 1], buffer_vertices[i * 3 + 2]))

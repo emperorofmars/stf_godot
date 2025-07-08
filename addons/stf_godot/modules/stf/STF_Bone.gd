@@ -23,12 +23,15 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
 	armature.set_bone_meta(bone_index, "stf_name", json_resource.get("name", null))
 
-	armature.set_bone_rest(bone_index, Transform3D(Basis(STF_TRS_Util.parse_quat(json_resource["rotation"])), STF_TRS_Util.parse_vec3(json_resource["translation"])))
+	var rest_pose = Transform3D(Basis(STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()), STF_TRS_Util.parse_vec3(json_resource["translation"]))
+	armature.set_bone_rest(bone_index, rest_pose)
+	armature.set_bone_pose(bone_index, rest_pose)
 
 	for child_id in json_resource.get("children", []):
 		var child_index = context.import(child_id, "node", context_object)
+		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
+		armature.set_bone_pose(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 		armature.set_bone_parent(child_index, bone_index)
-		armature.set_bone_rest(child_index, armature.get_bone_rest(child_index) * armature.get_bone_rest(bone_index).inverse())
 
 	return bone_index
 
