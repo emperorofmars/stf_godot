@@ -1,6 +1,10 @@
 class_name STF_Mesh
 extends STF_Module
 
+
+const MAX_BONES_PER_VERTEX: int = 4
+
+
 func _get_stf_type() -> String:
 	return "stf.mesh"
 
@@ -54,12 +58,12 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	match float_width:
 		4: buffer_split_normals = context.get_buffer(json_resource["split_normals"]).to_float32_array()
 		8: buffer_split_normals = context.get_buffer(json_resource["split_normals"]).to_float64_array()
-	var normals = PackedVector3Array()
+	var normals := PackedVector3Array()
 	for i in range(len(buffer_split_normals) / 3):
 		normals.push_back(Vector3(buffer_split_normals[i * 3], buffer_split_normals[i * 3 + 1], buffer_split_normals[i * 3 + 2]))
 	
 	var uv_channels = []
-	var buffers_uv = []
+	var buffers_uv: Array[PackedVector2Array] = []
 	if("uvs" in json_resource):
 		for uv_channel in json_resource["uvs"]:
 			uv_channels.append(uv_channel.get("name", "UV"))
@@ -67,6 +71,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			match float_width:
 				4: buffer_uv = context.get_buffer(uv_channel["uv"]).to_float32_array()
 				8: buffer_uv = context.get_buffer(uv_channel["uv"]).to_float64_array()
+				_: break
+			var uv := PackedVector2Array()
+			for i in range(len(buffer_uv) / 2):
+				uv.push_back(Vector2(buffer_uv[i * 2], buffer_uv[i * 2 + 1]))
+			buffers_uv.append(uv)
 
 	var buffers_split_colors = [] # todo
 
@@ -105,45 +114,53 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				split_to_deduped_split_index.append(len(deduped_split_indices) - 1)
 
 
-	var godot_vertices: Array[Vector3] = []
-	var godot_normals: Array[Vector3] = []
-	var godot_tangents: Array[Vector4] = []
-	var godot_uvs: Array[Array] = []
+	var godot_vertices := PackedVector3Array()
+	var godot_normals := PackedVector3Array()
+	var godot_uvs: Array[PackedVector2Array] = []
 
-	for uvIndex in range(len(buffers_uv)):
-		godot_uvs.append(new());
+	for uv_index in range(len(buffers_uv)):
+		godot_uvs.append(PackedVector2Array());
 
 	for i in range(len(deduped_split_indices)):
 		godot_vertices.append(vertices[split_indices[deduped_split_indices[i]]])
 		godot_normals.append(normals[deduped_split_indices[i]])
-		for uvIndex in range(len(buffers_uv)):
-			godot_uvs[uvIndex].append(buffers_uv[uvIndex][deduped_split_indices[i]])
+		for uv_index in range(len(buffers_uv)):
+			godot_uvs[uv_index].append(buffers_uv[uv_index][deduped_split_indices[i]])
 
 	var tris = get_int_buffer(context.get_buffer(json_resource["tris"]), indices_width)
-	var faceLengths = get_int_buffer(context.get_buffer(json_resource["faces"]), indices_width)
-	var faceMaterialIndices = get_int_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
+	var face_lengths = get_int_buffer(context.get_buffer(json_resource["faces"]), indices_width)
+	var face_material_indices = get_int_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
 
 
-	var subMeshIndices: Array[Array] = []
-	var trisIndex = 0
-	for faceIndex in range(len(faceLengths)):
-		var matIndex: int = faceMaterialIndices[faceIndex]
-		for faceLen in range(faceLengths[faceIndex]):
-			while len(subMeshIndices) <= matIndex: subMeshIndices.append([])
+	var sub_mesh_indices: Array[PackedInt32Array] = []
+	var tris_index = 0
+	for face_index in range(len(face_lengths)):
+		var mat_index: int = face_material_indices[face_index]
+		for face_len in range(face_lengths[face_index]):
+			while len(sub_mesh_indices) <= mat_index: sub_mesh_indices.append(PackedInt32Array())
 
-			subMeshIndices[matIndex].append(split_to_deduped_split_index[tris[trisIndex * 3 + 2]])
-			subMeshIndices[matIndex].append(split_to_deduped_split_index[tris[trisIndex * 3 + 1]])
-			subMeshIndices[matIndex].append(split_to_deduped_split_index[tris[trisIndex * 3]])
+			sub_mesh_indices[mat_index].append(split_to_deduped_split_index[tris[tris_index * 3 + 2]])
+			sub_mesh_indices[mat_index].append(split_to_deduped_split_index[tris[tris_index * 3 + 1]])
+			sub_mesh_indices[mat_index].append(split_to_deduped_split_index[tris[tris_index * 3]])
 
-			trisIndex += 1
+			tris_index += 1
 
-	for subMesh in subMeshIndices:
+
+	for sub_mesh in sub_mesh_indices:
 		# todo optimize submesh
 		var arrays = []
 		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = PackedVector3Array(godot_vertices)
-		arrays[Mesh.ARRAY_NORMAL] = PackedVector3Array(godot_normals)
-		arrays[Mesh.ARRAY_INDEX] = PackedInt32Array(subMesh) # wrong but lol for the visuals
+		arrays[Mesh.ARRAY_INDEX] = sub_mesh
+		arrays[Mesh.ARRAY_VERTEX] = godot_vertices
+		if(len(godot_normals) == len(godot_vertices)):
+			arrays[Mesh.ARRAY_NORMAL] = godot_normals
+		if(len(godot_uvs) > 0):
+			arrays[Mesh.ARRAY_TEX_UV] = godot_uvs[0]
+		if(len(godot_uvs) > 1):
+			arrays[Mesh.ARRAY_TEX_UV2] = godot_uvs[1]
+
+		# arrays[Mesh.ARRAY_BONES] = bones
+		# arrays[Mesh.ARRAY_WEIGHTS] = weights
 		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		#ret.surface_set_name(0, "")
 
