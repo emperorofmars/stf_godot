@@ -240,23 +240,50 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 
 	for sub_mesh in sub_mesh_indices:
-		# todo optimize submesh
 		var arrays = []
 		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_INDEX] = sub_mesh
-		arrays[Mesh.ARRAY_VERTEX] = godot_vertices
+
+		var submesh_indices = PackedInt32Array(range(len(sub_mesh)))
+		arrays[Mesh.ARRAY_INDEX] = submesh_indices
+
+		var submesh_vertices = PackedVector3Array()
+		for submesh_index in range(len(sub_mesh)):
+			submesh_vertices.append(godot_vertices[sub_mesh[submesh_index]])
+		arrays[Mesh.ARRAY_VERTEX] = submesh_vertices
+		
 		if(len(godot_normals) == len(godot_vertices)):
-			arrays[Mesh.ARRAY_NORMAL] = godot_normals
+			var submesh_normals = PackedVector3Array()
+			for submesh_index in range(len(sub_mesh)):
+				submesh_normals.append(godot_normals[sub_mesh[submesh_index]])
+			arrays[Mesh.ARRAY_NORMAL] = submesh_normals
+
 		if(len(godot_uvs) > 0):
-			arrays[Mesh.ARRAY_TEX_UV] = godot_uvs[0]
+			var submesh_uv = PackedVector2Array()
+			for submesh_index in range(len(sub_mesh)):
+				submesh_uv.append(godot_uvs[0][sub_mesh[submesh_index]])
+			arrays[Mesh.ARRAY_TEX_UV] = submesh_uv
 		if(len(godot_uvs) > 1):
-			arrays[Mesh.ARRAY_TEX_UV2] = godot_uvs[1]
+			var submesh_uv = PackedVector2Array()
+			for submesh_index in range(len(sub_mesh)):
+				submesh_uv.append(godot_uvs[1][sub_mesh[submesh_index]])
+			arrays[Mesh.ARRAY_TEX_UV2] = submesh_uv
 
 		if(len(godot_bones) == len(godot_vertices) * 4 && len(godot_weights) == len(godot_vertices) * 4):
 			arrays[Mesh.ARRAY_BONES] = godot_bones
 			arrays[Mesh.ARRAY_WEIGHTS] = godot_weights
+		
+		if(len(godot_bones) == len(godot_vertices) * 4 && len(godot_weights) == len(godot_vertices) * 4):
+			var submesh_bones = PackedInt32Array()
+			var submesh_weights = PackedFloat32Array()
+			for submesh_index in range(len(sub_mesh)):
+				for i in range(4):
+					submesh_bones.append(godot_bones[sub_mesh[submesh_index] * 4 + i])
+					submesh_weights.append(godot_weights[sub_mesh[submesh_index] * 4 + i])
+			arrays[Mesh.ARRAY_BONES] = submesh_bones
+			arrays[Mesh.ARRAY_WEIGHTS] = submesh_weights
 
 		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+
 		#ret.surface_set_name(0, "")
 
 	return ret
