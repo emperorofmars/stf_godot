@@ -201,14 +201,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		for vertex_index in range(len(buffer_weight_lens)):
 			var vertex_bones = []
 			var vertex_weights = []
+			var weights_sum = 0
 
 			var weight_len = buffer_weight_lens[vertex_index]
-
-			if(vertex_index < 20):
-				print(weight_len)
-			
-			var weights_sum = 0
-			
 			for weight_index in range(weight_len):
 				var bone_index = get_uint_from_buffer(buffer_weights, position, bone_indices_width)
 				position += bone_indices_width
@@ -230,9 +225,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			for i in range(4 - min(weight_len, 4)):
 				bones.append(0)
 				weights.append(0)
-			
-			if(vertex_index < 20):
-				print(vertex_bones, " : " , vertex_weights)
 
 		for i in range(len(deduped_split_indices)):
 			var vertex_index = split_indices[deduped_split_indices[i]]
@@ -263,7 +255,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		if(len(godot_bones) == len(godot_vertices) * 4 && len(godot_weights) == len(godot_vertices) * 4):
 			arrays[Mesh.ARRAY_BONES] = godot_bones
 			arrays[Mesh.ARRAY_WEIGHTS] = godot_weights
-			print("WOO")
 
 		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		#ret.surface_set_name(0, "")
