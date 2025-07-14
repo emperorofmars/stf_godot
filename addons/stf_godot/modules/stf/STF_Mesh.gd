@@ -59,6 +59,7 @@ func get_float_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: in
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+	#var ret = ImporterMesh.new()
 	var ret = ArrayMesh.new()
 	ret.resource_name = json_resource.get("name", "STF Mesh")
 
@@ -236,7 +237,48 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					godot_bones.append(0)
 					godot_weights.append(0)
 	
-	# todo blendshapes
+	# blendshapes
+	var blendshapes: Array = []
+	if("blendshapes" in json_resource):
+		var blendshape_index = 0
+		for json_blendshape in json_resource["blendshapes"]:
+
+			var indexed = "indices" in json_blendshape
+			var blendshape_indices := PackedInt32Array(get_uint_buffer(context.get_buffer(json_blendshape["indices"]), indices_width)) if indexed else PackedInt32Array(range(len(vertices)))
+
+			var buffer_blendshape_vertices = null
+			match float_width:
+				4: buffer_blendshape_vertices = context.get_buffer(json_blendshape["position_offsets"]).to_float32_array()
+				8: buffer_blendshape_vertices = context.get_buffer(json_blendshape["position_offsets"]).to_float64_array()
+			var blendshape_vertices = PackedVector3Array()
+			for i in range(len(buffer_blendshape_vertices) / 3):
+				blendshape_vertices.push_back(Vector3(buffer_blendshape_vertices[i * 3], buffer_blendshape_vertices[i * 3 + 1], buffer_blendshape_vertices[i * 3 + 2]))
+
+			var buffer_blendshape_normals = null
+			match float_width:
+				4: buffer_blendshape_normals = context.get_buffer(json_blendshape["position_offsets"]).to_float32_array()
+				8: buffer_blendshape_normals = context.get_buffer(json_blendshape["position_offsets"]).to_float64_array()
+			var blendshape_normals = PackedVector3Array()
+			for i in range(len(buffer_blendshape_normals) / 3):
+				blendshape_normals.push_back(Vector3(buffer_blendshape_normals[i * 3], buffer_blendshape_normals[i * 3 + 1], buffer_blendshape_normals[i * 3 + 2]))
+
+			var godot_blendshape_vertices = PackedVector3Array()
+			var godot_blendshape_normals = PackedVector3Array()
+			godot_blendshape_vertices.resize(len(godot_vertices))
+			godot_blendshape_normals.resize(len(godot_vertices))
+			for i in range(len(blendshape_vertices)):
+				var vertex_index = blendshape_indices[i] if indexed else i
+				for split_index in verts_to_split[vertex_index]:
+					godot_blendshape_vertices[split_to_deduped_split_index[split_index]] = blendshape_vertices[i]
+					godot_blendshape_normals[split_to_deduped_split_index[split_index]] = blendshape_normals[i]
+
+			var blendshape_arrays = []
+			blendshape_arrays.resize(Mesh.ARRAY_MAX)
+			blendshape_arrays[Mesh.ARRAY_VERTEX] = godot_blendshape_vertices
+			blendshape_arrays[Mesh.ARRAY_NORMAL] = godot_blendshape_normals
+
+			blendshapes.append(blendshape_arrays)
+			ret.add_blend_shape(json_blendshape["name"] if "name" in json_blendshape else ("Blendshape " + str(blendshape_index)))
 
 
 	for sub_mesh in sub_mesh_indices:
@@ -281,10 +323,33 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					submesh_weights.append(godot_weights[sub_mesh[submesh_index] * 4 + i])
 			arrays[Mesh.ARRAY_BONES] = submesh_bones
 			arrays[Mesh.ARRAY_WEIGHTS] = submesh_weights
+		
+		var submesh_blendshapes: Array[Array] = []
+		for blendshape_index in range(len(blendshapes)):
+			var blendshape = blendshapes[blendshape_index]
+			var submesh_blendshape = []
+			submesh_blendshape.resize(Mesh.ARRAY_MAX)
 
-		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
+			var submesh_blendshape_vertices = PackedVector3Array()
+			for submesh_index in range(len(sub_mesh)):
+				submesh_blendshape_vertices.append(blendshape[Mesh.ARRAY_VERTEX][sub_mesh[submesh_index]])
+			submesh_blendshape[Mesh.ARRAY_VERTEX] = submesh_blendshape_vertices
+			
+			var submesh_blendshape_normals = PackedVector3Array()
+			for submesh_index in range(len(sub_mesh)):
+				submesh_blendshape_normals.append(blendshape[Mesh.ARRAY_NORMAL][sub_mesh[submesh_index]])
+			submesh_blendshape[Mesh.ARRAY_NORMAL] = submesh_blendshape_normals
+
+			#print(len(submesh_blendshape_vertices), " ; ", len(submesh_blendshape_normals), " ; ", len(submesh_indices))
+			submesh_blendshapes.append(submesh_blendshape)
+
+		#ret.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes)
+		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes)
+		#ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
 
 		#ret.surface_set_name(0, "")
+	
+	#ret.regen_normal_maps()
 
 	return ret
 
