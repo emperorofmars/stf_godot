@@ -21,7 +21,7 @@ func _get_godot_type() -> String:
 	return "Mesh"
 
 
-func get_int_buffer(buffer: PackedByteArray, width: int):
+func get_uint_buffer(buffer: PackedByteArray, width: int) -> Array:
 	var ret = []
 	for i in range(0, len(buffer) / width):
 		match width:
@@ -30,6 +30,32 @@ func get_int_buffer(buffer: PackedByteArray, width: int):
 			4: ret.append(buffer.decode_u32(i * width))
 			8: ret.append(buffer.decode_u64(i * width))
 	return ret
+
+
+func get_int_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: int) -> int:
+	match width:
+		1: return buffer.decode_s8(offset_bytes)
+		2: return buffer.decode_s16(offset_bytes)
+		4: return buffer.decode_s32(offset_bytes)
+		8: return buffer.decode_s64(offset_bytes)
+		_: return -1
+
+
+func get_uint_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: int) -> int:
+	match width:
+		1: return buffer.decode_u8(offset_bytes)
+		2: return buffer.decode_u16(offset_bytes)
+		4: return buffer.decode_u32(offset_bytes)
+		8: return buffer.decode_u64(offset_bytes)
+		_: return -1
+
+
+func get_float_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: int) -> float:
+	match width:
+		2: return buffer.decode_half(offset_bytes)
+		4: return buffer.decode_float(offset_bytes)
+		8: return buffer.decode_double(offset_bytes)
+		_: return NAN
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
@@ -52,7 +78,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	for i in range(len(buffer_vertices) / 3):
 		vertices.push_back(Vector3(buffer_vertices[i * 3], buffer_vertices[i * 3 + 1], buffer_vertices[i * 3 + 2]))
 	
-	var split_indices = get_int_buffer(context.get_buffer(json_resource["splits"]), indices_width)
+	var split_indices = get_uint_buffer(context.get_buffer(json_resource["splits"]), indices_width)
 	
 	var buffer_split_normals = null
 	match float_width:
@@ -127,9 +153,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		for uv_index in range(len(buffers_uv)):
 			godot_uvs[uv_index].append(buffers_uv[uv_index][deduped_split_indices[i]])
 
-	var tris = get_int_buffer(context.get_buffer(json_resource["tris"]), indices_width)
-	var face_lengths = get_int_buffer(context.get_buffer(json_resource["faces"]), indices_width)
-	var face_material_indices = get_int_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
+	var tris = get_uint_buffer(context.get_buffer(json_resource["tris"]), indices_width)
+	var face_lengths = get_uint_buffer(context.get_buffer(json_resource["faces"]), indices_width)
+	var face_material_indices = get_uint_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
 
 
 	var sub_mesh_indices: Array[PackedInt32Array] = []
@@ -146,6 +172,81 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			tris_index += 1
 
 
+	# weights
+	var godot_bones := PackedInt32Array()
+	var godot_weights := PackedFloat32Array()
+	if("armature" in json_resource && "bones" in json_resource && "weights" in json_resource):
+		var armature: Skeleton3D = context.import(json_resource["armature"])
+
+		var bones_ids: Array = json_resource["bones"]
+		var bone_indices_width: int = json_resource.get("bone_indices_width", 1)
+		
+		var buffer_weight_lens = get_uint_buffer(context.get_buffer(json_resource["weight_lens"]), indices_width)
+		var buffer_weights = context.get_buffer(json_resource["weights"])
+
+		var stf_to_godot_bone_index: Dictionary[int, int] = {}
+
+		for stf_bone_index in range(len(bones_ids)):
+			var bone_id = bones_ids[stf_bone_index]
+			var godot_bone_index = -1
+			for i in range(armature.get_bone_count()):
+				if(armature.get_bone_meta(i, "stf_id") == bone_id):
+					godot_bone_index = i
+					break
+			stf_to_godot_bone_index[stf_bone_index] = godot_bone_index
+
+		var bones := PackedInt32Array()
+		var weights := PackedFloat32Array()
+		var position = 0;
+		for vertex_index in range(len(buffer_weight_lens)):
+			var vertex_bones = []
+			var vertex_weights = []
+
+			var weight_len = buffer_weight_lens[vertex_index]
+
+			if(vertex_index < 20):
+				print(weight_len)
+			
+			var weights_sum = 0
+			
+			for weight_index in range(weight_len):
+				var bone_index = get_uint_from_buffer(buffer_weights, position, bone_indices_width)
+				position += bone_indices_width
+				var bone_weight = get_float_from_buffer(buffer_weights, position, float_width)
+				position += float_width
+
+				vertex_bones.append(stf_to_godot_bone_index[bone_index])
+				vertex_weights.append(bone_weight)
+				weights_sum += bone_weight
+
+			vertex_bones.sort_custom(func (a, b): vertex_weights[vertex_bones.find(a)] > vertex_weights[vertex_bones.find(b)])
+			vertex_weights.sort_custom(func (a, b): a > b)
+			
+			if(weights_sum == 0): weights_sum = 1
+
+			for i in range(min(weight_len, 4)):
+				bones.append(vertex_bones[i])
+				weights.append(vertex_weights[i] / weights_sum)
+			for i in range(4 - min(weight_len, 4)):
+				bones.append(0)
+				weights.append(0)
+			
+			if(vertex_index < 20):
+				print(vertex_bones, " : " , vertex_weights)
+
+		for i in range(len(deduped_split_indices)):
+			var vertex_index = split_indices[deduped_split_indices[i]]
+			for j in range(4):
+				if(bones[vertex_index * 4 + j] >= 0):
+					godot_bones.append(bones[vertex_index * 4 + j])
+					godot_weights.append(weights[vertex_index * 4 + j])
+				else:
+					godot_bones.append(0)
+					godot_weights.append(0)
+	
+	# todo blendshapes
+
+
 	for sub_mesh in sub_mesh_indices:
 		# todo optimize submesh
 		var arrays = []
@@ -159,8 +260,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		if(len(godot_uvs) > 1):
 			arrays[Mesh.ARRAY_TEX_UV2] = godot_uvs[1]
 
-		# arrays[Mesh.ARRAY_BONES] = bones
-		# arrays[Mesh.ARRAY_WEIGHTS] = weights
+		if(len(godot_bones) == len(godot_vertices) * 4 && len(godot_weights) == len(godot_vertices) * 4):
+			arrays[Mesh.ARRAY_BONES] = godot_bones
+			arrays[Mesh.ARRAY_WEIGHTS] = godot_weights
+			print("WOO")
+
 		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		#ret.surface_set_name(0, "")
 

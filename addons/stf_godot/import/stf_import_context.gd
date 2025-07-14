@@ -26,3 +26,8 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 
 func get_buffer(stf_id: String) -> PackedByteArray:
 	return _state.get_buffer(stf_id)
+
+
+func _add_task(task: Callable):
+	_state._tasks.append(task)
+
