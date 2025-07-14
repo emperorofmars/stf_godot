@@ -31,15 +31,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if(armature_instance):
 				ret.skeleton = ret.get_path_to(armature_instance)
 				ret.skin = armature_instance.create_skin_from_rest_transforms()
-				"""var skin = Skin.new()
-
-				armature_instance = Skeleton3D.new()
-				for bone_index in armature_instance.get_bone_count():
-					skin.add_bind(bone_index, armature_instance.get_bone_global_rest(bone_index).inverse() * armature_instance.global_transform)
-				
-				ret.skin = skin"""
-
-				#print(armature_instance.get_bone_count(), " : ", armature_instance.create_skin_from_rest_transforms().get_bind_count())
 		)
 
 	return ret
