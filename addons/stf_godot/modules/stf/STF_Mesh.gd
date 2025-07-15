@@ -251,14 +251,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			godot_blendshape_vertices.resize(len(godot_vertices))
 			var godot_blendshape_normals = godot_normals.duplicate()
 
-			#var blendshape_normals := import_vec3_buffer(context.get_buffer(json_blendshape["normals"]), float_width)
+			var blendshape_normals := import_vec3_buffer(context.get_buffer(json_blendshape["normal_offsets"]), float_width)
 
 			for blendshape_vertex_index in range(len(blendshape_indices)):
 				var vertex_index = blendshape_indices[blendshape_vertex_index]
 				for split_index in verts_to_split[vertex_index]:
 					godot_blendshape_vertices[split_to_deduped_split_index[split_index]] = blendshape_vertices[blendshape_vertex_index]
-					godot_blendshape_normals[split_to_deduped_split_index[split_index]] = godot_normals[split_to_deduped_split_index[split_index]]
-					#godot_blendshape_normals[split_to_deduped_split_index[split_index]] = blendshape_normals[blendshape_vertex_index].normalized()
+					#godot_blendshape_normals[split_to_deduped_split_index[split_index]] = godot_normals[split_to_deduped_split_index[split_index]]
+					godot_blendshape_normals[split_to_deduped_split_index[split_index]] = (godot_normals[split_to_deduped_split_index[split_index]] + blendshape_normals[blendshape_vertex_index]).normalized()
 
 			var blendshape_arrays = []
 			blendshape_arrays.resize(Mesh.ARRAY_MAX)
