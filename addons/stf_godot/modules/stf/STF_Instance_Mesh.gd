@@ -34,11 +34,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				ret.skeleton = ret.get_path_to(armature_instance)
 				ret.skin = armature_instance.create_skin_from_rest_transforms()
 		)
-
-	if("blendshape_values" in json_resource):
-		for i in range(min(len(json_resource["blendshape_values"]), ret.get_blend_shape_count())):
-			if(json_resource["blendshape_values"][i]):
-				ret.set_blend_shape_value(i, json_resource["blendshape_values"][i])
 	
 	for i in range(ret.get_blend_shape_count()):
 		if("blendshape_values" in json_resource && len(json_resource["blendshape_values"]) > i && json_resource["blendshape_values"][i]):
