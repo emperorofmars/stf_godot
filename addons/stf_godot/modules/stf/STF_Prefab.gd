@@ -27,10 +27,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var child: Node3D = context.import(child_id, "node", ret)
 		ret.add_child(child)
 
-	__set_owner(ret, ret)
 
 	# todo animations
 
+
+	context._add_task(func():
+		__set_owner(ret, ret)
+	)
 	return ret
 
 func _export() -> STF_ResourceExport:
