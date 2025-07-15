@@ -17,8 +17,8 @@ func _get_godot_type() -> String:
 	return "MeshInstance3D"
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
-	var ret = ImporterMeshInstance3D.new()
-	#var ret = MeshInstance3D.new()
+	#var ret = ImporterMeshInstance3D.new()
+	var ret = MeshInstance3D.new()
 	ret.name = json_resource.get("name", "STF Instance Mesh")
 
 	ret.set_meta("stf_id", stf_id)
@@ -30,17 +30,16 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		context._add_task(func():
 			var armature_instance: Skeleton3D = context.import(json_resource["armature_instance"])
 			if(armature_instance):
-				ret.skeleton_path = ret.get_path_to(armature_instance)
-				#ret.skeleton = ret.get_path_to(armature_instance)
+				#ret.skeleton_path = ret.get_path_to(armature_instance)
+				ret.skeleton = ret.get_path_to(armature_instance)
 				ret.skin = armature_instance.create_skin_from_rest_transforms()
 		)
-	
-	# todo pose, blendshapes, materials
 
-	#print(ret.get_blend_shape_count())
+	if("blendshape_values" in json_resource):
+		for i in range(min(len(json_resource["blendshape_values"]), ret.get_blend_shape_count())):
+			ret.set_blend_shape_value(i, json_resource["blendshape_values"][i])
 
-	#for i in range(ret.get_blend_shape_count()):
-	#	ret.set_blend_shape_value(i, 0)
+	# todo materials
 
 	return ret
 

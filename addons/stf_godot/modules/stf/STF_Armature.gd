@@ -26,6 +26,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	for child_id in json_resource.get("root_bones", []):
 		context.import(child_id, "node", ret)
 
+	ret.reset_bone_poses()
+
 	return ret
 
 func _export() -> STF_ResourceExport:
