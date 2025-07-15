@@ -22,6 +22,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
 	armature.set_bone_meta(bone_index, "stf_name", json_resource.get("name", null))
+	var stf_meta := {"stf_name": json_resource.get("name", null)}
+	armature.set_bone_meta(bone_index, "stf", stf_meta)
 
 	var rest_pose = Transform3D(Basis(STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()), STF_TRS_Util.parse_vec3(json_resource["translation"]))
 	armature.set_bone_rest(bone_index, rest_pose)

@@ -21,7 +21,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.name = json_resource.get("name", "STF Prefab")
 
 	ret.set_meta("stf_id", stf_id)
-	ret.set_meta("stf_name", json_resource.get("name", null))
+	var stf_meta := {"stf_name": json_resource.get("name", null)}
+	ret.set_meta("stf", stf_meta)
 
 	for child_id in json_resource.get("root_nodes", []):
 		var child: Node3D = context.import(child_id, "node", ret)

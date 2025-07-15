@@ -274,7 +274,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.resource_name = json_resource.get("name", "STF Mesh")
 
 	ret.set_meta("stf_id", stf_id)
-	ret.set_meta("stf_name", json_resource.get("name", null))
+	var stf_meta := {"stf_name": json_resource.get("name", null)}
+	ret.set_meta("stf", stf_meta)
 
 	ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
 	#ret.set_blend_shape_mode(Mesh.BLEND_SHAPE_MODE_NORMALIZED)

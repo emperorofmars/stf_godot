@@ -21,8 +21,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var ret: Skeleton3D = armature.duplicate(true)
 	ret.reset_bone_poses()
 
-	ret.set_meta("stf_instance_id", stf_id)
-	ret.set_meta("stf_instance_name", json_resource.get("name", null))
+	var stf_meta := {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name", null)}
+	ret.set_meta("stf", stf_meta)
 
 	if("pose" in json_resource):
 		for bone_id in json_resource["pose"]:

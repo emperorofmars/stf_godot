@@ -25,7 +25,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.name = json_resource.get("name", "STF Node")
 
 	ret.set_meta("stf_id", stf_id)
-	ret.set_meta("stf_name", json_resource.get("name", null))
+	var stf_meta = ret.get_meta("stf", {})
+	stf_meta["stf_name"] = json_resource.get("name", null)
+	#ret.set_meta("stf", stf_meta)
 	
 	for child_id in json_resource.get("children", []):
 		var child: Node3D = context.import(child_id, "node", context_object)
@@ -49,7 +51,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 				var bone_attachment = BoneAttachment3D.new()
 				bone_attachment.name = ret.name + "_parent_binding"
-				bone_attachment.set_meta("stf_parent_binding_for", stf_id)
+				bone_attachment.set_meta("stf", {"stf_parent_binding_for": stf_id})
 				parent.add_child(bone_attachment)
 				bone_attachment.bone_idx = bone_index
 				parent.remove_child(ret)
