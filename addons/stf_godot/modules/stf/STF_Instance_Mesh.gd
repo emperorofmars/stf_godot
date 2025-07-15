@@ -37,7 +37,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	if("blendshape_values" in json_resource):
 		for i in range(min(len(json_resource["blendshape_values"]), ret.get_blend_shape_count())):
+			if(json_resource["blendshape_values"][i]):
+				ret.set_blend_shape_value(i, json_resource["blendshape_values"][i])
+	
+	for i in range(ret.get_blend_shape_count()):
+		if("blendshape_values" in json_resource && len(json_resource["blendshape_values"]) > i && json_resource["blendshape_values"][i]):
 			ret.set_blend_shape_value(i, json_resource["blendshape_values"][i])
+		elif("blendshape_values" in ret.mesh.get_meta("stf", {}) && len(ret.mesh.get_meta("stf")["blendshape_values"]) > i):
+			ret.set_blend_shape_value(i, ret.mesh.get_meta("stf")["blendshape_values"][i])
 
 	# todo materials
 

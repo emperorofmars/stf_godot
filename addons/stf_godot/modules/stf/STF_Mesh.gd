@@ -238,6 +238,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	
 	# blendshapes
 	var blendshapes: Array[Array] = []
+	var blendshape_values: Array[float] = []
 	var blendshape_names: Array[String] = []
 	if("blendshapes" in json_resource):
 		var blendshape_index = 0
@@ -268,13 +269,18 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			blendshapes.append(blendshape_arrays)
 			blendshape_names.append(json_blendshape["name"] if "name" in json_blendshape else ("Blendshape " + str(blendshape_index)))
 
+			if("default_value" in json_blendshape):
+				blendshape_values.append(json_blendshape["default_value"])
+			else:
+				blendshape_values.append(0.0)
+
 
 	#var ret = ImporterMesh.new()
 	var ret = ArrayMesh.new()
 	ret.resource_name = json_resource.get("name", "STF Mesh")
 
 	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name", null)}
+	var stf_meta := {"stf_name": json_resource.get("name", null), "blendshape_values": blendshape_values}
 	ret.set_meta("stf", stf_meta)
 
 	ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
