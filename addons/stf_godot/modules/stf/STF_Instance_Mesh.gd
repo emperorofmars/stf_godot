@@ -24,11 +24,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.set_meta("stf_id", stf_id)
 	ret.set_meta("stf_name", json_resource.get("name", null))
 
-	ret.mesh = context.import(json_resource["mesh"])
+	ret.mesh = context.import(json_resource["mesh"], "data")
 
 	if("armature_instance" in json_resource):
 		context._add_task(func():
-			var armature_instance: Skeleton3D = context.import(json_resource["armature_instance"])
+			var armature_instance: Skeleton3D = context.import(json_resource["armature_instance"], "instance")
 			if(armature_instance):
 				#ret.skeleton_path = ret.get_path_to(armature_instance)
 				ret.skeleton = ret.get_path_to(armature_instance)

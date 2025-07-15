@@ -17,7 +17,7 @@ func _get_godot_type() -> String:
 	return "Skeleton3D"
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
-	var armature: Skeleton3D = context.import(json_resource["armature"])
+	var armature: Skeleton3D = context.import(json_resource["armature"], "data")
 	var ret: Skeleton3D = armature.duplicate(true)
 	ret.reset_bone_poses()
 
