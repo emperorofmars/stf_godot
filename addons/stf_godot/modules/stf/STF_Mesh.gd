@@ -181,6 +181,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var bone_indices_width: int = json_resource.get("bone_indices_width", 1)
 		
 		var buffer_weight_lens = import_uint_buffer(context.get_buffer(json_resource["weight_lens"]), indices_width)
+		var buffer_bone_indices = import_uint_buffer(context.get_buffer(json_resource["bone_indices"]), bone_indices_width)
 		var buffer_weights = context.get_buffer(json_resource["weights"])
 
 		var stf_to_godot_bone_index: Dictionary[int, int] = {}
@@ -203,10 +204,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 			var weight_len = buffer_weight_lens[vertex_index]
 			for weight_index in range(weight_len):
-				var bone_index = get_uint_from_buffer(buffer_weights, position, bone_indices_width)
-				position += bone_indices_width
-				var bone_weight = get_float_from_buffer(buffer_weights, position, float_width)
-				position += float_width
+				var bone_index = buffer_bone_indices[position]
+				var bone_weight = get_float_from_buffer(buffer_weights, position * float_width, float_width)
+				position += 1
 
 				vertex_bones.append(stf_to_godot_bone_index[bone_index])
 				vertex_weights.append(bone_weight)
