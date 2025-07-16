@@ -28,7 +28,7 @@ func determine_module(json_resource: Dictionary, expected_kind: String = "data")
 	if(json_resource["type"] in _modules):
 		return _modules[json_resource["type"]]
 	else:
-		printerr("Unrecognized STF resource: %s" % json_resource["type"])
+		print("STF Warning: Unrecognized resource: %s" % json_resource["type"])
 		return null # todo fallback
 
 

@@ -18,7 +18,13 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	if(module):
 		var ret = module._import(self, stf_id, json_resource, context_object)
 		_state.register_imported_resource(stf_id, ret)
-		# todo components if relevant and present
+
+		if(expected_kind in ["data", "node"] && "components" in json_resource):
+			for component_id in json_resource["components"]:
+				var json_component_resource = _state.get_json_resource(component_id)
+				var component_module = _state.determine_module(json_component_resource, "component")
+				if(component_module):
+					component_module._import(self, component_id, json_component_resource, ret)
 		return ret
 	# scream error and fail hard
 	return null

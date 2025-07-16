@@ -386,6 +386,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, flags)
 
 		#ret.surface_set_name(0, "")
+	
+	if("material_slots" in json_resource):
+		for material_index in range(len(json_resource["material_slots"])):
+			var material_id = json_resource["material_slots"][material_index]
+			if(material_id):
+				var material = context.import(material_id, "data")
+				if(material):
+					ret.surface_set_material(material_index, material)
 
 	return ret
 
