@@ -11,3 +11,4 @@
 !.editorconfig
 !project.godot
 !addons/stf_godot/**/*
+!readme.adoc
