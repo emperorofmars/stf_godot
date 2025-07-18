@@ -179,8 +179,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		var bones_ids: Array = json_resource["bones"]
 		var bone_indices_width: int = json_resource.get("bone_indices_width", 1)
+		var weight_lens_width: int = json_resource.get("weight_lens_width", 1)
 		
-		var buffer_weight_lens = import_uint_buffer(context.get_buffer(json_resource["weight_lens"]), indices_width)
+		var buffer_weight_lens = import_uint_buffer(context.get_buffer(json_resource["weight_lens"]), weight_lens_width)
 		var buffer_bone_indices = import_uint_buffer(context.get_buffer(json_resource["bone_indices"]), bone_indices_width)
 		var buffer_weights = context.get_buffer(json_resource["weights"])
 
