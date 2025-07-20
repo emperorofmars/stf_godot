@@ -59,6 +59,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				ret.transform = parent.get_bone_global_rest(bone_index).inverse() * ret.transform
 		)
 
+	if("enabled" in json_resource && json_resource["enabled"] == false):
+		ret.visible = false
+
 	return ret
 
 func _export() -> STF_ResourceExport:
