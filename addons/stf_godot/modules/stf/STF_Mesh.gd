@@ -91,6 +91,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var split_indices = import_uint_buffer(context.get_buffer(json_resource["splits"]), indices_width)
 
+	var deduped_splits = import_uint_buffer(context.get_buffer(json_resource["deduped_splits"]), indices_width) if "deduped_splits" in json_resource else range(len(split_indices))
+
 	var normals := import_vec3_buffer(context.get_buffer(json_resource["split_normals"]), float_width)
 
 	var uv_channels = []
@@ -153,6 +155,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			godot_uvs[uv_index].append(buffers_uv[uv_index][deduped_split_indices[i]])
 
 	var tris = import_uint_buffer(context.get_buffer(json_resource["tris"]), indices_width)
+	if("deduped_splits" in json_resource):
+		var tmp = tris
+		tris = []
+		for t in tmp:
+			tris.append(deduped_splits[t])
 	var face_lengths = import_uint_buffer(context.get_buffer(json_resource["faces"]), indices_width)
 	var face_material_indices = import_uint_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
 
