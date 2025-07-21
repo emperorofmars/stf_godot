@@ -91,7 +91,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var split_indices = import_uint_buffer(context.get_buffer(json_resource["splits"]), indices_width)
 
-	var deduped_splits = import_uint_buffer(context.get_buffer(json_resource["deduped_splits"]), indices_width) if "deduped_splits" in json_resource else range(len(split_indices))
+	var face_corners = import_uint_buffer(context.get_buffer(json_resource["face_corners"]), indices_width) if "face_corners" in json_resource else range(len(split_indices))
 
 	var normals := import_vec3_buffer(context.get_buffer(json_resource["split_normals"]), float_width)
 
@@ -107,59 +107,27 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var buffers_split_colors = [] # todo
 
 
-	var compareUVs = func(a: int, b: int) -> bool:
-		for uv in buffers_uv:
-			if ((uv[a] - uv[b]).length() > 0.0001):
-				return false
-		return true
-
 	var verts_to_split: Dictionary[int, Array] = {}
-	var deduped_split_indices: Array[int] = []
-	var split_to_deduped_split_index: Array[int] = []
-	for splitIndex in range(len(split_indices)):
-		var vertexIndex = split_indices[splitIndex]
-
-		if (vertexIndex not in verts_to_split):
-			verts_to_split[vertexIndex] = [splitIndex]
-			deduped_split_indices.append(splitIndex)
-			split_to_deduped_split_index.append(len(deduped_split_indices) - 1)
+	for i in range(len(split_indices)):
+		var vertex_index = split_indices[i]
+		if (vertex_index not in verts_to_split):
+			verts_to_split[vertex_index] = [i]
 		else:
-			var success = false
-			for candidateIndex in range(len(verts_to_split[vertexIndex])):
-				var splitCandidate = verts_to_split[vertexIndex][candidateIndex]
-				if (
-					(normals[splitIndex] - normals[splitCandidate]).length() < 0.0001
-					&& compareUVs.call(splitIndex, splitCandidate)
-					# TODO colors
-				):
-					split_to_deduped_split_index.append(split_to_deduped_split_index[splitCandidate])
-					success = true
-					break
-			if (!success):
-				verts_to_split[vertexIndex].append(splitIndex)
-				deduped_split_indices.append(splitIndex)
-				split_to_deduped_split_index.append(len(deduped_split_indices) - 1)
+			verts_to_split[vertex_index].append(i)
 
 
 	var godot_vertices := PackedVector3Array()
-	var godot_normals := PackedVector3Array()
-	var godot_uvs: Array[PackedVector2Array] = []
+	godot_vertices.resize(len(split_indices))
+	for i in range(len(split_indices)):
+		godot_vertices[i] = vertices[split_indices[i]]
 
-	for uv_index in range(len(buffers_uv)):
-		godot_uvs.append(PackedVector2Array());
-
-	for i in range(len(deduped_split_indices)):
-		godot_vertices.append(vertices[split_indices[deduped_split_indices[i]]])
-		godot_normals.append(normals[deduped_split_indices[i]].normalized())
-		for uv_index in range(len(buffers_uv)):
-			godot_uvs[uv_index].append(buffers_uv[uv_index][deduped_split_indices[i]])
 
 	var tris = import_uint_buffer(context.get_buffer(json_resource["tris"]), indices_width)
-	if("deduped_splits" in json_resource):
+	if("face_corners" in json_resource):
 		var tmp = tris
 		tris = []
 		for t in tmp:
-			tris.append(deduped_splits[t])
+			tris.append(face_corners[t])
 	var face_lengths = import_uint_buffer(context.get_buffer(json_resource["faces"]), indices_width)
 	var face_material_indices = import_uint_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
 
@@ -171,9 +139,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		for face_len in range(face_lengths[face_index]):
 			while len(sub_mesh_indices) <= mat_index: sub_mesh_indices.append(PackedInt32Array())
 
-			sub_mesh_indices[mat_index].append(split_to_deduped_split_index[tris[tris_index * 3 + 2]])
-			sub_mesh_indices[mat_index].append(split_to_deduped_split_index[tris[tris_index * 3 + 1]])
-			sub_mesh_indices[mat_index].append(split_to_deduped_split_index[tris[tris_index * 3]])
+			sub_mesh_indices[mat_index].append(tris[tris_index * 3 + 2])
+			sub_mesh_indices[mat_index].append(tris[tris_index * 3 + 1])
+			sub_mesh_indices[mat_index].append(tris[tris_index * 3])
 
 			tris_index += 1
 
@@ -234,8 +202,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				bones.append(0)
 				weights.append(0)
 
-		for i in range(len(deduped_split_indices)):
-			var vertex_index = split_indices[deduped_split_indices[i]]
+		for i in range(len(split_indices)):
+			var vertex_index = split_indices[i]
 			for j in range(BONES_PER_VERTEX):
 				if(bones[vertex_index * BONES_PER_VERTEX + j] >= 0):
 					godot_bones.append(bones[vertex_index * BONES_PER_VERTEX + j])
@@ -243,7 +211,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				else:
 					godot_bones.append(0)
 					godot_weights.append(0)
-	
+
+
 	# blendshapes
 	var blendshapes: Array[Array] = []
 	var blendshape_values: Array[float] = []
@@ -262,21 +231,21 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			for blendshape_vertex_index in range(len(blendshape_indices)):
 				var vertex_index = blendshape_indices[blendshape_vertex_index]
 				for split_index in verts_to_split[vertex_index]:
-					godot_blendshape_vertices[split_to_deduped_split_index[split_index]] = blendshape_vertices[blendshape_vertex_index]
+					godot_blendshape_vertices[split_index] = blendshape_vertices[blendshape_vertex_index]
 
-			var godot_blendshape_normals = godot_normals.duplicate()
+			var godot_blendshape_normals = normals.duplicate()
 
-			if(len(godot_normals) == len(godot_vertices) && "split_normals" in json_blendshape):
+			if(len(normals) == len(godot_vertices) && "split_normals" in json_blendshape):
 				var blendshape_split_indices := PackedInt32Array(import_uint_buffer(context.get_buffer(json_blendshape["split_indices"]), indices_width)) if indexed else PackedInt32Array(range(len(normals)))
 				var blendshape_normals := import_vec3_buffer(context.get_buffer(json_blendshape["split_normals"]), float_width)
 				for blendshape_split_index in range(len(blendshape_split_indices)):
 					var split_index = blendshape_split_indices[blendshape_split_index]
-					godot_blendshape_normals[split_to_deduped_split_index[split_index]] = blendshape_normals[blendshape_split_index]
+					godot_blendshape_normals[split_index] = blendshape_normals[blendshape_split_index]
 
 			var blendshape_arrays = []
 			blendshape_arrays.resize(Mesh.ARRAY_MAX)
 			blendshape_arrays[Mesh.ARRAY_VERTEX] = godot_blendshape_vertices
-			if(len(godot_normals) == len(godot_vertices)): blendshape_arrays[Mesh.ARRAY_NORMAL] = godot_blendshape_normals
+			if(len(normals) == len(godot_vertices)): blendshape_arrays[Mesh.ARRAY_NORMAL] = godot_blendshape_normals
 
 			blendshapes.append(blendshape_arrays)
 			blendshape_names.append(json_blendshape["name"] if "name" in json_blendshape else ("Blendshape " + str(blendshape_index)))
@@ -330,25 +299,25 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		arrays[Mesh.ARRAY_VERTEX] = submesh_vertices
 
 		# normals
-		if(len(godot_normals) == len(godot_vertices)):
+		if(len(normals) == len(godot_vertices)):
 			var submesh_normals = PackedVector3Array()
 			submesh_normals.resize(len(submesh_map))
 			for submesh_index in submesh_map:
-				submesh_normals[submesh_map[submesh_index]] = godot_normals[submesh_index]
+				submesh_normals[submesh_map[submesh_index]] = normals[submesh_index]
 			arrays[Mesh.ARRAY_NORMAL] = submesh_normals
 
 		# uv maps
-		if(len(godot_uvs) > 0):
+		if(len(buffers_uv) > 0):
 			var submesh_uv = PackedVector2Array()
 			submesh_uv.resize(len(submesh_map))
 			for submesh_index in submesh_map:
-				submesh_uv[submesh_map[submesh_index]] = godot_uvs[0][submesh_index]
+				submesh_uv[submesh_map[submesh_index]] = buffers_uv[0][submesh_index]
 			arrays[Mesh.ARRAY_TEX_UV] = submesh_uv
-		if(len(godot_uvs) > 1):
+		if(len(buffers_uv) > 1):
 			var submesh_uv = PackedVector2Array()
 			submesh_uv.resize(len(submesh_map))
 			for submesh_index in submesh_map:
-				submesh_uv[submesh_map[submesh_index]] = godot_uvs[1][submesh_index]
+				submesh_uv[submesh_map[submesh_index]] = buffers_uv[1][submesh_index]
 			arrays[Mesh.ARRAY_TEX_UV2] = submesh_uv
 
 		# weightpaint
@@ -376,7 +345,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				submesh_blendshape_vertices[submesh_map[submesh_index]] = blendshape[Mesh.ARRAY_VERTEX][submesh_index] + godot_vertices[submesh_index]
 			submesh_blendshape[Mesh.ARRAY_VERTEX] = submesh_blendshape_vertices
 			
-			if(len(godot_normals) == len(godot_vertices)):
+			if(len(normals) == len(godot_vertices)):
 				var submesh_blendshape_normals = PackedVector3Array()
 				submesh_blendshape_normals.resize(len(submesh_map))
 				for submesh_index in submesh_map:

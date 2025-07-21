@@ -28,9 +28,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var child: Node3D = context.import(child_id, "node", ret)
 		ret.add_child(child)
 
-
-	# todo animations
-
+	for animation_id in json_resource.get("animations", []):
+		var animation = context.import(animation_id, "data", ret)
+		# todo add to a animation node or something
 
 	context._add_task(func():
 		__set_owner(ret, ret)
