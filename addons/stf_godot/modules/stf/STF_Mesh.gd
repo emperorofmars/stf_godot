@@ -113,9 +113,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var vertices := import_vec3_buffer(context.get_buffer(json_resource["vertices"]), float_width)
 
-	var split_indices = import_uint_buffer(context.get_buffer(json_resource["splits"]), indices_width)
+	var split_indices := import_uint_buffer(context.get_buffer(json_resource["splits"]), indices_width)
 
-	var face_corners = import_uint_buffer(context.get_buffer(json_resource["face_corners"]), indices_width) if "face_corners" in json_resource else range(len(split_indices))
+	var face_corners := import_uint_buffer(context.get_buffer(json_resource["face_corners"]), indices_width) if "face_corners" in json_resource else range(len(split_indices))
 
 	var normals := import_vec3_buffer(context.get_buffer(json_resource["split_normals"]), float_width) if "split_normals" in json_resource else PackedVector3Array()
 
