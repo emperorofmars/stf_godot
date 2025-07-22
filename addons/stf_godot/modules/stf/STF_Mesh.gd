@@ -32,6 +32,18 @@ func import_uint_buffer(buffer: PackedByteArray, width: int) -> Array:
 	return ret
 
 
+func import_vec4_buffer(buffer: PackedByteArray, width: int) -> PackedVector4Array:
+	var tmp = null
+	match width:
+		4: tmp = buffer.to_float32_array()
+		8: tmp = buffer.to_float64_array()
+	var ret = PackedVector4Array()
+	ret.resize(len(tmp) / 4)
+	for i in range(len(tmp) / 4):
+		ret[i] = Vector4(tmp[i * 4], tmp[i * 4 + 1], tmp[i * 4 + 2], tmp[i * 4 + 3])
+	return ret
+
+
 func import_vec3_buffer(buffer: PackedByteArray, width: int) -> PackedVector3Array:
 	var tmp = null
 	match width:
@@ -53,6 +65,18 @@ func import_vec2_buffer(buffer: PackedByteArray, width: int) -> PackedVector2Arr
 	ret.resize(len(tmp) / 2)
 	for i in range(len(tmp) / 2):
 		ret[i] = Vector2(tmp[i * 2], tmp[i * 2 + 1])
+	return ret
+
+
+func import_color_buffer(buffer: PackedByteArray, width: int) -> PackedColorArray:
+	var tmp = null
+	match width:
+		4: tmp = buffer.to_float32_array()
+		8: tmp = buffer.to_float64_array()
+	var ret = PackedColorArray()
+	ret.resize(len(tmp) / 4)
+	for i in range(len(tmp) / 4):
+		ret[i] = Color(tmp[i * 4], tmp[i * 4 + 1], tmp[i * 4 + 2], tmp[i * 4 + 3])
 	return ret
 
 
@@ -93,7 +117,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var face_corners = import_uint_buffer(context.get_buffer(json_resource["face_corners"]), indices_width) if "face_corners" in json_resource else range(len(split_indices))
 
-	var normals := import_vec3_buffer(context.get_buffer(json_resource["split_normals"]), float_width)
+	var normals := import_vec3_buffer(context.get_buffer(json_resource["split_normals"]), float_width) if "split_normals" in json_resource else PackedVector3Array()
+
+	var colors := import_color_buffer(context.get_buffer(json_resource["split_colors"]), float_width) if "split_colors" in json_resource else PackedVector4Array()
 
 	var uv_channels = []
 	var buffers_uv: Array[PackedVector2Array] = []
@@ -319,6 +345,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			for submesh_index in submesh_map:
 				submesh_uv[submesh_map[submesh_index]] = buffers_uv[1][submesh_index]
 			arrays[Mesh.ARRAY_TEX_UV2] = submesh_uv
+		
+		if(len(colors) == len(godot_vertices)):
+			var submesh_colors = PackedColorArray()
+			submesh_colors.resize(len(submesh_map))
+			for submesh_index in submesh_map:
+				submesh_colors[submesh_map[submesh_index]] = colors[submesh_index]
+			arrays[Mesh.ARRAY_COLOR] = submesh_colors
+
 
 		# weightpaint
 		if(len(godot_bones) == len(godot_vertices) * BONES_PER_VERTEX && len(godot_weights) == len(godot_vertices) * BONES_PER_VERTEX):
