@@ -41,7 +41,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		elif("blendshape_values" in ret.mesh.get_meta("stf", {}) && len(ret.mesh.get_meta("stf")["blendshape_values"]) > i):
 			ret.set_blend_shape_value(i, ret.mesh.get_meta("stf")["blendshape_values"][i])
 
-	# todo materials
+	if("materials" in json_resource):
+		for material_index in range(min(len(json_resource["materials"]), ret.mesh.get_surface_count())):
+			if(json_resource["materials"][material_index]):
+				var material = context.import(json_resource["materials"][material_index], "data")
+				ret.set_surface_override_material(material_index, material)
 
 	return ret
 
