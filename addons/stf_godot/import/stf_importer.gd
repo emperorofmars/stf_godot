@@ -37,6 +37,8 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 
 	if(options["stf/use_asset_name"]):
 		ret.name = path.get_file().get_basename()
+	elif(options["nodes/root_name"]):
+		ret.name = options["nodes/root_name"]
 
 	if(options["stf/authoring_import"]):
 		var stf_meta = ret.get_meta("stf", {})

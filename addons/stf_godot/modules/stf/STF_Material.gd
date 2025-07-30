@@ -20,10 +20,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	# todo make target materials hot-loadable & select target material/shader based on best match or user override
 
 	var ret = StandardMaterial3D.new()
-	ret.resource_name = json_resource.get("name", "STF Instance Mesh")
+	ret.resource_name = json_resource.get("name", "STF Material")
 
 	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name", "STF Material")}
+	var stf_meta := {"stf_name": json_resource.get("name")}
 	ret.set_meta("stf", stf_meta)
 
 	if("properties" in json_resource):
@@ -39,6 +39,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				ret.roughness_texture = ImageTexture.create_from_image(context.import(values[0].get("image")))
 			
 			if(key == "metallic.texture" && type == "image" && len(values) == 1):
+				ret.metallic = 1
 				ret.metallic_texture = ImageTexture.create_from_image(context.import(values[0].get("image")))
 
 	return ret

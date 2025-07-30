@@ -21,7 +21,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var ret = MeshInstance3D.new()
 	ret.name = json_resource.get("name", "STF Instance Mesh")
 
-	var stf_meta := {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name", null)}
+	var stf_meta := {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name")}
 	ret.set_meta("stf", stf_meta)
 
 	ret.mesh = context.import(json_resource["mesh"], "data")
