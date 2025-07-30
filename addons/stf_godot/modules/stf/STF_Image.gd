@@ -25,7 +25,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.set_meta("stf", stf_meta)
 
 	var format = json_resource["format"]
-	print(format)
 
 	var image_buffer = context.get_buffer(json_resource["buffer"])
 	match format:
