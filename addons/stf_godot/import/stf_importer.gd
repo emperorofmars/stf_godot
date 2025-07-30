@@ -14,13 +14,14 @@ func _get_import_flags() -> int:
 	return IMPORT_SCENE
 
 func _get_import_options(path: String):
-	add_import_option_advanced(TYPE_BOOL, "authoring_import", false)
-	add_import_option_advanced(TYPE_BOOL, "use_asset_name", false)
+	if(path and path.get_extension() != "stf"): return
+
+	add_import_option_advanced(TYPE_BOOL, "stf/authoring_import", false)
+	add_import_option_advanced(TYPE_BOOL, "stf/use_asset_name", false)
+	#add_import_option_advanced(TYPE_DICTIONARY, "stf/target_materials", {}, PROPERTY_HINT_RESOURCE_TYPE, "Material")
 
 func _get_option_visibility(path: String, for_animation: bool, option: String):
 	return option not in ["nodes/import_as_skeleton_bones", "nodes/use_node_type_suffixes"]
-	#return option in ["authoring_import", "use_asset_name", "nodes/root_name", "nodes/root_type", "nodes/apply_root_scale"]
-	return true
 
 func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	print("Importing STF asset: " + path)
@@ -34,10 +35,10 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	var ret: Node3D = import_context.import(import_state.get_root_id())
 	import_state.run_tasks()
 
-	if(options["use_asset_name"]):
+	if(options["stf/use_asset_name"]):
 		ret.name = path.get_file().get_basename()
 
-	if(options["authoring_import"]):
+	if(options["stf/authoring_import"]):
 		var stf_meta = ret.get_meta("stf", {})
 		stf_meta["import_meta"] = import_state._stf_file.json_definition["stf"]
 	else:

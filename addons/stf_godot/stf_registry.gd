@@ -30,6 +30,7 @@ static func get_default_modules() -> Array[STF_Module]:
 		STF_Instance_Mesh.new(),
 		STF_Mesh.new(),
 		STF_Material.new(),
+		STF_Image.new(),
 	]
 
 
