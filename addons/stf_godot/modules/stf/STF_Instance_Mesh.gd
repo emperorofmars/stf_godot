@@ -45,7 +45,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		for material_index in range(min(len(json_resource["materials"]), ret.mesh.get_surface_count())):
 			if(json_resource["materials"][material_index]):
 				var material = context.import(json_resource["materials"][material_index], "data")
-				ret.set_surface_override_material(material_index, material)
+				if(material):
+					ret.set_surface_override_material(material_index, material)
 
 	return ret
 
