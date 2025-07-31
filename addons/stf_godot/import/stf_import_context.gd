@@ -16,7 +16,7 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	var json_resource = _state.get_json_resource(stf_id)
 	var module = _state.determine_module(json_resource, expected_kind)
 	if(module):
-		var ret = module._import(self, stf_id, json_resource, context_object)
+		var ret := module._import(self, stf_id, json_resource, context_object)
 		if(ret):
 			_state.register_imported_resource(stf_id, ret)
 
@@ -25,8 +25,8 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 					var json_component_resource = _state.get_json_resource(component_id)
 					var component_module = _state.determine_module(json_component_resource, "component")
 					if(component_module):
-						component_module._import(self, component_id, json_component_resource, ret)
-			return ret
+						component_module._import(self, component_id, json_component_resource, ret._godot_object)
+			return ret._godot_object
 		else:
 			#todo report error
 			pass
@@ -34,8 +34,8 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	return null
 
 
-func resolve_animation_path(stf_path: Array) -> STF_AnimationPropertyResult:
-	return _state.resolve_animation_path(stf_path)
+func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.AnimationPropertyResult:
+	return _state.resolve_animation_path(stf_path, context_object)
 
 
 func get_buffer(stf_id: String) -> PackedByteArray:

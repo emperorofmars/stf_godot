@@ -20,7 +20,7 @@ func _check_godot_object(godot_object: Object) -> int:
 	return 0
 
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Node3D.new()
 	ret.name = json_resource.get("name", "STF Prefab")
 
@@ -32,23 +32,27 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var child: Node3D = context.import(child_id, "node", ret)
 		ret.add_child(child)
 
-	if("animations" in json_resource):
-		var animation_player := AnimationPlayer.new()
-		animation_player.name = "Imported STF Animations"
-		var animation_library := AnimationLibrary.new()
-		animation_library.resource_name = "Imported STF Animations"
-		animation_player.add_animation_library("STF", animation_library)
-		ret.add_child(animation_player)
-
-		for animation_id in json_resource["animations"]:
-			var animation: Animation = context.import(animation_id, "data", ret)
-			if(animation):
-				animation_library.add_animation(animation.resource_name, animation)
 
 	context._add_task(func():
 		__set_owner(ret, ret)
 	)
-	return ret
+	if("animations" in json_resource):
+		context._add_task(func():
+			var animation_player := AnimationPlayer.new()
+			animation_player.name = "Imported STF Animations"
+			ret.add_child(animation_player)
+			animation_player.set_owner(ret)
+
+			var animation_library := AnimationLibrary.new()
+			animation_library.resource_name = "Imported STF Animations"
+			animation_player.add_animation_library("STF", animation_library)
+
+			for animation_id in json_resource["animations"]:
+				var animation: Animation = context.import(animation_id, "data", ret)
+				if(animation):
+					animation_library.add_animation(animation.resource_name, animation)
+		)
+	return ImportResult.new(ret)
 
 func __set_owner(root: Node, owner: Node):
 	for child in root.get_children(true):
@@ -56,7 +60,7 @@ func __set_owner(root: Node, owner: Node):
 		__set_owner(child, owner)
 
 
-func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	var scene: SceneTree = godot_object
 	var root_node := scene.edited_scene_root
 
@@ -76,4 +80,4 @@ func _export(context: STF_ExportContext, godot_object: Object, context_object: V
 		stf_name = root_node.get_meta("stf")["stf_name"]
 	ret["name"] = stf_name
 
-	return STF_ResourceExport.new(stf_id, ret)
+	return ExportResult.new(stf_id, ret)

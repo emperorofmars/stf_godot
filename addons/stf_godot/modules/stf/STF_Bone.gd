@@ -16,9 +16,9 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Bone"
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var armature: Skeleton3D = context_object
-	var bone_index = armature.add_bone(json_resource.get("name", stf_id))
+	var bone_index := armature.add_bone(json_resource.get("name", stf_id))
 
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
 	armature.set_bone_meta(bone_index, "stf_name", json_resource.get("name", null))
@@ -33,7 +33,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		armature.set_bone_parent(child_index, bone_index)
 		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 
-	return bone_index
+	return ImportResult.new(bone_index)
 
-func _export() -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

@@ -16,7 +16,7 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Animation"
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Animation.new()
 	ret.resource_name = json_resource.get("name", "STF Animation")
 
@@ -34,6 +34,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: STF_AnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
+
+		print("Target: ", target)
+
 		if(target):
 			var track_index = ret.add_track(target._track_type)
 			ret.track_set_path(track_index, target._godot_path)
@@ -41,8 +44,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		# todo else warn
 
-	return ret
+	return ImportResult.new(ret)
 
-func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
 

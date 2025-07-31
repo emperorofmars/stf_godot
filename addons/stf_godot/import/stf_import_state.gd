@@ -11,7 +11,9 @@ var _meta: STF_Info
 # STF ID -> Godot Thingy
 var _imported_resources: Dictionary[String, Variant] = {}
 
-var _animation_converters: Dictionary[Object, STF_AnimationPropertyResolver] = {}
+# func (stf_path: Array, godot_object: Object):
+#	return AnimationPropertyResult.new("foo", Animation.TYPE_BEZIER)
+var _animation_converters: Dictionary[Object, Callable] = {}
 
 var _tasks: Array[Callable] = []
 
@@ -33,17 +35,18 @@ func determine_module(json_resource: Dictionary, expected_kind: String = "data")
 		print("STF Warning: Unrecognized resource: %s" % json_resource["type"])
 		return null # todo fallback
 
-
-func resolve_animation_path(stf_path: Array) -> STF_AnimationPropertyResult:
-	if(len(stf_path) > 0 && stf_path[0] in _imported_resources && _imported_resources[stf_path[0]] in _animation_converters):
+func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.AnimationPropertyResult:
+	if(len(stf_path) > 1 && stf_path[0] in _imported_resources && _imported_resources[stf_path[0]] in _animation_converters):
 		var resolver := _animation_converters[_imported_resources[stf_path[0]]]
-		return resolver.resolve(stf_path.slice(1), _imported_resources[stf_path[0]])
-	
+		return resolver.call(stf_path.slice(1), _imported_resources[stf_path[0]])
+
 	return null
 
 
-func register_imported_resource(stf_id: String, resource: Variant):
-	_imported_resources[stf_id] = resource
+func register_imported_resource(stf_id: String, result: STF_Module.ImportResult):
+	_imported_resources[stf_id] = result._godot_object
+	if(result._property_converter):
+		_animation_converters[result._godot_object] = result._property_converter._callable
 
 
 func get_buffer(stf_id: String) -> PackedByteArray:

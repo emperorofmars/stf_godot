@@ -16,7 +16,8 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Node3D"
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = null
 	if("instance" in json_resource):
 		ret = context.import(json_resource["instance"], "instance", context_object)
@@ -28,14 +29,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var stf_meta = ret.get_meta("stf", {})
 	stf_meta["stf_name"] = json_resource.get("name", null)
 	ret.set_meta("stf", stf_meta)
-	
+
 	for child_id in json_resource.get("children", []):
 		var child: Node3D = context.import(child_id, "node", context_object)
 		ret.add_child(child)
-	
+
 	if("trs" in json_resource):
 		ret.transform = STF_TRS_Util.parse_transform(json_resource["trs"])
-	
+
 	if("parent_binding" in json_resource && len(json_resource["parent_binding"]) == 3):
 		context._add_task(func():
 			var parent_binding: Array = json_resource["parent_binding"]
@@ -62,7 +63,23 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	if("enabled" in json_resource && json_resource["enabled"] == false):
 		ret.visible = false
 
-	return ret
+	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
+		var node: Node3D = godot_object
+		print(node)
+		match stf_path[0]:
+			"t": return AnimationPropertyResult.new(node.get_path().get_concatenated_names() + ":position", Animation.TYPE_POSITION_3D)
+			"r": return AnimationPropertyResult.new(node.get_path().get_concatenated_names() + ":rotation", Animation.TYPE_ROTATION_3D)
+			"s": return AnimationPropertyResult.new(node.get_path().get_concatenated_names() + ":scale", Animation.TYPE_SCALE_3D)
+			"enabled": return AnimationPropertyResult.new(node.get_path().get_concatenated_names() + ":visible", Animation.TYPE_VALUE) # todo does this work?
+			"instance": # todo distinguish between node and instance
+				var anim_ret := context.resolve_animation_path(stf_path.slice(2), node)
+				return AnimationPropertyResult.new(anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter) # todo does this work?
+			"components":
+				return null # todo
+		return null
 
-func _export() -> STF_ResourceExport:
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
+
+
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

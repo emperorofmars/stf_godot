@@ -106,7 +106,7 @@ func get_float_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: in
 		_: return NAN
 
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var float_width: int = json_resource.get("float_width", 4)
 	var indices_width: int = json_resource.get("indices_width", 4)
 	var material_indices_width: int = json_resource.get("material_indices_width", 1)
@@ -137,7 +137,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if ((uv[a] - uv[b]).length() > 0.0001):
 				return false
 		return true
-	
+
 	var compareColors = func(a: int, b: int) -> bool:
 		for i in range(4):
 			if (abs(colors[a][i] - colors[b][i]) > 0.0001):
@@ -232,7 +232,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var bones_ids: Array = json_resource["bones"]
 		var bone_indices_width: int = json_resource.get("bone_indices_width", 1)
 		var weight_lens_width: int = json_resource.get("weight_lens_width", 1)
-		
+
 		var buffer_weight_lens = import_uint_buffer(context.get_buffer(json_resource["weight_lens"]), weight_lens_width)
 		var buffer_bone_indices = import_uint_buffer(context.get_buffer(json_resource["bone_indices"]), bone_indices_width)
 		var buffer_weights = context.get_buffer(json_resource["weights"])
@@ -266,7 +266,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 			vertex_bones.sort_custom(func (a, b): vertex_weights[vertex_bones.find(a)] > vertex_weights[vertex_bones.find(b)])
 			vertex_weights.sort_custom(func (a, b): a > b)
-			
+
 			var weights_sum = 0
 			for i in range(min(weight_len, BONES_PER_VERTEX)):
 				weights_sum += vertex_weights[i]
@@ -358,7 +358,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if(submesh_index not in submesh_map):
 				submesh_map[submesh_index] = pos
 				pos += 1
-		
+
 		# triangle indices
 		var submesh_indices = PackedInt32Array()
 		submesh_indices.resize(len(sub_mesh))
@@ -424,13 +424,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		for blendshape in blendshapes:
 			var submesh_blendshape = []
 			submesh_blendshape.resize(Mesh.ARRAY_MAX)
-			
+
 			var submesh_blendshape_vertices = PackedVector3Array()
 			submesh_blendshape_vertices.resize(len(submesh_map))
 			for submesh_index in submesh_map:
 				submesh_blendshape_vertices[submesh_map[submesh_index]] = blendshape[Mesh.ARRAY_VERTEX][submesh_index] + godot_vertices[submesh_index]
 			submesh_blendshape[Mesh.ARRAY_VERTEX] = submesh_blendshape_vertices
-			
+
 			if(len(normals) == len(godot_vertices)):
 				var submesh_blendshape_normals = PackedVector3Array()
 				submesh_blendshape_normals.resize(len(submesh_map))
@@ -447,7 +447,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		#ret.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, null, "", flags)
 		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, flags)
-	
+
 	if("material_slots" in json_resource):
 		for material_index in range(len(json_resource["material_slots"])):
 			var material_id = json_resource["material_slots"][material_index]
@@ -459,8 +459,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	#ret.generate_lods(60, 60, [])
 
-	return ret
+	return ImportResult.new(ret)
 
-func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
 

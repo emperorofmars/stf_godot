@@ -16,7 +16,7 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Image"
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Image.new()
 	ret.resource_name = json_resource.get("name", "STF Image")
 
@@ -32,8 +32,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		"jpg": ret.load_jpg_from_buffer(image_buffer)
 		"jpeg": ret.load_jpg_from_buffer(image_buffer)
 
-	return ret
+	return ImportResult.new(ret)
 
-func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
 

@@ -22,8 +22,39 @@ func _get_godot_type() -> String:
 func _check_godot_object(godot_object: Object) -> int:
 	return -1
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+class OptionalCallable:
+	extends RefCounted
+	var _callable: Callable
+	func _init(callable: Callable) -> void: self._callable = callable
+
+class AnimationPropertyResult:
+	extends RefCounted
+	var _godot_path: String
+	var _track_type: int
+	var _keyframe_converter: Callable
+	func _init(godot_path: String, track_type: int, keyframe_converter: Callable = func (v): return v) -> void:
+		self._godot_path = godot_path
+		self._track_type = track_type
+		self._keyframe_converter = keyframe_converter
+
+class ImportResult:
+	extends RefCounted
+	var _godot_object: Variant
+	var _property_converter: OptionalCallable
+	func _init(godot_object: Variant, property_converter: OptionalCallable = null) -> void:
+		self._godot_object = godot_object
+		self._property_converter = property_converter
+
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	return null
 
-func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
+class ExportResult:
+	extends RefCounted
+	var _stf_id: String
+	var _json_resource: Dictionary
+	func _init(stf_id: String, json_resource: Dictionary) -> void:
+		self._stf_id = stf_id
+		self._json_resource = json_resource
+
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

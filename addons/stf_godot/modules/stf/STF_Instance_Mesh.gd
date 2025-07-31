@@ -16,7 +16,7 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "MeshInstance3D"
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	#var ret = ImporterMeshInstance3D.new()
 	var ret = MeshInstance3D.new()
 	ret.name = json_resource.get("name", "STF Instance Mesh")
@@ -34,7 +34,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				ret.skeleton = ret.get_path_to(armature_instance)
 				ret.skin = armature_instance.create_skin_from_rest_transforms()
 		)
-	
+
 	for i in range(ret.get_blend_shape_count()):
 		if("blendshape_values" in json_resource && len(json_resource["blendshape_values"]) > i && json_resource["blendshape_values"][i]):
 			ret.set_blend_shape_value(i, json_resource["blendshape_values"][i])
@@ -48,8 +48,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				if(material):
 					ret.set_surface_override_material(material_index, material)
 
-	return ret
+	return ImportResult.new(ret)
 
-func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
 

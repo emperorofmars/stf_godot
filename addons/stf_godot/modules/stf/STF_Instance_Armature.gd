@@ -16,7 +16,7 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Skeleton3D"
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var armature: Skeleton3D = context.import(json_resource["armature"], "data")
 	var ret: Skeleton3D = armature.duplicate(true)
 	ret.reset_bone_poses()
@@ -32,14 +32,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					bone_index = i
 					break
 			if(bone_index < 0): continue
-			
+
 			var transform = STF_TRS_Util.parse_transform(json_resource["pose"][bone_id])
 			ret.set_bone_pose(bone_index, transform)
 
 	# todo instance component, component mods
 
-	return ret
+	return ImportResult.new(ret)
 
-func _export() -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
 
