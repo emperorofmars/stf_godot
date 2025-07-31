@@ -68,17 +68,18 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var node: Node3D = godot_object
 		var path = node.owner.get_path_to(node).get_concatenated_names()
 		match stf_path[1]:
-			"t": return AnimationPropertyResult.new(path + ":position", Animation.TYPE_POSITION_3D)
-			"r": return AnimationPropertyResult.new(path + ":rotation", Animation.TYPE_ROTATION_3D)
-			"s": return AnimationPropertyResult.new(path + ":scale", Animation.TYPE_SCALE_3D)
-			"enabled": return AnimationPropertyResult.new(path + ":visible", Animation.TYPE_VALUE) # todo does this work?
+			"t": return ImportAnimationPropertyResult.new(path + ":position", Animation.TYPE_POSITION_3D)
+			"r": return ImportAnimationPropertyResult.new(path + ":rotation", Animation.TYPE_ROTATION_3D)
+			"s": return ImportAnimationPropertyResult.new(path + ":scale", Animation.TYPE_SCALE_3D)
+			"enabled": return ImportAnimationPropertyResult.new(path + ":visible", Animation.TYPE_VALUE)
 			"instance":
 				var anim_ret := context.resolve_animation_path([ret.get_meta("stf").get("stf_instance_id")] + stf_path.slice(2)) # slightly dirty but it works
 				if(anim_ret):
-					return AnimationPropertyResult.new(anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter) # todo does this work?
-				return null
+					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter)
 			"components":
-				return null # todo
+				var anim_ret := context.resolve_animation_path(stf_path.slice(2))
+				if(anim_ret):
+					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter)
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))

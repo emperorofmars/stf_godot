@@ -34,7 +34,7 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	return null
 
 
-func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.AnimationPropertyResult:
+func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.ImportAnimationPropertyResult:
 	return _state.resolve_animation_path(stf_path, context_object)
 
 

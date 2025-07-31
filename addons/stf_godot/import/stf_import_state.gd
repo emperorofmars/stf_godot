@@ -35,7 +35,7 @@ func determine_module(json_resource: Dictionary, expected_kind: String = "data")
 		print("STF Warning: Unrecognized resource: %s" % json_resource["type"])
 		return null # todo fallback
 
-func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.AnimationPropertyResult:
+func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.ImportAnimationPropertyResult:
 	if(len(stf_path) < 2): return null
 	if(stf_path[0] in _imported_resources && stf_path[0] in _animation_converters):
 		var resolver := _animation_converters[stf_path[0]]

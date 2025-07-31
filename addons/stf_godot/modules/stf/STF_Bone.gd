@@ -43,9 +43,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				break
 		if(anim_bone_index >= 0):
 			match stf_path[1]:
-				"t": return AnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":position", Animation.TYPE_POSITION_3D) # no clue if this is how it works
-				"r": return AnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":rotation", Animation.TYPE_ROTATION_3D)
-				"s": return AnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":scale", Animation.TYPE_SCALE_3D)
+				"t": return ImportAnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":position", Animation.TYPE_POSITION_3D) # todo no clue if this is how it works
+				"r": return ImportAnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":rotation", Animation.TYPE_ROTATION_3D)
+				"s": return ImportAnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":scale", Animation.TYPE_SCALE_3D)
 				"components":
 					return null # todo
 		return null

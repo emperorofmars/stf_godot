@@ -10,7 +10,7 @@ func _init(state: STF_ExportState) -> void:
 	_state = state
 
 
-func export(godot_object: Object, expected_kind: String = "data", context_object: Variant = null) -> String:
+func export(godot_object: Variant, expected_kind: String = "data", context_object: Variant = null) -> String:
 	if(godot_object in _state._exported_resources):
 		return _state._exported_resources[godot_object]
 

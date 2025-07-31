@@ -47,7 +47,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 			var anim_ret = context.resolve_animation_path(stf_path.slice(1), godot_object)
 			if(anim_ret):
-				return AnimationPropertyResult.new(node.owner.get_path_to(node).get_concatenated_names() + ":" + anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter)
+				return ImportAnimationPropertyResult.new(node.owner.get_path_to(node).get_concatenated_names() + ":" + anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter)
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))

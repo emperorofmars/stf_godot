@@ -27,7 +27,7 @@ class OptionalCallable:
 	var _callable: Callable
 	func _init(callable: Callable) -> void: self._callable = callable
 
-class AnimationPropertyResult:
+class ImportAnimationPropertyResult:
 	extends RefCounted
 	var _godot_path: String
 	var _track_type: int

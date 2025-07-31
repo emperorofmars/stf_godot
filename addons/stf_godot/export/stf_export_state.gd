@@ -42,7 +42,7 @@ func determine_module(godot_object: Object, expected_kind: String = "data") -> S
 	return null
 
 
-func register_exported_resource(godot_object: Object, exported_resource: STF_ResourceExport):
+func register_exported_resource(godot_object: Variant, exported_resource: STF_Module.ExportResult):
 	_exported_resources[godot_object] = exported_resource._stf_id
 	_resources[exported_resource._stf_id] = exported_resource._json_resource
 
