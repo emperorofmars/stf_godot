@@ -34,6 +34,10 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	return null
 
 
+func resolve_animation_path(stf_path: Array) -> STF_AnimationPropertyResult:
+	return _state.resolve_animation_path(stf_path)
+
+
 func get_buffer(stf_id: String) -> PackedByteArray:
 	return _state.get_buffer(stf_id)
 
