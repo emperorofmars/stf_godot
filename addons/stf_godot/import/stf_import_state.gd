@@ -13,7 +13,7 @@ var _imported_resources: Dictionary[String, Variant] = {}
 
 # func (stf_path: Array, godot_object: Object):
 #	return AnimationPropertyResult.new("foo", Animation.TYPE_BEZIER)
-var _animation_converters: Dictionary[Object, Callable] = {}
+var _animation_converters: Dictionary[String, Callable] = {}
 
 var _tasks: Array[Callable] = []
 
@@ -36,17 +36,17 @@ func determine_module(json_resource: Dictionary, expected_kind: String = "data")
 		return null # todo fallback
 
 func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.AnimationPropertyResult:
-	if(len(stf_path) > 1 && stf_path[0] in _imported_resources && _imported_resources[stf_path[0]] in _animation_converters):
-		var resolver := _animation_converters[_imported_resources[stf_path[0]]]
-		return resolver.call(stf_path.slice(1), _imported_resources[stf_path[0]])
-
+	if(len(stf_path) < 2): return null
+	if(stf_path[0] in _imported_resources && stf_path[0] in _animation_converters):
+		var resolver := _animation_converters[stf_path[0]]
+		return resolver.call(stf_path, context_object if context_object else _imported_resources[stf_path[0]])
 	return null
 
 
 func register_imported_resource(stf_id: String, result: STF_Module.ImportResult):
 	_imported_resources[stf_id] = result._godot_object
 	if(result._property_converter):
-		_animation_converters[result._godot_object] = result._property_converter._callable
+		_animation_converters[stf_id] = result._property_converter._callable
 
 
 func get_buffer(stf_id: String) -> PackedByteArray:

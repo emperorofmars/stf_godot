@@ -38,7 +38,19 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	# todo instance component, component mods
 
-	return ImportResult.new(ret)
+	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 2): return null
+		var node: Skeleton3D = godot_object
+		if(len(stf_path) > 1):
+			match stf_path[1]:
+				"component_mods": return null
+
+			var anim_ret = context.resolve_animation_path(stf_path.slice(1), godot_object)
+			if(anim_ret):
+				return AnimationPropertyResult.new(node.owner.get_path_to(node).get_concatenated_names() + ":" + anim_ret._godot_path, anim_ret._track_type, anim_ret._keyframe_converter)
+		return null
+
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

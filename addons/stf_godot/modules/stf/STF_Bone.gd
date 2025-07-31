@@ -33,7 +33,24 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		armature.set_bone_parent(child_index, bone_index)
 		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 
-	return ImportResult.new(bone_index)
+	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 2): return null
+		var node: Skeleton3D = godot_object
+		var anim_bone_index = -1
+		for i in range(node.get_bone_count()):
+			if(node.get_bone_meta(i, "stf_id") == stf_path[0]):
+				anim_bone_index = i
+				break
+		if(anim_bone_index >= 0):
+			match stf_path[1]:
+				"t": return AnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":position", Animation.TYPE_POSITION_3D) # no clue if this is how it works
+				"r": return AnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":rotation", Animation.TYPE_ROTATION_3D)
+				"s": return AnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":scale", Animation.TYPE_SCALE_3D)
+				"components":
+					return null # todo
+		return null
+
+	return ImportResult.new(bone_index, OptionalCallable.new(animation_property_resolve_func))
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
