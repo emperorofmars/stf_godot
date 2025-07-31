@@ -24,10 +24,25 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var stf_meta := {"stf_name": json_resource.get("name")}
 	ret.set_meta("stf", stf_meta)
 
-	# todo everything
+	ret.loop_mode = Animation.LOOP_NONE if json_resource.get("loop", false) else Animation.LOOP_LINEAR
+	ret.step = 1 / json_resource.get("fps", 30)
+
+	var start_offset = 0
+	if("range" in json_resource):
+		ret.length = json_resource["range"][1] - json_resource["range"][0]
+		start_offset = json_resource["range"][0]
+
+	for stf_track in json_resource.get("tracks", []):
+		var target: STF_AnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
+		if(target):
+			var track_index = ret.add_track(target._track_type)
+			ret.track_set_path(track_index, target._godot_path)
+			# todo keyframes
+
+		# todo else warn
 
 	return ret
 
-func _export() -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
 	return null
 

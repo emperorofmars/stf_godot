@@ -50,6 +50,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	return ret
 
-func _export() -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
 	return null
 

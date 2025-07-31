@@ -11,6 +11,8 @@ var _meta: STF_Info
 # STF ID -> Godot Thingy
 var _imported_resources: Dictionary[String, Variant] = {}
 
+var _animation_converters: Dictionary[Object, STF_AnimationPropertyResolver] = {}
+
 var _tasks: Array[Callable] = []
 
 
@@ -30,6 +32,14 @@ func determine_module(json_resource: Dictionary, expected_kind: String = "data")
 	else:
 		print("STF Warning: Unrecognized resource: %s" % json_resource["type"])
 		return null # todo fallback
+
+
+func resolve_animation_path(stf_path: Array[String]) -> STF_AnimationPropertyResult:
+	if(len(stf_path) > 0 && stf_path[0] in _imported_resources && _imported_resources[stf_path[0]] in _animation_converters):
+		var resolver := _animation_converters[_imported_resources[stf_path[0]]]
+		return resolver.resolve(stf_path.slice(1), _imported_resources[stf_path[0]])
+	
+	return null
 
 
 func register_imported_resource(stf_id: String, resource: Variant):
