@@ -8,7 +8,7 @@ func _get_stf_type() -> String:
 	return ""
 
 func _get_priority() -> int:
-	return 0
+	return -1
 
 func _get_stf_kind() -> String:
 	return ""
@@ -19,8 +19,11 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return ""
 
+func _check_godot_object(godot_object: Object) -> int:
+	return -1
+
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> Variant:
 	return null
 
-func _export() -> STF_ResourceExport:
+func _export(context: STF_ExportContext, godot_object: Object, context_object: Variant) -> STF_ResourceExport:
 	return null

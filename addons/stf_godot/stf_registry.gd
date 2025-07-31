@@ -42,9 +42,12 @@ static func get_modules_by_stf_type() -> Dictionary[String, STF_Module]:
 	# todo handle registered modules
 	return ret
 
-static func get_modules_by_godot_type() -> Dictionary[String, STF_Module]:
-	var ret: Dictionary[String, STF_Module] = {}
-	for module in _default_stf_modules:
-		ret[module._get_godot_type()] = module
+static func get_modules_by_godot_type() -> Dictionary[String, Array]:
+	var ret: Dictionary[String, Array] = {}
+	for module in get_default_modules():
+		if(module._get_godot_type() not in ret):
+			ret[module._get_godot_type()] = [module]
+		else:
+			ret[module._get_godot_type()].append(module)
 	# todo handle registered modules
 	return ret

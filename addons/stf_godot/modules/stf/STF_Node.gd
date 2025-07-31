@@ -27,7 +27,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.set_meta("stf_id", stf_id)
 	var stf_meta = ret.get_meta("stf", {})
 	stf_meta["stf_name"] = json_resource.get("name", null)
-	#ret.set_meta("stf", stf_meta)
+	ret.set_meta("stf", stf_meta)
 	
 	for child_id in json_resource.get("children", []):
 		var child: Node3D = context.import(child_id, "node", context_object)

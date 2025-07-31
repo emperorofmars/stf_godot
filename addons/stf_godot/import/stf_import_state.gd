@@ -8,7 +8,7 @@ var _modules: Dictionary[String, STF_Module]
 
 var _meta: STF_Info
 
-## STF ID -> Godot Thingy
+# STF ID -> Godot Thingy
 var _imported_resources: Dictionary[String, Variant] = {}
 
 var _tasks: Array[Callable] = []

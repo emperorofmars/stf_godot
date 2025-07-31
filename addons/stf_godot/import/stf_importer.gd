@@ -13,6 +13,7 @@ func _get_extensions() -> PackedStringArray:
 func _get_import_flags() -> int:
 	return IMPORT_SCENE
 
+
 func _get_import_options(path: String):
 	if(path and path.get_extension() != "stf"): return
 
@@ -21,7 +22,10 @@ func _get_import_options(path: String):
 	#add_import_option_advanced(TYPE_DICTIONARY, "stf/target_materials", {}, PROPERTY_HINT_RESOURCE_TYPE, "Material")
 
 func _get_option_visibility(path: String, for_animation: bool, option: String):
+	if(path and path.get_extension() != "stf"): return true
+
 	return option not in ["nodes/import_as_skeleton_bones", "nodes/use_node_type_suffixes"]
+
 
 func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	print("Importing STF asset: " + path)
