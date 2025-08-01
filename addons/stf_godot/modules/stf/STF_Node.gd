@@ -113,9 +113,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		match stf_path[1]:
-			"t": return ImportAnimationPropertyResult.new(path + ":position", converter_func_translation)
-			"r": return ImportAnimationPropertyResult.new(path + ":rotation", converter_func_rotation)
-			"s": return ImportAnimationPropertyResult.new(path + ":scale", converter_func_scale)
+			"t": return ImportAnimationPropertyResult.new(path, converter_func_translation)
+			"r": return ImportAnimationPropertyResult.new(path, converter_func_rotation)
+			"s": return ImportAnimationPropertyResult.new(path, converter_func_scale)
 			"enabled": return ImportAnimationPropertyResult.new(path + ":visible")
 			"instance":
 				var anim_ret := context.resolve_animation_path([ret.get_meta("stf").get("stf_instance_id")] + stf_path.slice(2)) # slightly dirty but it works

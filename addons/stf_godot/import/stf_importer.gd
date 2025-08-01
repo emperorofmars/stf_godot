@@ -19,6 +19,7 @@ func _get_import_options(path: String):
 
 	add_import_option_advanced(TYPE_BOOL, "stf/authoring_import", false)
 	add_import_option_advanced(TYPE_BOOL, "stf/use_asset_name", false)
+	add_import_option_advanced(TYPE_BOOL, "stf/simplify_animations", false)
 	#add_import_option_advanced(TYPE_DICTIONARY, "stf/target_materials", {}, PROPERTY_HINT_RESOURCE_TYPE, "Material")
 
 func _get_option_visibility(path: String, for_animation: bool, option: String):
