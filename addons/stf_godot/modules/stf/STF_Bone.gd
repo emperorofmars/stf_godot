@@ -42,12 +42,15 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				anim_bone_index = i
 				break
 		if(anim_bone_index >= 0):
-			match stf_path[1]:
-				"t": return ImportAnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":position", Animation.TYPE_POSITION_3D) # todo no clue if this is how it works
-				"r": return ImportAnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":rotation", Animation.TYPE_ROTATION_3D)
-				"s": return ImportAnimationPropertyResult.new("bones:" + str(anim_bone_index) + ":scale", Animation.TYPE_SCALE_3D)
+			match stf_path[1]: # todo no clue if this is how it works
+				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), Animation.TYPE_POSITION_3D)
+				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), Animation.TYPE_ROTATION_3D)
+				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), Animation.TYPE_SCALE_3D)
 				"components":
 					return null # todo
+			""""t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index) + ":position", Animation.TYPE_POSITION_3D)
+			"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index) + ":rotation", Animation.TYPE_ROTATION_3D)
+			"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index) + ":scale", Animation.TYPE_SCALE_3D)"""
 		return null
 
 	return ImportResult.new(bone_index, OptionalCallable.new(animation_property_resolve_func))

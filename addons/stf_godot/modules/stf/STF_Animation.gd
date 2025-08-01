@@ -35,11 +35,16 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
 		if(target):
-			#print("Target: ", target._godot_path)
+			#print("Target: ", target._godot_path, " : ", target._track_type)
 
 			var track_index = ret.add_track(target._track_type)
 			ret.track_set_path(track_index, target._godot_path)
 			# todo keyframes
+
+			if(target._track_type == Animation.TYPE_POSITION_3D):
+				ret.track_insert_key(track_index, 1.0, Vector3.ZERO, 1)
+			elif(target._track_type == Animation.TYPE_ROTATION_3D):
+				ret.track_insert_key(track_index, 1.0, Quaternion.IDENTITY, 1)
 
 		# todo else warn
 
