@@ -48,7 +48,27 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				if(material):
 					ret.set_surface_override_material(material_index, material)
 
-	return ImportResult.new(ret)
+
+	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 4): return null
+		var anim_target: MeshInstance3D = godot_object
+
+		var blendshape_converter = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
+			var track_index = animation.add_track(Animation.TYPE_BLEND_SHAPE)
+			animation.track_set_path(track_index, target)
+			for keyframe in keyframes:
+				var frame = keyframe["frame"]
+				var value = keyframe["values"][0][0]
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+
+		match stf_path[1]:
+			"blendshape":
+				var blendshape_name = stf_path[2]
+				match stf_path[3]:
+					"value": return ImportAnimationPropertyResult.new(anim_target.owner.get_path_to(anim_target).get_concatenated_names() + ":" + blendshape_name, blendshape_converter)
+		return null
+
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

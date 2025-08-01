@@ -34,7 +34,7 @@ class ImportAnimationPropertyResult:
 	func _init(godot_path: String, keyframe_converter: Callable = __default_keyframe_converter) -> void:
 		self._godot_path = godot_path
 		self._keyframe_converter = keyframe_converter
-	func __default_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
+	static func __default_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
 		var track_index = animation.add_track(Animation.TYPE_VALUE)
 		animation.track_set_path(track_index, target)
 		for keyframe in keyframes:
