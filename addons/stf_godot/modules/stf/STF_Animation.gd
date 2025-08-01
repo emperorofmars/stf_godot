@@ -29,22 +29,15 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var start_offset = 0
 	if("range" in json_resource):
-		ret.length = json_resource["range"][1] - json_resource["range"][0]
-		start_offset = json_resource["range"][0]
+		ret.length = (json_resource["range"][1] - json_resource["range"][0]) * ret.step
+		start_offset = json_resource["range"][0] * ret.step
+
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
-		if(target):
+		if(target && target._godot_path && target._keyframe_converter):
 			#print("Target: ", target._godot_path, " : ", target._track_type)
-
-			var track_index = ret.add_track(target._track_type)
-			ret.track_set_path(track_index, target._godot_path)
-			# todo keyframes
-
-			if(target._track_type == Animation.TYPE_POSITION_3D):
-				ret.track_insert_key(track_index, 1.0, Vector3.ZERO, 1)
-			elif(target._track_type == Animation.TYPE_ROTATION_3D):
-				ret.track_insert_key(track_index, 1.0, Quaternion.IDENTITY, 1)
+			target._keyframe_converter.call(ret, target._godot_path, stf_track["keyframes"], start_offset)
 
 		# todo else warn
 

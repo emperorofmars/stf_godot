@@ -41,16 +41,54 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if(node.get_bone_meta(i, "stf_id") == stf_path[0]):
 				anim_bone_index = i
 				break
+
+		# todo depending on user setting return rotation/position etc types, or make everything its own bezier track
+
+		var converter_func_translation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
+			var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
+			animation.track_set_path(track_index, target)
+			for keyframe in keyframes:
+				var frame = keyframe["frame"]
+				var value := Vector3.ZERO
+				for i in range(len(keyframe["values"])):
+					if(keyframe["values"][i]):
+						value[i] = keyframe["values"][i][0]
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+
+		var converter_func_rotation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
+			var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
+			animation.track_set_path(track_index, target)
+			for keyframe in keyframes:
+				var frame = keyframe["frame"]
+				var value_tmp := Vector4.ZERO
+				for i in range(len(keyframe["values"])):
+					if(keyframe["values"][i]):
+						value_tmp[i] = keyframe["values"][i][0]
+				var value = Quaternion.IDENTITY
+				value.x = value_tmp[0]
+				value.y = value_tmp[1]
+				value.z = value_tmp[2]
+				value.w = value_tmp[3]
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+
+		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
+			var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
+			animation.track_set_path(track_index, target)
+			for keyframe in keyframes:
+				var frame = keyframe["frame"]
+				var value := Vector3.ZERO
+				for i in range(len(keyframe["values"])):
+					if(keyframe["values"][i]):
+						value[i] = keyframe["values"][i][0]
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+
 		if(anim_bone_index >= 0):
 			match stf_path[1]: # todo no clue if this is how it works
-				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), Animation.TYPE_POSITION_3D)
-				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), Animation.TYPE_ROTATION_3D)
-				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), Animation.TYPE_SCALE_3D)
+				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), converter_func_translation)
+				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), converter_func_rotation)
+				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), converter_func_scale)
 				"components":
 					return null # todo
-			""""t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index) + ":position", Animation.TYPE_POSITION_3D)
-			"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index) + ":rotation", Animation.TYPE_ROTATION_3D)
-			"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index) + ":scale", Animation.TYPE_SCALE_3D)"""
 		return null
 
 	return ImportResult.new(bone_index, OptionalCallable.new(animation_property_resolve_func))

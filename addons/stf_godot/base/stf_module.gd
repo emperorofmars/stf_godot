@@ -27,14 +27,20 @@ class OptionalCallable:
 	var _callable: Callable
 	func _init(callable: Callable) -> void: self._callable = callable
 
+func __default_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
+	var track_index = animation.add_track(Animation.TYPE_VALUE)
+	animation.track_set_path(track_index, target)
+	for keyframe in keyframes:
+		var frame = keyframe["frame"]
+		var value = keyframe["values"][0][0]
+		animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+
 class ImportAnimationPropertyResult:
 	extends RefCounted
 	var _godot_path: String
-	var _track_type: int
 	var _keyframe_converter: Callable
-	func _init(godot_path: String, track_type: int, keyframe_converter: Callable = func (v): return v) -> void:
+	func _init(godot_path: String, keyframe_converter: Callable = func (v): return v) -> void:
 		self._godot_path = godot_path
-		self._track_type = track_type
 		self._keyframe_converter = keyframe_converter
 
 class ImportResult:
