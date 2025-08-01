@@ -53,6 +53,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
 						value[i] = keyframe["values"][i][0]
+				var relative_pose = armature.get_bone_rest(bone_index)
+				value += relative_pose.origin
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		var converter_func_rotation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
@@ -69,6 +71,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				value.y = value_tmp[1]
 				value.z = value_tmp[2]
 				value.w = value_tmp[3]
+				var relative_pose = armature.get_bone_rest(bone_index)
+				value = relative_pose.basis.get_rotation_quaternion() * value
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
@@ -76,7 +80,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			animation.track_set_path(track_index, target)
 			for keyframe in keyframes:
 				var frame = keyframe["frame"]
-				var value := Vector3.ZERO
+				var value := Vector3.ONE
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
 						value[i] = keyframe["values"][i][0]
