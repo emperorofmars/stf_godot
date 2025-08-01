@@ -53,6 +53,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		if(len(stf_path) < 4): return null
 		var anim_target: MeshInstance3D = godot_object
 
+		# todo depending on user setting return rotation/position etc types, or make everything its own bezier track
 		var blendshape_converter = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			var track_index = animation.add_track(Animation.TYPE_BLEND_SHAPE)
 			animation.track_set_path(track_index, target)
