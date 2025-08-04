@@ -11,12 +11,12 @@ ifdef::env-github[]
 :note-caption: :information_source:
 endif::[]
 
-**Squirrel Transfer Format - Modular 3D Interchange Format**
+**Squirrel Transfer Format - Modular 3D File-Format**
 Intended for (not only) game development use-cases.
 
-**WIP implementation for Godot 4.4. Do not use productively!**
+**WIP implementation for Godot 4.4+. Do not use productively!**
 
-**https://github.com/emperorofmars/stf_documentation[Read the Documentation!]**
+**https://stfform.at/[Read the Documentation!]**
 
 == Installation
 * Download the https://github.com/emperorofmars/stf_godot/releases/latest[latest release] and unpack the `addons/stf_godot` directory it into the addons directory of your godot project.
