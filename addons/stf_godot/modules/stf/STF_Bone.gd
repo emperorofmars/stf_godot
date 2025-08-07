@@ -43,19 +43,38 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				break
 
 		# todo depending on user setting return rotation/position etc types, or make everything its own bezier track
+		var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
 
 		var converter_func_translation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
+			#if(simplify_animations):
 			var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 			animation.track_set_path(track_index, target)
 			for keyframe in keyframes:
 				var frame = keyframe["frame"]
 				var value := Vector3.ZERO
-				for i in range(len(keyframe["values"])):
+				for i in range(3):
 					if(keyframe["values"][i]):
 						value[i] = keyframe["values"][i][0]
 				var relative_pose = armature.get_bone_rest(bone_index)
 				value += relative_pose.origin
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			# Godot why
+			"""else:
+				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
+				animation.track_set_path(track_indices[0], target + ":position:x")
+				animation.track_set_path(track_indices[1], target + ":position:y")
+				animation.track_set_path(track_indices[2], target + ":position:z")
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value := Vector3.ZERO
+					for i in range(3):
+						if(keyframe["values"][i]):
+							value[i] = keyframe["values"][i][0]
+					var relative_pose = armature.get_bone_rest(bone_index)
+					value += relative_pose.origin
+					for i in range(3):
+						animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][1], keyframe["values"][i][2]), Vector2(keyframe["values"][i][3], keyframe["values"][i][4]))"""
+
 
 		var converter_func_rotation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
@@ -73,7 +92,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				value.w = value_tmp[3]
 				var relative_pose = armature.get_bone_rest(bone_index)
 				value = relative_pose.basis.get_rotation_quaternion() * value
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value.normalized(), 1)
 
 		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			var track_index = animation.add_track(Animation.TYPE_SCALE_3D)

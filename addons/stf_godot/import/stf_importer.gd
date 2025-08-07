@@ -35,7 +35,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	if(not stf_file):
 		return null
 
-	var import_state = STF_ImportState.new(stf_file, STF_Registry.get_modules_by_stf_type())
+	var import_state = STF_ImportState.new(stf_file, STF_Registry.get_modules_by_stf_type(), options)
 	var import_context = STF_ImportContext.new(import_state)
 	var ret: Node3D = import_context.import(import_state.get_root_id())
 	import_state.run_tasks()

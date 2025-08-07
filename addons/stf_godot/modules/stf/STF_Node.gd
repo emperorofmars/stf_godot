@@ -99,7 +99,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				value.w = value_tmp[3]
 				var relative_pose = ret.transform
 				value = relative_pose.basis.get_rotation_quaternion() * value
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value.normalized(), 1)
 
 		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			var track_index = animation.add_track(Animation.TYPE_SCALE_3D)

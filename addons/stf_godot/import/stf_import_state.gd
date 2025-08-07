@@ -17,11 +17,14 @@ var _animation_converters: Dictionary[String, Callable] = {}
 
 var _tasks: Array[Callable] = []
 
+var _import_options: Dictionary
 
-func _init(stf_file: STF_File, modules: Dictionary[String, STF_Module]) -> void:
+
+func _init(stf_file: STF_File, modules: Dictionary[String, STF_Module], import_options: Dictionary = {}) -> void:
 	_stf_file = stf_file
 	_modules = modules
 	_meta = STF_Info.parse(_stf_file.json_definition)
+	_import_options = import_options
 
 
 func get_json_resource(stf_id: String) -> Dictionary:

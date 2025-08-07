@@ -45,3 +45,6 @@ func get_buffer(stf_id: String) -> PackedByteArray:
 func _add_task(task: Callable):
 	_state._tasks.append(task)
 
+
+func _get_import_options() -> Dictionary:
+	return _state._import_options
