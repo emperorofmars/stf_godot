@@ -53,18 +53,41 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		if(len(stf_path) < 4): return null
 		var anim_target: MeshInstance3D = godot_object
 
-		# todo depending on user setting return rotation/position etc types, or make everything its own bezier track
+		# Depending on user setting return rotation, position etc types, or make everything its own bezier track
+		var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
+
 		var blendshape_converter = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_BLEND_SHAPE)
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value: float = 0
-				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
-					value = keyframe["values"][0][1]
-				else:
-					value = keyframe["values"][0][0] # todo legacy, remove at some point
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			if(simplify_animations):
+				var track_index = animation.add_track(Animation.TYPE_BLEND_SHAPE)
+				animation.track_set_path(track_index, target)
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value: float = 0
+					if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
+						value = keyframe["values"][0][1]
+					else:
+						value = keyframe["values"][0][0] # todo legacy, remove at some point
+					animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			else:
+				var track_index := animation.add_track(Animation.TYPE_BEZIER)
+				animation.track_set_path(track_index, target)
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value: float = 0
+					var skip_frame = false
+					if(keyframe["values"][0]):
+						if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
+							if(keyframe["values"][0][0] == false):
+								skip_frame = true
+								break
+							value = keyframe["values"][0][1]
+						else:
+							value = keyframe["values"][0][0] # todo legacy, remove at some point
+					if(skip_frame):
+						continue
+					if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && len(keyframe["values"][0]) == 6):
+						animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, value, Vector2(keyframe["values"][0][2], keyframe["values"][0][3]), Vector2(keyframe["values"][0][4], keyframe["values"][0][5]))
+					# todo else
 
 		match stf_path[1]:
 			"blendshape":

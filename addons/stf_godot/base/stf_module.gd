@@ -35,12 +35,18 @@ class ImportAnimationPropertyResult:
 		self._godot_path = godot_path
 		self._keyframe_converter = keyframe_converter
 	static func __default_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
+		# todo bezier option
 		var track_index = animation.add_track(Animation.TYPE_VALUE)
 		animation.track_set_path(track_index, target)
 		for keyframe in keyframes:
 			var frame = keyframe["frame"]
-			var value = keyframe["values"][0][0]
-			animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			var value
+			if(keyframe["values"][0]):
+				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
+					value = keyframe["values"][0][1]
+				else:
+					value = keyframe["values"][0][0] # todo legacy, remove at some point
+				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 class ImportResult:
 	extends RefCounted
