@@ -63,63 +63,151 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	if("enabled" in json_resource && json_resource["enabled"] == false):
 		ret.visible = false
 
+
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
 		var node: Node3D = godot_object
 		var path = node.owner.get_path_to(node).get_concatenated_names()
 
-		# todo depending on user setting return rotation/position etc types, or make everything its own bezier track
+		# Depending on user setting return rotation, position etc types, or make everything its own bezier track
+		var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
 
 		var converter_func_translation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value := Vector3.ZERO
-				for i in range(len(keyframe["values"])):
-					if(keyframe["values"][i]):
-						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
-							value[i] = keyframe["values"][i][1]
-						else:
-							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
-				var relative_pose = ret.transform
-				value += relative_pose.origin
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			if(simplify_animations):
+				var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
+				animation.track_set_path(track_index, target)
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value := Vector3.ZERO
+					for i in range(len(keyframe["values"])):
+						if(keyframe["values"][i]):
+							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+								value[i] = keyframe["values"][i][1]
+							else:
+								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+					var relative_pose = ret.transform
+					value += relative_pose.origin
+					animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			else:
+				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
+				animation.track_set_path(track_indices[0], target + ":position:x")
+				animation.track_set_path(track_indices[1], target + ":position:y")
+				animation.track_set_path(track_indices[2], target + ":position:z")
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value := Vector3.ZERO
+					var skip_frame = false
+					for i in range(3):
+						if(keyframe["values"][i]):
+							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+								if(keyframe["values"][i][0] == false):
+									skip_frame = true
+									break
+								value[i] = keyframe["values"][i][1]
+							else:
+								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+					if(skip_frame):
+						continue
+					var relative_pose = ret.transform
+					value += relative_pose.origin
+					for i in range(3):
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL && len(keyframe["values"][i]) == 6):
+							animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][2], keyframe["values"][i][3]), Vector2(keyframe["values"][i][4], keyframe["values"][i][5]))
+						# todo else
 
 		var converter_func_rotation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value_tmp := Vector4.ZERO
-				for i in range(len(keyframe["values"])):
-					if(keyframe["values"][i]):
-						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
-							value_tmp[i] = keyframe["values"][i][1]
-						else:
-							value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
-				var value = Quaternion.IDENTITY
-				value.x = value_tmp[0]
-				value.y = value_tmp[1]
-				value.z = value_tmp[2]
-				value.w = value_tmp[3]
-				var relative_pose = ret.transform
-				value = relative_pose.basis.get_rotation_quaternion() * value
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value.normalized(), 1)
+			if(simplify_animations):
+				var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
+				animation.track_set_path(track_index, target)
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value_tmp := Vector4.ZERO
+					for i in range(len(keyframe["values"])):
+						if(keyframe["values"][i]):
+							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+								value_tmp[i] = keyframe["values"][i][1]
+							else:
+								value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+					var value = Quaternion.IDENTITY
+					value.x = value_tmp[0]
+					value.y = value_tmp[1]
+					value.z = value_tmp[2]
+					value.w = value_tmp[3]
+					var relative_pose = ret.transform
+					value = relative_pose.basis.get_rotation_quaternion() * value
+					animation.track_insert_key(track_index, frame * animation.step - start_offset, value.normalized(), 1)
+			else:
+				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
+				animation.track_set_path(track_indices[0], target + ":rotation:x")
+				animation.track_set_path(track_indices[1], target + ":rotation:y")
+				animation.track_set_path(track_indices[2], target + ":rotation:z")
+				animation.track_set_path(track_indices[3], target + ":rotation:w")
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value_tmp := Vector4.ZERO
+					var skip_frame = false
+					for i in range(4):
+						if(keyframe["values"][i]):
+							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+								if(keyframe["values"][i][0] == false):
+									skip_frame = true
+									break
+								value_tmp[i] = keyframe["values"][i][1]
+							else:
+								value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+					if(skip_frame):
+						continue
+					var value = Quaternion.IDENTITY
+					value.x = value_tmp[0]
+					value.y = value_tmp[1]
+					value.z = value_tmp[2]
+					value.w = value_tmp[3]
+					var relative_pose = ret.transform
+					value = relative_pose.basis.get_rotation_quaternion() * value
+					for i in range(4):
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL && len(keyframe["values"][i]) == 6):
+							animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][2], keyframe["values"][i][3]), Vector2(keyframe["values"][i][4], keyframe["values"][i][5]))
+						# todo else
 
 		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value := Vector3.ONE
-				for i in range(len(keyframe["values"])):
-					if(keyframe["values"][i]):
-						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
-							value[i] = keyframe["values"][i][1]
-						else:
-							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			if(simplify_animations):
+				var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
+				animation.track_set_path(track_index, target)
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value := Vector3.ONE
+					for i in range(len(keyframe["values"])):
+						if(keyframe["values"][i]):
+							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+								value[i] = keyframe["values"][i][1]
+							else:
+								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+					animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+			else:
+				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
+				animation.track_set_path(track_indices[0], target + ":scale:x")
+				animation.track_set_path(track_indices[1], target + ":scale:y")
+				animation.track_set_path(track_indices[2], target + ":scale:z")
+				for keyframe in keyframes:
+					var frame = keyframe["frame"]
+					var value := Vector3.ZERO
+					var skip_frame = false
+					for i in range(3):
+						if(keyframe["values"][i]):
+							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+								if(keyframe["values"][i][0] == false):
+									skip_frame = true
+									break
+								value[i] = keyframe["values"][i][1]
+							else:
+								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+					if(skip_frame):
+						continue
+					for i in range(3):
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL && len(keyframe["values"][i]) == 6):
+							animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][2], keyframe["values"][i][3]), Vector2(keyframe["values"][i][4], keyframe["values"][i][5]))
+						# todo else
+
 
 		match stf_path[1]:
 			"t": return ImportAnimationPropertyResult.new(path, converter_func_translation)
