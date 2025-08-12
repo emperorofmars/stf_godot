@@ -59,7 +59,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			animation.track_set_path(track_index, target)
 			for keyframe in keyframes:
 				var frame = keyframe["frame"]
-				var value = keyframe["values"][0][0]
+				var value: float = 0
+				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
+					value = keyframe["values"][0][1]
+				else:
+					value = keyframe["values"][0][0] # todo legacy, remove at some point
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		match stf_path[1]:

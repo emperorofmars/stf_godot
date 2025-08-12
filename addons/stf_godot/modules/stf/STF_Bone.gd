@@ -54,11 +54,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				var value := Vector3.ZERO
 				for i in range(3):
 					if(keyframe["values"][i]):
-						value[i] = keyframe["values"][i][0]
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+							value[i] = keyframe["values"][i][1]
+						else:
+							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				var relative_pose = armature.get_bone_rest(bone_index)
 				value += relative_pose.origin
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
-			# Godot why
+			# Godot why can't skeleton bones be animated by bezier tracks?
 			"""else:
 				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 				animation.track_set_path(track_indices[0], target + ":position:x")
@@ -84,7 +87,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				var value_tmp := Vector4.ZERO
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
-						value_tmp[i] = keyframe["values"][i][0]
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+							value_tmp[i] = keyframe["values"][i][1]
+						else:
+							value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				var value = Quaternion.IDENTITY
 				value.x = value_tmp[0]
 				value.y = value_tmp[1]
@@ -102,7 +108,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				var value := Vector3.ONE
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
-						value[i] = keyframe["values"][i][0]
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+							value[i] = keyframe["values"][i][1]
+						else:
+							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		if(anim_bone_index >= 0):

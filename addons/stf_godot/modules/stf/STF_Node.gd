@@ -78,7 +78,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				var value := Vector3.ZERO
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
-						value[i] = keyframe["values"][i][0]
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+							value[i] = keyframe["values"][i][1]
+						else:
+							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				var relative_pose = ret.transform
 				value += relative_pose.origin
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
@@ -91,7 +94,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				var value_tmp := Vector4.ZERO
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
-						value_tmp[i] = keyframe["values"][i][0]
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+							value_tmp[i] = keyframe["values"][i][1]
+						else:
+							value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				var value = Quaternion.IDENTITY
 				value.x = value_tmp[0]
 				value.y = value_tmp[1]
@@ -109,7 +115,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				var value := Vector3.ONE
 				for i in range(len(keyframe["values"])):
 					if(keyframe["values"][i]):
-						value[i] = keyframe["values"][i][0]
+						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
+							value[i] = keyframe["values"][i][1]
+						else:
+							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		match stf_path[1]:
