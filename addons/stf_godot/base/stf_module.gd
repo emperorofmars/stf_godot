@@ -31,11 +31,10 @@ class ImportAnimationPropertyResult:
 	extends RefCounted
 	var _godot_path: String
 	var _keyframe_converter: Callable
-	func _init(godot_path: String, keyframe_converter: Callable = __default_keyframe_converter) -> void:
+	func _init(godot_path: String, keyframe_converter: Callable = __default_simplified_keyframe_converter) -> void:
 		self._godot_path = godot_path
 		self._keyframe_converter = keyframe_converter
-	static func __default_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
-		# todo bezier option
+	static func __default_simplified_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
 		var track_index = animation.add_track(Animation.TYPE_VALUE)
 		animation.track_set_path(track_index, target)
 		for keyframe in keyframes:
@@ -47,6 +46,17 @@ class ImportAnimationPropertyResult:
 				else:
 					value = keyframe["values"][0][0] # todo legacy, remove at some point
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
+	static func __default_bezier_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
+		var track_index = animation.add_track(Animation.TYPE_BEZIER)
+		animation.track_set_path(track_index, target)
+		for keyframe in keyframes:
+			var frame = keyframe["frame"]
+			var value
+			if(keyframe["values"][0]):
+				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && keyframe["values"][0][0] == true && len(keyframe["values"][0]) == 6):
+					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][1], Vector2(keyframe["values"][0][2], keyframe["values"][0][3]), Vector2(keyframe["values"][0][4], keyframe["values"][0][5]))
+				elif(len(keyframe["values"][0]) == 5): # todo legacy, remove at some point
+					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][0], Vector2(keyframe["values"][0][1], keyframe["values"][0][2]), Vector2(keyframe["values"][0][3], keyframe["values"][0][4]))
 
 class ImportResult:
 	extends RefCounted

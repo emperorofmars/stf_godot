@@ -73,21 +73,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				animation.track_set_path(track_index, target)
 				for keyframe in keyframes:
 					var frame = keyframe["frame"]
-					var value: float = 0
-					var skip_frame = false
 					if(keyframe["values"][0]):
-						if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
-							if(keyframe["values"][0][0] == false):
-								skip_frame = true
-								break
-							value = keyframe["values"][0][1]
-						else:
-							value = keyframe["values"][0][0] # todo legacy, remove at some point
-					if(skip_frame):
-						continue
-					if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && len(keyframe["values"][0]) == 6):
-						animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, value, Vector2(keyframe["values"][0][2], keyframe["values"][0][3]), Vector2(keyframe["values"][0][4], keyframe["values"][0][5]))
-					# todo else
+						if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && keyframe["values"][0][0] && len(keyframe["values"][0]) == 6):
+							animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][1], Vector2(keyframe["values"][0][2], keyframe["values"][0][3]), Vector2(keyframe["values"][0][4], keyframe["values"][0][5]))
+						elif(len(keyframe["values"][0]) == 5): # todo legacy, remove at some point
+							animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][0], Vector2(keyframe["values"][0][1], keyframe["values"][0][2]), Vector2(keyframe["values"][0][3], keyframe["values"][0][4]))
 
 		match stf_path[1]:
 			"blendshape":
