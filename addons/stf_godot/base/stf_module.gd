@@ -61,7 +61,7 @@ class ImportAnimationPropertyResult:
 class ImportResult:
 	extends RefCounted
 	var _godot_object: Variant
-	var _property_converter: OptionalCallable
+	var _property_converter: OptionalCallable # (stf_path: Array, godot_object: Object) -> ImportAnimationPropertyResult
 	func _init(godot_object: Variant, property_converter: OptionalCallable = null) -> void:
 		self._godot_object = godot_object
 		self._property_converter = property_converter

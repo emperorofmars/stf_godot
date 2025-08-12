@@ -64,13 +64,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.visible = false
 
 
+	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
+	var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
+
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
 		var node: Node3D = godot_object
 		var path = node.owner.get_path_to(node).get_concatenated_names()
-
-		# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-		var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
 
 		var converter_func_translation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			if(simplify_animations):
@@ -216,7 +216,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			"t": return ImportAnimationPropertyResult.new(path, converter_func_translation)
 			"r": return ImportAnimationPropertyResult.new(path, converter_func_rotation)
 			"s": return ImportAnimationPropertyResult.new(path, converter_func_scale)
-			"enabled": return ImportAnimationPropertyResult.new(path + ":visible")
+			"enabled": return ImportAnimationPropertyResult.new(path + ":visible", ImportAnimationPropertyResult.__default_simplified_keyframe_converter if simplify_animations else ImportAnimationPropertyResult.__default_bezier_keyframe_converter)
 			"instance":
 				var anim_ret := context.resolve_animation_path([ret.get_meta("stf").get("stf_instance_id")] + stf_path.slice(2)) # slightly dirty but it works
 				if(anim_ret):
