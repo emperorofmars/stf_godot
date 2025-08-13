@@ -54,9 +54,9 @@ class ImportAnimationPropertyResult:
 			var value
 			if(keyframe["values"][0]):
 				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && keyframe["values"][0][0] == true && len(keyframe["values"][0]) == 6):
-					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][1], Vector2(keyframe["values"][0][2], keyframe["values"][0][3]), Vector2(keyframe["values"][0][4], keyframe["values"][0][5]))
+					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][1], Vector2(keyframe["values"][0][2] * animation.step, keyframe["values"][0][3]), Vector2(keyframe["values"][0][4] * animation.step, keyframe["values"][0][5]))
 				elif(len(keyframe["values"][0]) == 5): # todo legacy, remove at some point
-					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][0], Vector2(keyframe["values"][0][1], keyframe["values"][0][2]), Vector2(keyframe["values"][0][3], keyframe["values"][0][4]))
+					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][0], Vector2(keyframe["values"][0][1] * animation.step, keyframe["values"][0][2]), Vector2(keyframe["values"][0][3] * animation.step, keyframe["values"][0][4]))
 
 class ImportResult:
 	extends RefCounted
