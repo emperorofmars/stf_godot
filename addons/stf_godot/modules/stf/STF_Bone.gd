@@ -52,8 +52,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					if(keyframe["values"][i]):
 						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
 							value[i] = keyframe["values"][i][1]
-						else:
-							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				var relative_pose = armature.get_bone_rest(bone_index)
 				value += relative_pose.origin
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
@@ -69,8 +67,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					if(keyframe["values"][i]):
 						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
 							value_tmp[i] = keyframe["values"][i][1]
-						else:
-							value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				var value = Quaternion.IDENTITY
 				value.x = value_tmp[0]
 				value.y = value_tmp[1]
@@ -90,8 +86,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					if(keyframe["values"][i]):
 						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
 							value[i] = keyframe["values"][i][1]
-						else:
-							value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 
 		if(anim_bone_index >= 0):

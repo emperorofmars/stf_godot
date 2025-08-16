@@ -83,10 +83,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 						if(keyframe["values"][i]):
 							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
 								value[i] = keyframe["values"][i][1]
-							else:
-								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
-					var relative_pose = ret.transform
-					value += relative_pose.origin
 					animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
 			else:
 				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
@@ -103,18 +99,12 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 								if(keyframe["values"][i][0] == false):
 									skip_frame += 1
 								value[i] = keyframe["values"][i][1]
-							else:
-								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 					if(skip_frame == 3):
 						continue
-					var relative_pose = ret.transform
-					value += relative_pose.origin
 					for i in range(3):
 						if(keyframe["values"][i]):
 							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL && len(keyframe["values"][i]) == 6):
 								animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][2] * animation.step, keyframe["values"][i][3]), Vector2(keyframe["values"][i][4] * animation.step, keyframe["values"][i][5]))
-							elif(len(keyframe["values"][i]) == 5): # todo legacy, remove at some point
-								animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][1], keyframe["values"][i][2]), Vector2(keyframe["values"][i][3], keyframe["values"][i][4]))
 
 		var converter_func_rotation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			if(simplify_animations):
@@ -127,15 +117,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 						if(keyframe["values"][i]):
 							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
 								value_tmp[i] = keyframe["values"][i][1]
-							else:
-								value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 					var value = Quaternion.IDENTITY
 					value.x = value_tmp[0]
 					value.y = value_tmp[1]
 					value.z = value_tmp[2]
 					value.w = value_tmp[3]
-					var relative_pose = ret.transform
-					value = relative_pose.basis.get_rotation_quaternion() * value
 					animation.track_insert_key(track_index, frame * animation.step - start_offset, value.normalized(), 1)
 			else:
 				var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
@@ -145,31 +131,20 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				animation.track_set_path(track_indices[3], target + ":rotation:w")
 				for keyframe in keyframes:
 					var frame = keyframe["frame"]
-					var value_tmp := Vector4.ZERO
+					var value := Vector4.ZERO
 					var skip_frame = 0
 					for i in range(4):
 						if(keyframe["values"][i]):
 							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
 								if(keyframe["values"][i][0] == false):
 									skip_frame += 1
-								value_tmp[i] = keyframe["values"][i][1]
-							else:
-								value_tmp[i] = keyframe["values"][i][0] # todo legacy, remove at some point
+								value[i] = keyframe["values"][i][1]
 					if(skip_frame == 4):
 						continue
-					var value = Quaternion.IDENTITY
-					value.x = value_tmp[0]
-					value.y = value_tmp[1]
-					value.z = value_tmp[2]
-					value.w = value_tmp[3]
-					var relative_pose = ret.transform
-					value = relative_pose.basis.get_rotation_quaternion() * value
 					for i in range(4):
 						if(keyframe["values"][i]):
 							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL && len(keyframe["values"][i]) == 6):
 								animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][2] * animation.step, keyframe["values"][i][3]), Vector2(keyframe["values"][i][4] * animation.step, keyframe["values"][i][5]))
-							elif(len(keyframe["values"][i]) == 5): # todo legacy, remove at some point
-								animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][1] * animation.step, keyframe["values"][i][2]), Vector2(keyframe["values"][i][3] * animation.step, keyframe["values"][i][4]))
 
 		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
 			if(simplify_animations):
@@ -200,16 +175,12 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 								if(keyframe["values"][i][0] == false):
 									skip_frame += 1
 								value[i] = keyframe["values"][i][1]
-							else:
-								value[i] = keyframe["values"][i][0] # todo legacy, remove at some point
 					if(skip_frame == 3):
 						continue
 					for i in range(3):
 						if(keyframe["values"][i]):
 							if(typeof(keyframe["values"][i][0]) == TYPE_BOOL && len(keyframe["values"][i]) == 6):
 								animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][2] * animation.step, keyframe["values"][i][3]), Vector2(keyframe["values"][i][4] * animation.step, keyframe["values"][i][5]))
-							elif(len(keyframe["values"][i]) == 5): # todo legacy, remove at some point
-								animation.bezier_track_insert_key(track_indices[i], frame * animation.step - start_offset, value[i], Vector2(keyframe["values"][i][1] * animation.step, keyframe["values"][i][2]), Vector2(keyframe["values"][i][3] * animation.step, keyframe["values"][i][4]))
 
 
 		match stf_path[1]:

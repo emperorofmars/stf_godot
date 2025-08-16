@@ -24,8 +24,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var stf_meta := {"stf_name": json_resource.get("name")}
 	ret.set_meta("stf", stf_meta)
 
-	ret.loop_mode = Animation.LOOP_NONE if json_resource.get("loop", false) else Animation.LOOP_LINEAR
 	ret.step = 1 / json_resource.get("fps", 30)
+
+	match(json_resource.get("loop", "none")):
+		"loop": ret.loop_mode = Animation.LOOP_LINEAR
+		"pingpong": ret.loop_mode = Animation.LOOP_PINGPONG
+		"none": ret.loop_mode = Animation.LOOP_NONE
+		_: ret.loop_mode = Animation.LOOP_NONE
 
 	var start_offset = 0
 	if("range" in json_resource):
