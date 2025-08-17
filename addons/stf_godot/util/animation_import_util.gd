@@ -53,7 +53,7 @@ static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionar
 	return keyframes
 
 
-static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, track_type = Animation.TYPE_VALUE, transform_func: STF_Module.OptionalCallable = null):
+static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null, track_type = Animation.TYPE_VALUE):
 	if(simplify):
 		var track_index = animation.add_track(Animation.TYPE_VALUE)
 		animation.track_set_path(track_index, target)
@@ -79,7 +79,7 @@ static func import_value(context: STF_ImportContext, animation: Animation, targe
 			)
 
 static func import_blendshape(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null):
-	import_value(context, animation, target, track, start_offset, use_baked, simplify, Animation.TYPE_BLEND_SHAPE, transform_func)
+	import_value(context, animation, target, track, start_offset, use_baked, simplify, transform_func, Animation.TYPE_BLEND_SHAPE)
 
 
 static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null):
