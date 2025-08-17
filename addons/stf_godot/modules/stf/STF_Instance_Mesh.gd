@@ -53,40 +53,15 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		if(len(stf_path) < 4): return null
 		var anim_target: MeshInstance3D = godot_object
 
-		# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-		var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
-
-		var blendshape_converter = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			if(simplify_animations):
-				var track_index = animation.add_track(Animation.TYPE_BLEND_SHAPE)
-				animation.track_set_path(track_index, target)
-				for keyframe in keyframes:
-					var frame = keyframe["frame"]
-					var value: float = 0
-					if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
-						value = keyframe["values"][0][1]
-					else:
-						value = keyframe["values"][0][0] # todo legacy, remove at some point
-					animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
-			else:
-				var track_index := animation.add_track(Animation.TYPE_BEZIER)
-				animation.track_set_path(track_index, target)
-				for keyframe in keyframes:
-					var frame = keyframe["frame"]
-					if(keyframe["values"][0]):
-						if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && keyframe["values"][0][0] && len(keyframe["values"][0]) == 6):
-							animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][1], Vector2(keyframe["values"][0][2] * animation.step, keyframe["values"][0][3]), Vector2(keyframe["values"][0][4] * animation.step, keyframe["values"][0][5]))
-						elif(len(keyframe["values"][0]) == 5): # todo legacy, remove at some point
-							animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][0], Vector2(keyframe["values"][0][1] * animation.step, keyframe["values"][0][2]), Vector2(keyframe["values"][0][3] * animation.step, keyframe["values"][0][4]))
-
 		match stf_path[1]:
 			"blendshape":
 				var blendshape_name = stf_path[2]
 				match stf_path[3]:
-					"value": return ImportAnimationPropertyResult.new(anim_target.owner.get_path_to(anim_target).get_concatenated_names() + ":" + blendshape_name, blendshape_converter)
+					"value": return ImportAnimationPropertyResult.new(anim_target.owner.get_path_to(anim_target).get_concatenated_names() + ":" + blendshape_name, STFAnimationImportUtil.import_blendshape)
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
+
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

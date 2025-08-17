@@ -33,6 +33,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		armature.set_bone_parent(child_index, bone_index)
 		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 
+
+	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
+	var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
+	var use_baked = context._get_import_options().get("stf/use_baked", false)
+
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
 		var node: Skeleton3D = godot_object
@@ -42,62 +47,19 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				anim_bone_index = i
 				break
 
-		var converter_func_translation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_POSITION_3D) # Godot doesn't support bezier curves vor skeleton tracks :(
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value := Vector3.ZERO
-				for i in range(3):
-					if(keyframe["values"][i]):
-						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
-							value[i] = keyframe["values"][i][1]
-				var relative_pose = armature.get_bone_rest(bone_index)
-				value += relative_pose.origin
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
-
-
-		var converter_func_rotation = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_ROTATION_3D) # Godot doesn't support bezier curves vor skeleton tracks :(
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value_tmp := Vector4.ZERO
-				for i in range(len(keyframe["values"])):
-					if(keyframe["values"][i]):
-						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
-							value_tmp[i] = keyframe["values"][i][1]
-				var value = Quaternion.IDENTITY
-				value.x = value_tmp[0]
-				value.y = value_tmp[1]
-				value.z = value_tmp[2]
-				value.w = value_tmp[3]
-				var relative_pose = armature.get_bone_rest(bone_index)
-				value = relative_pose.basis.get_rotation_quaternion() * value
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value.normalized(), 1)
-
-		var converter_func_scale = func(animation: Animation, target: String, keyframes: Array, start_offset: float):
-			var track_index = animation.add_track(Animation.TYPE_SCALE_3D) # Godot doesn't support bezier curves vor skeleton tracks :(
-			animation.track_set_path(track_index, target)
-			for keyframe in keyframes:
-				var frame = keyframe["frame"]
-				var value := Vector3.ONE
-				for i in range(len(keyframe["values"])):
-					if(keyframe["values"][i]):
-						if(typeof(keyframe["values"][i][0]) == TYPE_BOOL):
-							value[i] = keyframe["values"][i][1]
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
-
 		if(anim_bone_index >= 0):
 			match stf_path[1]: # todo no clue if this works
-				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), converter_func_translation)
-				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), converter_func_rotation)
-				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), converter_func_scale)
+				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, OptionalCallable.new(func(v): v += armature.get_bone_rest(bone_index)))
+				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, OptionalCallable.new(func(v): armature.get_bone_rest(bone_index) * v))
+				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d)
 				"components":
-					return null # todo
+					var anim_ret := context.resolve_animation_path(stf_path.slice(2))
+					if(anim_ret):
+						return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter)
 		return null
 
 	return ImportResult.new(bone_index, OptionalCallable.new(animation_property_resolve_func))
+
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

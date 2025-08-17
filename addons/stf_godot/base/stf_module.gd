@@ -31,32 +31,11 @@ class ImportAnimationPropertyResult:
 	extends RefCounted
 	var _godot_path: String
 	var _keyframe_converter: Callable
-	func _init(godot_path: String, keyframe_converter: Callable = __default_simplified_keyframe_converter) -> void:
+	var _value_transform_func: OptionalCallable
+	func _init(godot_path: String, keyframe_converter: Callable = STFAnimationImportUtil.import_value, value_transform_func: OptionalCallable = null) -> void:
 		self._godot_path = godot_path
 		self._keyframe_converter = keyframe_converter
-	static func __default_simplified_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
-		var track_index = animation.add_track(Animation.TYPE_VALUE)
-		animation.track_set_path(track_index, target)
-		for keyframe in keyframes:
-			var frame = keyframe["frame"]
-			var value
-			if(keyframe["values"][0]):
-				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL):
-					value = keyframe["values"][0][1]
-				else:
-					value = keyframe["values"][0][0] # todo legacy, remove at some point
-				animation.track_insert_key(track_index, frame * animation.step - start_offset, value, 1)
-	static func __default_bezier_keyframe_converter(animation: Animation, target: String, keyframes: Array, start_offset: float):
-		var track_index = animation.add_track(Animation.TYPE_BEZIER)
-		animation.track_set_path(track_index, target)
-		for keyframe in keyframes:
-			var frame = keyframe["frame"]
-			var value
-			if(keyframe["values"][0]):
-				if(typeof(keyframe["values"][0][0]) == TYPE_BOOL && keyframe["values"][0][0] == true && len(keyframe["values"][0]) == 6):
-					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][1], Vector2(keyframe["values"][0][2] * animation.step, keyframe["values"][0][3]), Vector2(keyframe["values"][0][4] * animation.step, keyframe["values"][0][5]))
-				elif(len(keyframe["values"][0]) == 5): # todo legacy, remove at some point
-					animation.bezier_track_insert_key(track_index, frame * animation.step - start_offset, keyframe["values"][0][0], Vector2(keyframe["values"][0][1] * animation.step, keyframe["values"][0][2]), Vector2(keyframe["values"][0][3] * animation.step, keyframe["values"][0][4]))
+		self._value_transform_func = value_transform_func
 
 class ImportResult:
 	extends RefCounted
