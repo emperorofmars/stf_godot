@@ -48,14 +48,19 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				break
 
 		if(anim_bone_index >= 0):
+			var translation_conversion = func(v):
+				return v + armature.get_bone_rest(anim_bone_index).origin
+			var rotation_conversion = func(v):
+				return armature.get_bone_rest(anim_bone_index).basis.get_rotation_quaternion() * v
+
 			match stf_path[1]: # todo no clue if this works
-				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, OptionalCallable.new(func(v): v += armature.get_bone_rest(bone_index)))
-				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, OptionalCallable.new(func(v): armature.get_bone_rest(bone_index) * v))
-				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d)
+				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, OptionalCallable.new(translation_conversion), false)
+				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, OptionalCallable.new(rotation_conversion), false)
+				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d, null, false)
 				"components":
 					var anim_ret := context.resolve_animation_path(stf_path.slice(2))
 					if(anim_ret):
-						return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter)
+						return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)
 		return null
 
 	return ImportResult.new(bone_index, OptionalCallable.new(animation_property_resolve_func))

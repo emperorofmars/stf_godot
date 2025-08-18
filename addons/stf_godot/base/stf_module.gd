@@ -32,10 +32,12 @@ class ImportAnimationPropertyResult:
 	var _godot_path: String
 	var _keyframe_converter: Callable
 	var _value_transform_func: OptionalCallable
-	func _init(godot_path: String, keyframe_converter: Callable = STFAnimationImportUtil.import_value, value_transform_func: OptionalCallable = null) -> void:
+	var _can_import_bezier: bool
+	func _init(godot_path: String, keyframe_converter: Callable = STFAnimationImportUtil.import_value, value_transform_func: OptionalCallable = null, can_import_bezier = true) -> void:
 		self._godot_path = godot_path
 		self._keyframe_converter = keyframe_converter
 		self._value_transform_func = value_transform_func
+		self._can_import_bezier = can_import_bezier
 
 class ImportResult:
 	extends RefCounted

@@ -48,6 +48,12 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				if(material):
 					ret.set_surface_override_material(material_index, material)
 
+	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
+	var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
+	var use_baked = context._get_import_options().get("stf/use_baked", false)
+	var anim_path_prefix = ""
+	if(!simplify_animations && !use_baked):
+		anim_path_prefix = "blend_shapes/"
 
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 4): return null
@@ -57,7 +63,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			"blendshape":
 				var blendshape_name = stf_path[2]
 				match stf_path[3]:
-					"value": return ImportAnimationPropertyResult.new(anim_target.owner.get_path_to(anim_target).get_concatenated_names() + ":" + blendshape_name, STFAnimationImportUtil.import_blendshape)
+					"value": return ImportAnimationPropertyResult.new(anim_target.owner.get_path_to(anim_target).get_concatenated_names() + ":" + anim_path_prefix + blendshape_name, STFAnimationImportUtil.import_blendshape)
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))

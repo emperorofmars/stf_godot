@@ -71,17 +71,17 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		match stf_path[1]:
 			"t": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_position_3d)
-			"r": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_position_3d)
+			"r": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_rotation_3d)
 			"s": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_scale_3d)
 			"enabled": return ImportAnimationPropertyResult.new(path + ":visible")
 			"instance":
 				var anim_ret := context.resolve_animation_path([ret.get_meta("stf").get("stf_instance_id")] + stf_path.slice(2)) # slightly dirty but it works
 				if(anim_ret):
-					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter)
+					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)
 			"components":
 				var anim_ret := context.resolve_animation_path(stf_path.slice(2))
 				if(anim_ret):
-					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter)
+					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
