@@ -19,7 +19,7 @@ Intended for (not only) game development use-cases.
 **https://stfform.at/[Read the Documentation!]**
 
 == Installation
-* Download the https://github.com/emperorofmars/stf_godot/releases/latest[latest release] and unpack the `addons/stf_godot` directory it into the addons directory of your godot project.
+* Download the https://github.com/emperorofmars/stf_godot/releases/latest[latest release] and unpack the `addons/stf_godot` directory into the `addons` directory of your godot project.
 * Enable it under `Project` -> `Project Settings` -> `Plugins` -> `stf_godot`
 
 == License
