@@ -54,20 +54,20 @@ static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionar
 	return keyframes
 
 
-static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
-	if(simplify || !can_import_bezier && !use_baked):
+static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
+	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, transform_func._callable.call(keyframe._values[0][2]) if transform_func else keyframe._values[0][2], 1)
-	elif(use_baked || !can_import_bezier):
+	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			animation.track_insert_key(track_index, keyframe_index * animation.step, transform_func._callable.call(keyframe[0]) if transform_func else keyframe[0], 1)
 			keyframe_index += 1
-	else:
+	else: # Bezier
 		var track_index = animation.add_track(Animation.TYPE_BEZIER)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
@@ -85,12 +85,12 @@ static func import_value(context: STF_ImportContext, animation: Animation, targe
 				tangent_out
 			)
 
-static func import_blendshape(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
-	import_value(context, animation, target, track, start_offset, use_baked, simplify, transform_func, can_import_bezier, Animation.TYPE_BLEND_SHAPE)
+static func import_blendshape(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+	import_value(context, animation, target, track, start_offset, animation_handling, transform_func, can_import_bezier, Animation.TYPE_BLEND_SHAPE)
 
 
-static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
-	if(simplify || !can_import_bezier && !use_baked):
+static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
@@ -101,7 +101,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
-	elif(use_baked || !can_import_bezier):
+	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
 		var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 		animation.track_set_path(track_index, target)
 		var keyframe_index = 0
@@ -114,7 +114,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe_index * animation.step, value, 1)
 			keyframe_index += 1
-	else:
+	else: # Bezier
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":position:x")
 		animation.track_set_path(track_indices[1], target + ":position:y")
@@ -149,8 +149,8 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 					)
 
 
-static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
-	if(simplify || !can_import_bezier && !use_baked):
+static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
@@ -161,22 +161,22 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 			if(keyframe._values[3] != null): value.w = keyframe._values[3][2]
 			if(transform_func):
 				value = transform_func._callable.call(value)
-			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
-	elif(use_baked || !can_import_bezier):
+			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value.normalized(), 1)
+	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
-			var value = Quaternion.IDENTITY
+			var value := Quaternion.IDENTITY
 			if(keyframe[0] != null): value.x = keyframe[0]
 			if(keyframe[1] != null): value.y = keyframe[1]
 			if(keyframe[2] != null): value.z = keyframe[2]
 			if(keyframe[3] != null): value.w = keyframe[3]
 			if(transform_func):
 				value = transform_func._callable.call(value)
-			animation.track_insert_key(track_index, keyframe_index * animation.step, value, 1)
+			animation.track_insert_key(track_index, keyframe_index * animation.step, value.normalized(), 1)
 			keyframe_index += 1
-	else:
+	else: # Bezier
 		#var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":rotation:x")
@@ -190,7 +190,7 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 			var tangent_in := Quaternion.IDENTITY
 			var tangent_in_weight := Vector4.ZERO
 
-			# Why can't a Quaternion be indexed?
+			# Why can't a Quaternion be indexed in Godot?
 
 			# todo check more keyframe interpolation types
 			if(keyframe._values[0] != null):
@@ -253,8 +253,8 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 				)
 
 
-static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, use_baked = false, simplify = false, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
-	if(simplify || !can_import_bezier && !use_baked):
+static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
@@ -265,7 +265,7 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
-	elif(use_baked || !can_import_bezier):
+	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
 		var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
 		animation.track_set_path(track_index, target)
 		var keyframe_index = 0
@@ -278,7 +278,7 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe_index * animation.step, value, 1)
 			keyframe_index += 1
-	else:
+	else: # Bezier
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":scale:x")
 		animation.track_set_path(track_indices[1], target + ":scale:y")

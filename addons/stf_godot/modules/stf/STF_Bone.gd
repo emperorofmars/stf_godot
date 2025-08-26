@@ -34,10 +34,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 
 
-	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-	var simplify_animations = context._get_import_options().get("stf/simplify_animations", false)
-	var use_baked = context._get_import_options().get("stf/use_baked", false)
-
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
 		var node: Skeleton3D = godot_object
