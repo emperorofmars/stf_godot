@@ -57,7 +57,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				bone_attachment.bone_idx = bone_index
 				parent.remove_child(ret)
 				bone_attachment.add_child(ret)
-				ret.transform = parent.get_bone_global_rest(bone_index).inverse() * ret.transform
 		)
 
 	if("enabled" in json_resource && json_resource["enabled"] == false):
