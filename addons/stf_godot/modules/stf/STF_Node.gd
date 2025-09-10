@@ -71,6 +71,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		match stf_path[1]:
 			"t": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_position_3d)
 			"r": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_rotation_3d)
+			#"r_euler": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_euler_rotation_3d)
 			"s": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_scale_3d)
 			"enabled": return ImportAnimationPropertyResult.new(path + ":visible")
 			"instance":

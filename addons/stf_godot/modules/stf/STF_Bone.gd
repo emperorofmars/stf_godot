@@ -44,14 +44,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				break
 
 		if(anim_bone_index >= 0):
-			var translation_conversion = func(v):
-				return v + armature.get_bone_rest(anim_bone_index).origin
-			var rotation_conversion = func(v):
-				return armature.get_bone_rest(anim_bone_index).basis.get_rotation_quaternion() * v
-
 			match stf_path[1]: # todo no clue if this works
-				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, OptionalCallable.new(translation_conversion), false)
-				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, OptionalCallable.new(rotation_conversion), false)
+				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, null, false)
+				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, null, false)
+				#"r_euler": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_euler_rotation_3d, null, false)
 				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d, null, false)
 				"components":
 					var anim_ret := context.resolve_animation_path(stf_path.slice(2))
