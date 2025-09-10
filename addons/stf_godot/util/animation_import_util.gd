@@ -95,7 +95,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
-			for i in range(len(keyframe._values)):
+			for i in range(3):
 				if(keyframe._values[i] != null):
 					value[i] = keyframe._values[i][2]
 			if(transform_func):
@@ -107,7 +107,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			var value := Vector3.ZERO
-			for i in range(len(keyframe)):
+			for i in range(3):
 				if(keyframe[i] != null):
 					value[i] = keyframe[i]
 			if(transform_func):
@@ -123,7 +123,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 			var value := Vector3.ZERO
 			var tangent_in := Vector3.ZERO
 			var tangent_out := Vector3.ZERO
-			for i in range(len(keyframe._values)):
+			for i in range(3):
 				# todo check more keyframe interpolation types
 				if(keyframe._values[i] != null && keyframe._values[i][0] && keyframe._values[i][3] == "bezier"):
 					value[i] = keyframe._values[i][2]
@@ -133,7 +133,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 				value = transform_func._callable.call(value)
 				tangent_in = transform_func._callable.call(tangent_in)
 				tangent_out = transform_func._callable.call(tangent_out)
-			for i in range(len(keyframe._values)):
+			for i in range(3):
 				if(keyframe._values[i] != null && keyframe._values[i][0]):
 					var subtangent_out := Vector2.ZERO
 					var subtangent_in := Vector2.ZERO
@@ -231,7 +231,7 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 				tangent_out = transform_func._callable.call(tangent_out)
 				tangent_in = transform_func._callable.call(tangent_in)
 
-			# todo tangent x axis conversion from quat to euler ???
+			# todo tangent conversion from quat to euler ???
 			var value_euler := value.normalized().get_euler()
 			var tangent_out_euler := value_euler - tangent_out.normalized().get_euler()
 			var tangent_out_weight_euler := Vector3.ONE # todo
@@ -251,6 +251,69 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 					subtangent_in,
 					subtangent_out
 				)
+
+
+static func import_euler_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
+		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
+		animation.track_set_path(track_index, target)
+		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
+			var value := Vector3.ZERO
+			if(keyframe._values[0] != null): value.x = keyframe._values[0][2]
+			if(keyframe._values[1] != null): value.y = keyframe._values[1][2]
+			if(keyframe._values[2] != null): value.z = keyframe._values[2][2]
+			if(transform_func):
+				value = transform_func._callable.call(value)
+			var value_quat = Quaternion.from_euler(value).normalized()
+			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value_quat, 1)
+	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
+		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
+		animation.track_set_path(track_index, target)
+		var keyframe_index = 0
+		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
+			var value := Vector3.ZERO
+			if(keyframe[0] != null): value.x = keyframe[0]
+			if(keyframe[1] != null): value.y = keyframe[1]
+			if(keyframe[2] != null): value.z = keyframe[2]
+			if(transform_func):
+				value = transform_func._callable.call(value)
+			var value_quat = Quaternion.from_euler(value).normalized()
+			animation.track_insert_key(track_index, keyframe_index * animation.step, value_quat, 1)
+			keyframe_index += 1
+	else: # Bezier
+		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
+		animation.track_set_path(track_indices[0], target + ":rotation:x")
+		animation.track_set_path(track_indices[1], target + ":rotation:y")
+		animation.track_set_path(track_indices[2], target + ":rotation:z")
+
+		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
+			var value := Vector3.ZERO
+			var tangent_in := Vector3.ZERO
+			var tangent_out := Vector3.ZERO
+			for i in range(len(keyframe._values)):
+				# todo check more keyframe interpolation types
+				if(keyframe._values[i] != null && keyframe._values[i][0] && keyframe._values[i][3] == "bezier"):
+					value[i] = keyframe._values[i][2]
+					tangent_in[i] = keyframe._values[i][6][1] if len(keyframe._values[i]) > 6 else 0
+					tangent_out[i] = keyframe._values[i][5][1]
+			if(transform_func):
+				value = transform_func._callable.call(value)
+				tangent_in = transform_func._callable.call(tangent_in)
+				tangent_out = transform_func._callable.call(tangent_out)
+			for i in range(len(keyframe._values)):
+				if(keyframe._values[i] != null && keyframe._values[i][0]):
+					var subtangent_out := Vector2.ZERO
+					var subtangent_in := Vector2.ZERO
+					if(keyframe._values[i][3] == "bezier"):
+						subtangent_out = Vector2(keyframe._values[i][5][0] * animation.step, -tangent_out[i])
+						if(len(keyframe._values[0]) > 6): subtangent_in = Vector2(keyframe._values[i][6][0] * animation.step, -tangent_in[i])
+					animation.bezier_track_insert_key(
+						track_indices[i],
+						keyframe._frame * animation.step - start_offset,
+						value[i],
+						subtangent_in,
+						subtangent_out
+					)
 
 
 static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):

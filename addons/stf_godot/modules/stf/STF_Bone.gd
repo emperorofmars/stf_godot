@@ -47,7 +47,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			match stf_path[1]: # todo no clue if this works
 				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, null, false)
 				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, null, false)
-				#"r_euler": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_euler_rotation_3d, null, false)
+				"r_euler": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_euler_rotation_3d, null, false)
 				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d, null, false)
 				"components":
 					var anim_ret := context.resolve_animation_path(stf_path.slice(2))
