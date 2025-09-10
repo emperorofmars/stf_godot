@@ -15,8 +15,6 @@ var _imported_resources: Dictionary[String, Variant] = {}
 #	return AnimationPropertyResult.new("foo", Animation.TYPE_BEZIER)
 var _animation_converters: Dictionary[String, Callable] = {}
 
-var _tasks: Array[Callable] = []
-
 var _import_options: Dictionary
 
 
@@ -59,7 +57,3 @@ func get_buffer(stf_id: String) -> PackedByteArray:
 func get_root_id() -> String:
 	return _stf_file.json_definition["stf"]["root"]
 
-
-func run_tasks():
-	for task in _tasks:
-		task.call()

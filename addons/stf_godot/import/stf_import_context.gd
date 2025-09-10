@@ -5,6 +5,8 @@ extends RefCounted
 
 var _state: STF_ImportState
 
+var _tasks: Array[Callable] = []
+
 
 func _init(state: STF_ImportState) -> void:
 	_state = state
@@ -43,7 +45,12 @@ func get_buffer(stf_id: String) -> PackedByteArray:
 
 
 func _add_task(task: Callable):
-	_state._tasks.append(task)
+	_tasks.append(task)
+
+func _run_tasks():
+	for task in _tasks:
+		task.call()
+	_tasks.clear()
 
 
 func _get_import_options() -> Dictionary:

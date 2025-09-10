@@ -35,6 +35,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	context._add_task(func():
 		__set_owner(ret, ret)
 	)
+
+	context._run_tasks()
+
 	if("animations" in json_resource):
 		context._add_task(func():
 			var animation_player := AnimationPlayer.new()
@@ -51,6 +54,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				if(animation):
 					animation_library.add_animation(animation.resource_name, animation)
 		)
+
+	context._run_tasks()
+
 	return ImportResult.new(ret)
 
 func __set_owner(root: Node, owner: Node):
