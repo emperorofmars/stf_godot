@@ -25,6 +25,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret = Node3D.new()
 	ret.name = json_resource.get("name", "STF Node")
 
+	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
+
 	ret.set_meta("stf_id", stf_id)
 	var stf_meta = ret.get_meta("stf", {})
 	stf_meta["stf_name"] = json_resource.get("name", null)
