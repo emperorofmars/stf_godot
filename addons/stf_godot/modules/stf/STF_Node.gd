@@ -16,6 +16,9 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Node3D"
 
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is Node3D else -1
+
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = null
@@ -23,7 +26,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret = context.import(json_resource["instance"], "instance", context_object)
 	else:
 		ret = Node3D.new()
-	ret.name = json_resource.get("name", "STF Node")
+	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Node")
 
 	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
 

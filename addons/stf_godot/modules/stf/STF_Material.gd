@@ -14,7 +14,10 @@ func _get_like_types() -> Array[String]:
 	return ["material"]
 
 func _get_godot_type() -> String:
-	return "Material"
+	return "StandardMaterial3D"
+
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is StandardMaterial3D else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	# todo make target materials hot-loadable & select target material/shader based on best match or user override

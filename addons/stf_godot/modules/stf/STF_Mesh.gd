@@ -20,6 +20,9 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Mesh"
 
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is Mesh else -1
+
 
 func import_uint_buffer(buffer: PackedByteArray, width: int) -> Array:
 	var ret = []
@@ -335,7 +338,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	#var ret = ImporterMesh.new()
 	var ret = ArrayMesh.new()
-	ret.resource_name = json_resource.get("name", "STF Mesh")
+	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Mesh")
 
 	ret.set_meta("stf_id", stf_id)
 	var stf_meta := {"stf_name": json_resource.get("name"), "blendshape_values": blendshape_values}

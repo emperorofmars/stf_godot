@@ -22,7 +22,7 @@ func _check_godot_object(godot_object: Object) -> int:
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Node3D.new()
-	ret.name = json_resource.get("name", "STF Prefab")
+	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Prefab")
 
 	ret.set_meta("stf_id", stf_id)
 	var stf_meta := {"stf_name": json_resource.get("name", null)}

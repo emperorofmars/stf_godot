@@ -16,9 +16,12 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Animation"
 
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is Animation else -1
+
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Animation.new()
-	ret.resource_name = json_resource.get("name", "STF Animation")
+	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Animation")
 
 	ret.set_meta("stf_id", stf_id)
 	var stf_meta := {"stf_name": json_resource.get("name")}
@@ -39,7 +42,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-	var animation_handling = context._get_import_options().get("stf/animation_handling", 0)
+	var animation_handling = context._get_import_options().get("animation_handling", 0)
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])

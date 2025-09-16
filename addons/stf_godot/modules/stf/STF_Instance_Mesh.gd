@@ -16,10 +16,13 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "MeshInstance3D"
 
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is MeshInstance3D else -1
+
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	#var ret = ImporterMeshInstance3D.new()
 	var ret = MeshInstance3D.new()
-	ret.name = json_resource.get("name", "STF Instance Mesh")
+	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Mesh")
 
 	var stf_meta := {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name")}
 	ret.set_meta("stf", stf_meta)
@@ -49,7 +52,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					ret.set_surface_override_material(material_index, material)
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-	var animation_handling = context._get_import_options().get("stf/animation_handling", 0)
+	var animation_handling = context._get_import_options().get("animation_handling", 0)
 	var anim_path_prefix = ""
 	if(animation_handling == 0):
 		anim_path_prefix = "blend_shapes/"

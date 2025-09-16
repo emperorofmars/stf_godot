@@ -8,6 +8,7 @@ class STFKeyframe:
 		_frame = frame
 		_values = values
 
+
 static func arrange_unbaked_keyframes(track: Dictionary) -> Array[STFKeyframe]:
 	var subtracks = track.get("subtracks", [])
 	var len = -1;
@@ -54,7 +55,7 @@ static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionar
 	return keyframes
 
 
-static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
+static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
 	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
@@ -85,11 +86,11 @@ static func import_value(context: STF_ImportContext, animation: Animation, targe
 				tangent_out
 			)
 
-static func import_blendshape(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+static func import_blendshape(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	import_value(context, animation, target, track, start_offset, animation_handling, transform_func, can_import_bezier, Animation.TYPE_BLEND_SHAPE)
 
 
-static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 		animation.track_set_path(track_index, target)
@@ -149,7 +150,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 					)
 
 
-static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
@@ -214,16 +215,6 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 			tangent_out = Vector4(tangent_out_quat.x, tangent_out_quat.y, tangent_out_quat.z, tangent_out_quat.w)
 			tangent_in = Vector4(tangent_in_quat.x, tangent_in_quat.y, tangent_in_quat.z, tangent_in_quat.w)
 
-			print(value)
-
-
-			"""# todo tangent conversion from quat to euler ???
-			var value_euler := value.normalized().get_euler()
-			var tangent_out_euler := value_euler - tangent_out.normalized().get_euler()
-			var tangent_out_weight_euler := Vector3.ONE # todo
-			var tangent_in_euler := value_euler - tangent_in.normalized().get_euler()
-			var tangent_in_weight_euler := -Vector3.ONE # todo"""
-
 			for i in range(4):
 				var subtangent_out := Vector2.ZERO
 				var subtangent_in := Vector2.ZERO
@@ -239,7 +230,7 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 				)
 
 
-static func import_euler_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+static func import_euler_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
@@ -302,7 +293,7 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 					)
 
 
-static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: STF_Module.OptionalCallable = null, can_import_bezier: bool = true):
+static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
 		var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
 		animation.track_set_path(track_index, target)

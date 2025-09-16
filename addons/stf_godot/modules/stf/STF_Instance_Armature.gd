@@ -16,9 +16,13 @@ func _get_like_types() -> Array[String]:
 func _get_godot_type() -> String:
 	return "Skeleton3D"
 
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for armatures vs armature instances
+
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var armature: Skeleton3D = context.import(json_resource["armature"], "data")
 	var ret: Skeleton3D = armature.duplicate(true)
+	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Armature")
 	ret.reset_bone_poses()
 
 	var stf_meta := {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name", null)}
