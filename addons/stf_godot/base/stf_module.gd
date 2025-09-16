@@ -3,17 +3,24 @@ extends RefCounted
 ## Base class for every STF module to inherit
 ## Provides functionality to _import a specific STF resource `type` into a Godot construct and to serialize that Godot construct back into the STF resource
 
+## The `type` property on STF resources to match to the stf_module.
 @abstract func _get_stf_type() -> String
 
+## If multiple modules are registered for the same `type`, then the priority determines the match.
 @abstract func _get_priority() -> int
 
+## Can be `data`, `node`, `component`. Useful for validation.
 @abstract func _get_stf_kind() -> String
 
+## I.e. `stf.node` would set `node`. Useful for validation.
 @abstract func _get_like_types() -> Array[String]
 
+## Godot type to match for export
 @abstract func _get_godot_type() -> String
 
+## Since Godot types will be ambiguous in many cases, objects will be checked on a case by case basis.
 @abstract func _check_godot_object(godot_object: Object) -> int
+
 
 class ImportAnimationPropertyResult:
 	extends RefCounted
@@ -35,6 +42,7 @@ class ImportResult:
 		self._godot_object = godot_object
 		self._property_converter = property_converter
 
+## The main star for import.
 @abstract func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult
 
 
@@ -46,4 +54,5 @@ class ExportResult:
 		self._stf_id = stf_id
 		self._json_resource = json_resource
 
+## The main star for export.
 @abstract func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult
