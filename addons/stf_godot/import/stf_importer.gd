@@ -19,14 +19,19 @@ func _get_import_options(path: String):
 
 	add_import_option_advanced(TYPE_BOOL, "authoring_import", false)
 	add_import_option_advanced(TYPE_BOOL, "use_asset_name", false)
+	add_import_option_advanced(TYPE_INT, "max_weights", 1, PROPERTY_HINT_ENUM, "4,8")
 	add_import_option_advanced(TYPE_INT, "animation_handling", 1, PROPERTY_HINT_ENUM, "Prefer Bezier -> Baked -> Simplified,Prefer Baked -> Simplified,Prefer Simplified")
 	add_import_option_advanced(TYPE_BOOL, "enable_debug_log", false)
 	#add_import_option_advanced(TYPE_DICTIONARY, "target_materials", {}, PROPERTY_HINT_RESOURCE_TYPE, "Material")
 
 func _get_option_visibility(path: String, for_animation: bool, option: String):
-	if(path and path.get_extension() != "stf"): return false
-	return option not in ["nodes/import_as_skeleton_bones", "nodes/use_node_type_suffixes"]
+	if(not path || path.get_extension() != "stf"):
+		if(option in ["authoring_import", "use_asset_name", "max_weights", "animation_handling", "enable_debug_log"]):
+			return false
+		else:
+			return null
 
+	return option not in ["nodes/import_as_skeleton_bones", "nodes/use_node_type_suffixes"]
 
 
 func _import_scene(path: String, flags: int, options: Dictionary) -> Object:

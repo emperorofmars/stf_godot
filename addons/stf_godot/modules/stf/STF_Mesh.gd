@@ -2,9 +2,6 @@ class_name STF_Mesh
 extends STF_Module
 
 
-const BONES_PER_VERTEX: int = 4
-
-
 func _get_stf_type() -> String:
 	return "stf.mesh"
 
@@ -110,6 +107,11 @@ func get_float_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: in
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+	var BONES_PER_VERTEX: int = 4
+	match context._get_import_options().get("max_weights", 0):
+		0: BONES_PER_VERTEX = 4
+		1: BONES_PER_VERTEX = 8
+
 	var float_width: int = json_resource.get("float_width", 4)
 	var indices_width: int = json_resource.get("indices_width", 4)
 	var material_indices_width: int = json_resource.get("material_indices_width", 1)
