@@ -42,7 +42,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-	var animation_handling = context._get_import_options().get("animation_handling", 0)
+	var animation_handling = context._get_import_options().get(STF_ImportOptions.AnimationHandling, 0)
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])

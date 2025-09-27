@@ -32,6 +32,7 @@ static func get_default_modules() -> Array[STF_Module]:
 		STF_Material.new(),
 		STF_Image.new(),
 		STF_Animation.new(),
+		STFEXP_Constraint_Twist.new(),
 	]
 
 

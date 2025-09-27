@@ -52,7 +52,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 					ret.set_surface_override_material(material_index, material)
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
-	var animation_handling = context._get_import_options().get("animation_handling", 0)
+	var animation_handling = context._get_import_options().get(STF_ImportOptions.AnimationHandling, 0)
 	var anim_path_prefix = ""
 	if(animation_handling == 0):
 		anim_path_prefix = "blend_shapes/"

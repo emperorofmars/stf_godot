@@ -108,7 +108,7 @@ func get_float_from_buffer(buffer: PackedByteArray, offset_bytes: int, width: in
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var BONES_PER_VERTEX: int = 4
-	match context._get_import_options().get("max_weights", 0):
+	match context._get_import_options().get(STF_ImportOptions.MaxWeights, 0):
 		0: BONES_PER_VERTEX = 4
 		1: BONES_PER_VERTEX = 8
 
