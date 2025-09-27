@@ -21,6 +21,8 @@ func _check_godot_object(godot_object: Object) -> int:
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+	if(context_object is not STF_Bone.ArmatureBone):
+		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints are only supported on bones.")
 	var parent: STF_Bone.ArmatureBone = context_object
 
 	var ret = CopyTransformModifier3D.new()
@@ -34,12 +36,17 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			ref_bone = STF_Godot_Util.get_bone_from_skeleton(parent._armature_context._skeleton, STF_Godot_Util.get_resource_reference(json_resource, target[0]))
 		elif(len(target) == 0):
 			var bone_parent: int = parent._armature_context._skeleton.get_bone_parent(parent._bone_index)
-			if(bone_parent < 0): return
+			if(bone_parent < 0):
+				print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints function only within a single Skeleton3D.")
+				return
 			ref_bone = parent._armature_context._skeleton.get_bone_parent(bone_parent)
 		else:
+			print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints function only within a single Skeleton3D.")
 			return
 
-		if(ref_bone < 0): return
+		if(ref_bone < 0):
+			print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Invalid target bone.")
+			return
 
 		ret.set_setting_count(1)
 		ret.set_axis_flags(0, CopyTransformModifier3D.AXIS_FLAG_Y)
