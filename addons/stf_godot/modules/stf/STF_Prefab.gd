@@ -32,11 +32,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var child: Node3D = context.import(child_id, "node", ret)
 		ret.add_child(child)
 
+	context._run_tasks()
+
 	context._add_task(func():
 		__set_owner(ret, ret)
 	)
-
-	context._run_tasks()
 
 	if("animations" in json_resource):
 		context._add_task(func():

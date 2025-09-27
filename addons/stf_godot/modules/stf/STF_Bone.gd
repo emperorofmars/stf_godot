@@ -22,17 +22,16 @@ func _check_godot_object(godot_object: Object) -> int:
 
 class ArmatureBone:
 	extends RefCounted
-
-	var _skeleton: Skeleton3D
+	var _armature_context: STF_Armature.ArmatureImportContext
 	var _bone_index: int
-
-	func _init(skeleton: Skeleton3D, bone_index: int):
-		_skeleton = skeleton
+	func _init(armature_context: STF_Armature.ArmatureImportContext, bone_index: int):
+		_armature_context = armature_context
 		_bone_index = bone_index
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
-	var armature: Skeleton3D = context_object
+	var armature_context: STF_Armature.ArmatureImportContext = context_object
+	var armature: Skeleton3D = armature_context._skeleton
 	var bone_index := armature.add_bone(STF_Godot_Util.get_name_or_default(json_resource, stf_id))
 
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
@@ -70,7 +69,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 						return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)
 		return null
 
-	return ImportResult.new(ArmatureBone.new(armature, bone_index), OptionalCallable.new(animation_property_resolve_func)) # todo return armature_bone
+	return ImportResult.new(ArmatureBone.new(context_object, bone_index), OptionalCallable.new(animation_property_resolve_func))
 
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:

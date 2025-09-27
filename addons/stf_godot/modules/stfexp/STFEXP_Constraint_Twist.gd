@@ -24,19 +24,18 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var parent: STF_Bone.ArmatureBone = context_object
 
 	var ret = CopyTransformModifier3D.new()
-	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Twist Constraint " + parent._skeleton.get_bone_name(parent._bone_index))
-	parent._skeleton.add_child(ret)
+	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Twist Constraint " + parent._armature_context._skeleton.get_bone_name(parent._bone_index))
+	parent._armature_context._skeleton.add_child(ret)
 
-	var target: Array = json_resource.get("target", [])
-	var ref_bone: int = -1
-
-	var _handle = func ():
+	parent._armature_context._add_task(func():
+		var target: Array = json_resource.get("target", [])
+		var ref_bone: int = -1
 		if(len(target) == 1):
-			ref_bone = STF_Godot_Util.get_bone_from_skeleton(parent._skeleton, STF_Godot_Util.get_resource_reference(json_resource, target[0]))
+			ref_bone = STF_Godot_Util.get_bone_from_skeleton(parent._armature_context._skeleton, STF_Godot_Util.get_resource_reference(json_resource, target[0]))
 		elif(len(target) == 0):
-			var bone_parent: int = parent._skeleton.get_bone_parent(parent._bone_index)
+			var bone_parent: int = parent._armature_context._skeleton.get_bone_parent(parent._bone_index)
 			if(bone_parent < 0): return
-			ref_bone = parent._skeleton.get_bone_parent(bone_parent)
+			ref_bone = parent._armature_context._skeleton.get_bone_parent(bone_parent)
 		else:
 			return
 
@@ -44,15 +43,15 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		ret.set_setting_count(1)
 		ret.set_axis_flags(0, CopyTransformModifier3D.AXIS_FLAG_Y)
-		ret.set_copy_flags(0, CopyTransformModifier3D.TRANSFORM_FLAG_POSITION)
+		ret.set_copy_flags(0, CopyTransformModifier3D.TRANSFORM_FLAG_ROTATION)
 		ret.set_reference_bone(0, ref_bone)
 		ret.set_apply_bone(0, parent._bone_index)
 		ret.set_amount(0, json_resource.get("weight", 0.5))
 		ret.set_relative(0, true)
 		ret.set_additive(0, true)
-	context._add_task(_handle)
+	)
 
-	return ImportResult.new(ret)
+	return ImportResult.new(ret, null)
 
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:

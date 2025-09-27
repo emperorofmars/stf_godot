@@ -18,7 +18,7 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	var json_resource = _state.get_json_resource(stf_id)
 	var module = _state.determine_module(json_resource, expected_kind)
 	if(module):
-		var ret := module._import(self, stf_id, json_resource, context_object)
+		var ret: = module._import(self, stf_id, json_resource, context_object)
 		if(ret):
 			_state.register_imported_resource(stf_id, ret)
 
@@ -27,7 +27,12 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 					var json_component_resource = _state.get_json_resource(component_id)
 					var component_module = _state.determine_module(json_component_resource, "component")
 					if(component_module):
-						component_module._import(self, component_id, json_component_resource, ret._godot_object)
+						var component_ret: = component_module._import(self, component_id, json_component_resource, ret._godot_object)
+						if(component_ret):
+							_state.register_imported_resource(stf_id, component_ret)
+						else:
+							#todo report error
+							pass
 			return ret._godot_object
 		else:
 			#todo report error
@@ -48,9 +53,14 @@ func _add_task(task: Callable):
 	_tasks.append(task)
 
 func _run_tasks():
-	for task in _tasks:
-		task.call()
-	_tasks.clear()
+	const max_depth: = 1000
+	var iter: = 0
+	while(len(_tasks) > 0 && iter < max_depth):
+		var tmp = _tasks
+		_tasks = []
+		for task in tmp:
+			task.call()
+		iter += 1
 
 
 func _get_import_options() -> Dictionary:
