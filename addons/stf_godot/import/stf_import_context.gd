@@ -31,13 +31,10 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 						if(component_ret):
 							_state.register_imported_resource(stf_id, component_ret)
 						else:
-							#todo report error
-							pass
+							print_rich("[color=red]Error: Failed to import component resource [u]" + stf_id + "[/u][/color]")
 			return ret._godot_object
 		else:
-			#todo report error
-			pass
-	# todo scream error and fail hard
+			print_rich("[color=red]Error: Failed to import resource [u]" + stf_id + "[/u][/color]")
 	return null
 
 
