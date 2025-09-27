@@ -29,6 +29,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Twist Constraint " + parent._armature_context._skeleton.get_bone_name(parent._bone_index))
 	parent._armature_context._skeleton.add_child(ret)
 
+	ret.set_meta("stf_id", stf_id)
+	var stf_meta := {"stf_name": json_resource.get("name", null)}
+	ret.set_meta("stf", stf_meta)
+
 	parent._armature_context._add_task(func():
 		var target: Array = json_resource.get("target", [])
 		var ref_bone: int = -1
