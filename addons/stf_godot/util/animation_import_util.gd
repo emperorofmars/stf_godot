@@ -1,33 +1,54 @@
 class_name STFAnimationImportUtil
 
 
+class STFSubtrackKeyframe:
+	var _source_of_truth: float
+	var _value: float
+	var _interpolation_type: String
+	var _handle_type: String
+	var _handle_right: Array
+	var _handle_left: Array
+	func _init(values: Array[Variant]) -> void:
+		_source_of_truth = values[0]
+		_value = values[1]
+		_interpolation_type = values[2]
+		if(_interpolation_type == "bezier"):
+			_handle_type = values[3]
+			_handle_right = values[4]
+			if(len(values) > 5):
+				_handle_left = values[5]
+		elif(_interpolation_type in ["constant", "quadratic", "cubic"]):
+			if(len(values) > 4):
+				_handle_left = values[4]
+
 class STFKeyframe:
 	var _frame: float
-	var _values: Array[Variant]
+	var _subframes: Array[STFSubtrackKeyframe]
 	func _init(frame: float, values: Array[Variant]) -> void:
 		_frame = frame
-		_values = values
+		for v in values:
+			_subframes.append(STFSubtrackKeyframe.new(v))
+
 
 
 static func arrange_unbaked_keyframes(track: Dictionary) -> Array[STFKeyframe]:
 	var subtracks = track.get("subtracks", [])
+	var timepoints = track.get("timepoints", [])
 	var len = -1;
 	for subtrack in subtracks:
 		if(subtrack && len(subtrack["keyframes"]) > len):
 			len = len(subtrack["keyframes"])
-	if(len <= 0): return []
+	if(len <= 0 || len(timepoints) == 0): return []
 
 	var keyframes: Array[STFKeyframe] = []
-	for i in range(len):
+	for i in range(timepoints):
 		var value: Array[Variant] = []
 		value.resize(len(subtracks))
-		var frame = 0
 		for subtrack_index in range(len(subtracks)):
 			if(subtracks[subtrack_index] && subtracks[subtrack_index]["keyframes"][i]):
 				value[subtrack_index] = subtracks[subtrack_index]["keyframes"][i]
-				frame = subtracks[subtrack_index]["keyframes"][i][1]
-		keyframes.append(STFKeyframe.new(frame, value))
-	
+		keyframes.append(STFKeyframe.new(timepoints[i], value))
+
 	return keyframes
 
 
@@ -60,7 +81,7 @@ static func import_value(context: STF_ImportContext, animation: Animation, targe
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
-			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, transform_func._callable.call(keyframe._values[0][2]) if transform_func else keyframe._values[0][2], 1)
+			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, transform_func._callable.call(keyframe._subframes[0]._value) if transform_func else keyframe._subframes[0]._value, 1)
 	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
@@ -75,13 +96,13 @@ static func import_value(context: STF_ImportContext, animation: Animation, targe
 			# todo check more keyframe interpolation types
 			var tangent_out := Vector2.ZERO
 			var tangent_in := Vector2.ZERO
-			if(keyframe._values[0][3] == "bezier"):
-				tangent_out = Vector2(keyframe._values[0][5][0] * animation.step, -transform_func._callable.call(keyframe._values[0][5][1]) if transform_func else -keyframe._values[0][5][1])
-				if(len(keyframe._values[0]) > 6): tangent_in = Vector2(keyframe._values[0][6][0] * animation.step, -transform_func._callable.call(keyframe._values[0][6][1]) if transform_func else -keyframe._values[0][6][1])
+			if(keyframe._subframes[0]._interpolation_type == "bezier"):
+				tangent_out = Vector2(keyframe._subframes[0]._handle_right[0] * animation.step, -transform_func._callable.call(keyframe._subframes[0]._handle_right[1]) if transform_func else -keyframe._subframes[0]._handle_right[1])
+				if(keyframe._subframes[0]._handle_left): tangent_in = Vector2(keyframe._subframes[0]._handle_left[0] * animation.step, -transform_func._callable.call(keyframe._subframes[0]._handle_left[1]) if transform_func else -keyframe._subframes[0]._handle_left[1])
 			animation.bezier_track_insert_key(
 				track_index,
 				keyframe._frame * animation.step - start_offset,
-				transform_func._callable.call(keyframe._values[0][2]) if transform_func else keyframe._values[0][2],
+				transform_func._callable.call(keyframe._subframes[0]._value) if transform_func else keyframe._subframes[0]._value,
 				tangent_in,
 				tangent_out
 			)
@@ -97,8 +118,8 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
 			for i in range(3):
-				if(keyframe._values[i] != null):
-					value[i] = keyframe._values[i][2]
+				if(keyframe._subframes[i] != null):
+					value[i] = keyframe._subframes[i]._value
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
@@ -126,21 +147,21 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 			var tangent_out := Vector3.ZERO
 			for i in range(3):
 				# todo check more keyframe interpolation types
-				if(keyframe._values[i] != null && keyframe._values[i][0] && keyframe._values[i][3] == "bezier"):
-					value[i] = keyframe._values[i][2]
-					tangent_in[i] = keyframe._values[i][6][1] if len(keyframe._values[i]) > 6 else 0
-					tangent_out[i] = keyframe._values[i][5][1]
+				if(keyframe._subframes[i] != null && keyframe._subframes[i]._source_of_truth && keyframe._subframes[i]._interpolation_type == "bezier"):
+					value[i] = keyframe._subframes[i]._value
+					tangent_in[i] = keyframe._subframes[i]._handle_left[1] if keyframe._subframes[i]._handle_left else 0
+					tangent_out[i] = keyframe._subframes[i]._handle_right[1]
 			if(transform_func):
 				value = transform_func._callable.call(value)
 				tangent_in = transform_func._callable.call(tangent_in)
 				tangent_out = transform_func._callable.call(tangent_out)
 			for i in range(3):
-				if(keyframe._values[i] != null && keyframe._values[i][0]):
+				if(keyframe._subframes[i] != null && keyframe._subframes[i]._source_of_truth):
 					var subtangent_out := Vector2.ZERO
 					var subtangent_in := Vector2.ZERO
-					if(keyframe._values[i][3] == "bezier"):
-						subtangent_out = Vector2(keyframe._values[i][5][0] * animation.step, -tangent_out[i])
-						if(len(keyframe._values[0]) > 6): subtangent_in = Vector2(keyframe._values[i][6][0] * animation.step, -tangent_in[i])
+					if(keyframe._subframes[i]._interpolation_type == "bezier"):
+						subtangent_out = Vector2(keyframe._subframes[i]._handle_right[0] * animation.step, -tangent_out[i])
+						if(keyframe._subframes[0]._handle_left): subtangent_in = Vector2(keyframe._subframes[i]._handle_left[0] * animation.step, -tangent_in[i])
 					animation.bezier_track_insert_key(
 						track_indices[i],
 						keyframe._frame * animation.step - start_offset,
@@ -156,10 +177,10 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Quaternion.IDENTITY
-			if(keyframe._values[0] != null): value.x = keyframe._values[0][2]
-			if(keyframe._values[1] != null): value.y = keyframe._values[1][2]
-			if(keyframe._values[2] != null): value.z = keyframe._values[2][2]
-			if(keyframe._values[3] != null): value.w = keyframe._values[3][2]
+			if(keyframe._subframes[0] != null): value.x = keyframe._subframes[0]._value
+			if(keyframe._subframes[1] != null): value.y = keyframe._subframes[1]._value
+			if(keyframe._subframes[2] != null): value.z = keyframe._subframes[2]._value
+			if(keyframe._subframes[3] != null): value.w = keyframe._subframes[3]._value
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value.normalized(), 1)
@@ -192,15 +213,15 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 			var tangent_in_weight := Vector4.ZERO
 
 			for i in range(4):
-				if(keyframe._values[i] != null):
-					value[i] = keyframe._values[i][2]
+				if(keyframe._subframes[i] != null):
+					value[i] = keyframe._subframes[i]._value
 					# todo check more keyframe interpolation types
-					if(keyframe._values[i][3] == "bezier"):
-						tangent_out[i] = value[i] + keyframe._values[i][5][1]
-						tangent_out_weight[i] = keyframe._values[i][5][0]
-						if(len(keyframe._values[i]) > 6):
-							tangent_in[i] = value[i] + keyframe._values[i][6][1]
-							tangent_in_weight[i] = keyframe._values[i][6][0]
+					if(keyframe._subframes[i]._interpolation_type == "bezier"):
+						tangent_out[i] = value[i] + keyframe._subframes[i]._handle_right[1]
+						tangent_out_weight[i] = keyframe._subframes[i]._handle_right[0]
+						if(keyframe._subframes[i]._handle_left):
+							tangent_in[i] = value[i] + keyframe._subframes[i]._handle_left[1]
+							tangent_in_weight[i] = keyframe._subframes[i]._handle_left[0]
 
 			var value_quat := Quaternion(value.x, value.y, value.z, value.w).normalized()
 			var tangent_out_quat := Quaternion(tangent_out.x, tangent_out.y, tangent_out.z, tangent_out.w).normalized()
@@ -218,9 +239,9 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 			for i in range(4):
 				var subtangent_out := Vector2.ZERO
 				var subtangent_in := Vector2.ZERO
-				if(keyframe._values[i][3] == "bezier"):
+				if(keyframe._subframes[i]._interpolation_type == "bezier"):
 					subtangent_out = Vector2(tangent_out_weight[i] * animation.step, tangent_out[i])
-					if(len(keyframe._values[0]) > 6): subtangent_in = Vector2(tangent_in_weight[i] * animation.step, tangent_in[i])
+					if(keyframe._subframes[0]._handle_left): subtangent_in = Vector2(tangent_in_weight[i] * animation.step, tangent_in[i])
 				animation.bezier_track_insert_key(
 					track_indices[i],
 					keyframe._frame * animation.step - start_offset,
@@ -236,9 +257,9 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
-			if(keyframe._values[0] != null): value.x = keyframe._values[0][2]
-			if(keyframe._values[1] != null): value.y = keyframe._values[1][2]
-			if(keyframe._values[2] != null): value.z = keyframe._values[2][2]
+			if(keyframe._subframes[0] != null): value.x = keyframe._subframes[0]._value
+			if(keyframe._subframes[1] != null): value.y = keyframe._subframes[1]._value
+			if(keyframe._subframes[2] != null): value.z = keyframe._subframes[2]._value
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			var value_quat = Quaternion.from_euler(value).normalized()
@@ -267,23 +288,23 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 			var value := Vector3.ZERO
 			var tangent_in := Vector3.ZERO
 			var tangent_out := Vector3.ZERO
-			for i in range(len(keyframe._values)):
+			for i in range(len(keyframe._subframes)):
 				# todo check more keyframe interpolation types
-				if(keyframe._values[i] != null && keyframe._values[i][0] && keyframe._values[i][3] == "bezier"):
-					value[i] = keyframe._values[i][2]
-					tangent_in[i] = keyframe._values[i][6][1] if len(keyframe._values[i]) > 6 else 0
-					tangent_out[i] = keyframe._values[i][5][1]
+				if(keyframe._subframes[i] != null && keyframe._subframes[i]._source_of_truth && keyframe._subframes[i]._interpolation_type == "bezier"):
+					value[i] = keyframe._subframes[i]._value
+					tangent_in[i] = keyframe._subframes[i]._handle_left[1] if keyframe._subframes[i]._handle_left else 0
+					tangent_out[i] = keyframe._subframes[i]._handle_right[1]
 			if(transform_func):
 				value = transform_func._callable.call(value)
 				tangent_in = transform_func._callable.call(tangent_in)
 				tangent_out = transform_func._callable.call(tangent_out)
-			for i in range(len(keyframe._values)):
-				if(keyframe._values[i] != null && keyframe._values[i][0]):
+			for i in range(len(keyframe._subframes)):
+				if(keyframe._subframes[i] != null && keyframe._subframes[i]._source_of_truth):
 					var subtangent_out := Vector2.ZERO
 					var subtangent_in := Vector2.ZERO
-					if(keyframe._values[i][3] == "bezier"):
-						subtangent_out = Vector2(keyframe._values[i][5][0] * animation.step, -tangent_out[i])
-						if(len(keyframe._values[0]) > 6): subtangent_in = Vector2(keyframe._values[i][6][0] * animation.step, -tangent_in[i])
+					if(keyframe._subframes[i]._interpolation_type == "bezier"):
+						subtangent_out = Vector2(keyframe._subframes[i]._handle_right[0] * animation.step, -tangent_out[i])
+						if(keyframe._subframes[0]._handle_left): subtangent_in = Vector2(keyframe._subframes[i]._handle_left[0] * animation.step, -tangent_in[i])
 					animation.bezier_track_insert_key(
 						track_indices[i],
 						keyframe._frame * animation.step - start_offset,
@@ -299,9 +320,9 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
-			for i in range(len(keyframe._values)):
-				if(keyframe._values[i] != null):
-					value[i] = keyframe._values[i][2]
+			for i in range(len(keyframe._subframes)):
+				if(keyframe._subframes[i] != null):
+					value[i] = keyframe._subframes[i]._value
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
@@ -328,22 +349,22 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 			var tangent_in := Vector3.ZERO
 			# todo check more keyframe interpolation types
 			var tangent_out := Vector3.ZERO
-			for i in range(len(keyframe._values)):
-				if(keyframe._values[i] != null && keyframe._values[i][0] && keyframe._values[i][3] == "bezier"):
-					value[i] = keyframe._values[i][2]
-					tangent_in[i] = keyframe._values[i][6][1] if len(keyframe._values[i]) > 6 else 0
-					tangent_out[i] = keyframe._values[i][5][1]
+			for i in range(len(keyframe._subframes)):
+				if(keyframe._subframes[i] != null && keyframe._subframes[i]._source_of_truth && keyframe._subframes[i]._interpolation_type == "bezier"):
+					value[i] = keyframe._subframes[i]._value
+					tangent_in[i] = keyframe._subframes[i]._handle_left[1] if len(keyframe._subframes[i]._handle_left) > 6 else 0
+					tangent_out[i] = keyframe._subframes[i]._handle_right[1]
 			if(transform_func):
 				value = transform_func._callable.call(value)
 				tangent_in = transform_func._callable.call(tangent_in)
 				tangent_out = transform_func._callable.call(tangent_out)
-			for i in range(len(keyframe._values)):
-				if(keyframe._values[i] != null && keyframe._values[i][0]):
+			for i in range(len(keyframe._subframes)):
+				if(keyframe._subframes[i] != null && keyframe._subframes[i]._source_of_truth):
 					var subtangent_out := Vector2.ZERO
 					var subtangent_in := Vector2.ZERO
-					if(keyframe._values[i][3] == "bezier"):
-						subtangent_out = Vector2(keyframe._values[i][5][0] * animation.step, -tangent_out[i])
-						if(len(keyframe._values[0]) > 6): subtangent_in = Vector2(keyframe._values[i][6][0] * animation.step, -tangent_in[i])
+					if(keyframe._subframes[i]._interpolation_type == "bezier"):
+						subtangent_out = Vector2(keyframe._subframes[i]._handle_right[0] * animation.step, -tangent_out[i])
+						if(keyframe._subframes[0]._handle_left): subtangent_in = Vector2(keyframe._subframes[i]._handle_left[0] * animation.step, -tangent_in[i])
 					animation.bezier_track_insert_key(
 						track_indices[i],
 						keyframe._frame * animation.step - start_offset,
