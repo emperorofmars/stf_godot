@@ -78,7 +78,7 @@ static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionar
 
 static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
 	# Unbaked Simplified
-	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
+	if(animation_handling == 2 || track.get("interpolation") not in ["bezier", "mixed"]):
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
 		match track.get("interpolation"):
@@ -124,7 +124,7 @@ static func import_blendshape(context: STF_ImportContext, animation: Animation, 
 
 static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	# Unbaked Simplified
-	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
+	if(animation_handling == 2 || track.get("interpolation") not in ["bezier", "mixed"]):
 		var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 		animation.track_set_path(track_index, target)
 		match track.get("interpolation"):
@@ -195,7 +195,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 
 static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	# Unbaked Simplified
-	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
+	if(animation_handling == 2 || track.get("interpolation") not in ["bezier", "mixed"]):
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
 		match track.get("interpolation"):
@@ -286,7 +286,7 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 
 static func import_euler_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	# Unbaked Simplified
-	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
+	if(animation_handling == 2 || track.get("interpolation") not in ["bezier", "mixed"]):
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
 		match track.get("interpolation"):
@@ -360,7 +360,7 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 
 static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	# Unbaked Simplified
-	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
+	if(animation_handling == 2 || track.get("interpolation") not in ["bezier", "mixed"]):
 		var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
 		animation.track_set_path(track_index, target)
 		match track.get("interpolation"):
