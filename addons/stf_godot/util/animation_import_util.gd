@@ -41,7 +41,7 @@ static func arrange_unbaked_keyframes(track: Dictionary) -> Array[STFKeyframe]:
 	if(len <= 0 || len(timepoints) == 0): return []
 
 	var keyframes: Array[STFKeyframe] = []
-	for i in range(timepoints):
+	for i in range(len(timepoints)):
 		var value: Array[Variant] = []
 		value.resize(len(subtracks))
 		for subtrack_index in range(len(subtracks)):
@@ -77,19 +77,30 @@ static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionar
 
 
 static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
-	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
+	# Unbaked Simplified
+	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, transform_func._callable.call(keyframe._subframes[0]._value) if transform_func else keyframe._subframes[0]._value, 1)
-	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
+	# Baked
+	elif(animation_handling == 1 || !can_import_bezier):
 		var track_index = animation.add_track(track_type)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			animation.track_insert_key(track_index, keyframe_index * animation.step, transform_func._callable.call(keyframe[0]) if transform_func else keyframe[0], 1)
 			keyframe_index += 1
-	else: # Bezier
+	# Bezier
+	else:
 		var track_index = animation.add_track(Animation.TYPE_BEZIER)
 		animation.track_set_path(track_index, target)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
@@ -112,9 +123,14 @@ static func import_blendshape(context: STF_ImportContext, animation: Animation, 
 
 
 static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
-	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
+	# Unbaked Simplified
+	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
 		var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
 			for i in range(3):
@@ -123,9 +139,14 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
-	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
+	# Baked
+	elif(animation_handling == 1 || !can_import_bezier):
 		var track_index = animation.add_track(Animation.TYPE_POSITION_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			var value := Vector3.ZERO
@@ -136,7 +157,8 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe_index * animation.step, value, 1)
 			keyframe_index += 1
-	else: # Bezier
+	# Bezier
+	else:
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":position:x")
 		animation.track_set_path(track_indices[1], target + ":position:y")
@@ -172,9 +194,14 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 
 
 static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
-	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
+	# Unbaked Simplified
+	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Quaternion.IDENTITY
 			if(keyframe._subframes[0] != null): value.x = keyframe._subframes[0]._value
@@ -184,9 +211,14 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value.normalized(), 1)
-	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
+	# Baked
+	elif(animation_handling == 1 || !can_import_bezier):
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			var value := Quaternion.IDENTITY
@@ -198,7 +230,8 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe_index * animation.step, value.normalized(), 1)
 			keyframe_index += 1
-	else: # Bezier
+	# Bezier
+	else:
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":quaternion:x")
 		animation.track_set_path(track_indices[1], target + ":quaternion:y")
@@ -252,9 +285,14 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 
 
 static func import_euler_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
-	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
+	# Unbaked Simplified
+	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
 			if(keyframe._subframes[0] != null): value.x = keyframe._subframes[0]._value
@@ -264,9 +302,14 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 				value = transform_func._callable.call(value)
 			var value_quat = Quaternion.from_euler(value).normalized()
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value_quat, 1)
-	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
+	# Baked
+	elif(animation_handling == 1 || !can_import_bezier):
 		var track_index = animation.add_track(Animation.TYPE_ROTATION_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			var value := Vector3.ZERO
@@ -278,7 +321,8 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 			var value_quat = Quaternion.from_euler(value).normalized()
 			animation.track_insert_key(track_index, keyframe_index * animation.step, value_quat, 1)
 			keyframe_index += 1
-	else: # Bezier
+	# Bezier
+	else:
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":rotation:x")
 		animation.track_set_path(track_indices[1], target + ":rotation:y")
@@ -315,9 +359,14 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 
 
 static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
-	if(animation_handling == 2 || !can_import_bezier && animation_handling != 1): # Simplified & unbaked
+	# Unbaked Simplified
+	if(animation_handling == 2 || track.get("interpolation") != "bezier"):
 		var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
 			var value := Vector3.ZERO
 			for i in range(len(keyframe._subframes)):
@@ -326,9 +375,14 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 			if(transform_func):
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, value, 1)
-	elif(animation_handling == 1 || !can_import_bezier): # Unbaked
+	# Baked
+	elif(animation_handling == 1 || !can_import_bezier):
 		var track_index = animation.add_track(Animation.TYPE_SCALE_3D)
 		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
 		var keyframe_index = 0
 		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
 			var value := Vector3.ZERO
@@ -339,7 +393,8 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 				value = transform_func._callable.call(value)
 			animation.track_insert_key(track_index, keyframe_index * animation.step, value, 1)
 			keyframe_index += 1
-	else: # Bezier
+	# Bezier
+	else:
 		var track_indices := [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
 		animation.track_set_path(track_indices[0], target + ":scale:x")
 		animation.track_set_path(track_indices[1], target + ":scale:y")
