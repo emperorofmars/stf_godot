@@ -25,6 +25,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints are only supported on bones.")
 	var parent: STF_Bone.ArmatureBone = context_object
 
+	# todo use RemoteTransform3D for non bone targets
+
 	var ret = CopyTransformModifier3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Twist Constraint " + parent._armature_context._skeleton.get_bone_name(parent._bone_index))
 	parent._armature_context._skeleton.add_child(ret)
