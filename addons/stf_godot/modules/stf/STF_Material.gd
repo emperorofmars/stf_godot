@@ -43,12 +43,16 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if(key == "albedo.texture" && type == "image" && len(values) == 1):
 				ret.albedo_texture = __get_texture(context.import(values[0].get("image")))
 
-			if(key == "roughness.texture" && type == "image" && len(values) == 1):
+			elif(key == "roughness.texture" && type == "image" && len(values) == 1):
 				ret.roughness_texture = __get_texture(context.import(values[0].get("image")))
 
-			if(key == "metallic.texture" && type == "image" && len(values) == 1):
+			elif(key == "metallic.texture" && type == "image" && len(values) == 1):
 				ret.metallic = 1
 				ret.metallic_texture = __get_texture(context.import(values[0].get("image")))
+			
+			elif(key == "normal.texture" && type == "image" && len(values) == 1):
+				ret.normal_enabled = true
+				ret.normal_texture = __get_texture(context.import(values[0].get("image")))
 
 	return ImportResult.new(ret)
 
