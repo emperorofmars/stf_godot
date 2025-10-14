@@ -32,7 +32,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var anchor_target: Array = json_resource.get("anchor", [])
 	if(len(anchor_target) == 0): return null
 
-	context._add_task(func():
+	context._add_task(context.PROCESS_STEPS.DEFAULT, func():
 		var target_node := context.import(STF_Godot_Util.get_resource_reference(json_resource, anchor_target[0]), "node")
 		var remote_parent = target_node
 		if(len(anchor_target) == 3 && target_node is Skeleton3D):

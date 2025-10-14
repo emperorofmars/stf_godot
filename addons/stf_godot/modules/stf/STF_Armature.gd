@@ -40,10 +40,7 @@ class ArmatureImportContext:
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Skeleton3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Armature")
-
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name", null)}
-	ret.set_meta("stf", stf_meta)
+	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 	
 	var child_context = ArmatureImportContext.new(ret)
 

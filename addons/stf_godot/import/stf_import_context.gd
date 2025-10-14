@@ -5,7 +5,11 @@ extends RefCounted
 
 var _state: STF_ImportState
 
-var _tasks: Array[Callable] = []
+# Dictionary[int, Array[Callable]]
+var _tasks: Dictionary[int, Array] = {}
+var _current_step := 0
+
+enum PROCESS_STEPS { DEFAULT = 100, BEFORE_MATERIAL = 1000, MATERIAL = 1010, AFTER_MATERIAL = 1020, BEFORE_ANIMATION = 10000, ANIMATION = 10010, AFTER_ANIMATION = 10020, FINALE = 10000000 }
 
 
 func _init(state: STF_ImportState) -> void:
@@ -46,18 +50,25 @@ func get_buffer(stf_id: String) -> PackedByteArray:
 	return _state.get_buffer(stf_id)
 
 
-func _add_task(task: Callable):
-	_tasks.append(task)
+func _add_task(step: int, task: Callable):
+	if(step < self._current_step):
+		step = self._current_step
+	if(step not in _tasks):
+		_tasks[step] = [task]
+	else:
+		_tasks[step].append(task)
 
 func _run_tasks():
 	const max_depth: = 1000
-	var iter: = 0
-	while(len(_tasks) > 0 && iter < max_depth):
-		var tmp = _tasks
-		_tasks = []
-		for task in tmp:
-			task.call()
-		iter += 1
+	self._current_step = 0
+	for task_step in self._tasks:
+		var iter: = 0
+		while(len(_tasks) > 0 && iter < max_depth):
+			var tmp = self._tasks[task_step]
+			self._tasks[task_step] = []
+			for task in tmp:
+				task.call()
+			iter += 1
 
 
 func _get_import_options() -> Dictionary:

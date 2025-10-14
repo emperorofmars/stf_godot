@@ -23,3 +23,13 @@ static func get_resource_reference(json_resource: Dictionary, reference_index: i
 	else:
 		return ""
 
+
+static func set_stf_meta(stf_id: String, json_resource: Dictionary, godot_resource: Object):
+	godot_resource.set_meta("stf_id", stf_id)
+	var stf_meta: Dictionary = godot_resource.get_meta("stf", {})
+	stf_meta["stf_id"] = stf_id
+	stf_meta["stf_name"] = json_resource.get("name")
+	if("processed" not in stf_meta):
+		stf_meta["processed"] = []
+	godot_resource.set_meta("stf", stf_meta)
+

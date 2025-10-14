@@ -23,23 +23,16 @@ func _check_godot_object(godot_object: Object) -> int:
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Prefab")
-
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name", null)}
-	ret.set_meta("stf", stf_meta)
+	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 
 	for child_id in json_resource.get("root_nodes", []):
 		var child: Node3D = context.import(child_id, "node", ret)
 		ret.add_child(child)
 
-	context._run_tasks()
-
-	context._add_task(func():
-		__set_owner(ret, ret)
-	)
+	context._add_task(context.PROCESS_STEPS.BEFORE_ANIMATION, func(): __set_owner(ret, ret))
 
 	if("animations" in json_resource):
-		context._add_task(func():
+		context._add_task(context.PROCESS_STEPS.ANIMATION, func():
 			var animation_player := AnimationPlayer.new()
 			animation_player.name = "Imported STF Animations"
 			ret.add_child(animation_player)
@@ -54,8 +47,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				if(animation):
 					animation_library.add_animation(animation.resource_name, animation)
 		)
-
-	context._run_tasks()
 
 	return ImportResult.new(ret)
 

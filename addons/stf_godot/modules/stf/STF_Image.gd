@@ -22,10 +22,9 @@ func _check_godot_object(godot_object: Object) -> int:
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Image.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Image")
+	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name")}
-	ret.set_meta("stf", stf_meta)
+	ret.get_meta("stf")["data_type"] = json_resource.get("data_type", "color")
 
 	var format = json_resource["format"]
 

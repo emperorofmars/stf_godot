@@ -27,13 +27,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	else:
 		ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Node")
+	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 
 	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
-
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta = ret.get_meta("stf", {})
-	stf_meta["stf_name"] = json_resource.get("name", null)
-	ret.set_meta("stf", stf_meta)
 
 	for child_id in json_resource.get("children", []):
 		var child: Node3D = context.import(child_id, "node", context_object)
@@ -43,7 +39,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.transform = STF_TRS_Util.parse_transform(json_resource["trs"])
 
 	if("parent_binding" in json_resource && len(json_resource["parent_binding"]) == 3):
-		context._add_task(func():
+		context._add_task(context.PROCESS_STEPS.DEFAULT, func():
 			var parent_binding: Array = json_resource["parent_binding"]
 			var parent: Node = ret.get_parent()
 			if(parent.is_class("Skeleton3D")):

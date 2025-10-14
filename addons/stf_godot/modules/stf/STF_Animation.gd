@@ -22,10 +22,7 @@ func _check_godot_object(godot_object: Object) -> int:
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Animation.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Animation")
-
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name")}
-	ret.set_meta("stf", stf_meta)
+	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 
 	ret.step = 1 / json_resource.get("fps", 30)
 

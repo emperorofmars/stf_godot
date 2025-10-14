@@ -341,10 +341,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	#var ret = ImporterMesh.new()
 	var ret = ArrayMesh.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Mesh")
-
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name"), "blendshape_values": blendshape_values}
-	ret.set_meta("stf", stf_meta)
+	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 
 	ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
 	#ret.set_blend_shape_mode(Mesh.BLEND_SHAPE_MODE_NORMALIZED)
