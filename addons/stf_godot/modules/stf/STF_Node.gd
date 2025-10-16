@@ -24,6 +24,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var ret = null
 	if("instance" in json_resource):
 		ret = context.import(json_resource["instance"], "instance", context_object)
+		if(not ret):
+			ret = Node3D.new()
 	else:
 		ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Node")
