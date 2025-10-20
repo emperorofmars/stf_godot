@@ -38,6 +38,7 @@ static func get_default_modules() -> Array[STF_Module]:
 		STFEXP_Collider_Sphere.new(),
 		STFEXP_Collider_Capsule.new(),
 		STFEXP_Camera.new(),
+		STFEXP_Light.new(),
 	]
 
 

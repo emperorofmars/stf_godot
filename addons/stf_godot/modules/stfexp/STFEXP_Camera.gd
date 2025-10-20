@@ -38,7 +38,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		_:
 			camera.projection = Camera3D.PROJECTION_PERSPECTIVE
 			if("fov" in json_resource):
-				camera.fov = json_resource["fov"]
+				camera.fov = rad_to_deg(json_resource["fov"])
 
 	return ImportResult.new(ret)
 

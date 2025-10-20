@@ -38,7 +38,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	if(options.get(STF_ImportOptions.EnableDebugLog, false)):
 		print_rich("Importing STF asset: [u]", path, "[/u]")
 
-	var time_start := Time.get_ticks_msec()
+	var time_start := Time.get_ticks_usec()
 	
 	var stf_file = STF_File.read(path)
 	if(not stf_file):
@@ -60,9 +60,9 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	else:
 		__clean_stf_meta(ret)
 
-	var time_end := Time.get_ticks_msec()
+	var time_end := Time.get_ticks_usec()
 
-	print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", time_end - time_start, " ms.[/color]")
+	print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000.0, " ms.[/color]")
 	return ret
 
 
