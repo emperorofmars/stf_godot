@@ -428,3 +428,61 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 						subtangent_out
 					)
 
+
+static func import_color(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+	# Unbaked Simplified
+	if(animation_handling == 2 || track.get("interpolation") not in ["bezier", "mixed"]):
+		var track_index = animation.add_track(Animation.TrackType.TYPE_VALUE)
+		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
+		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
+			var value = []
+			for sub in keyframe._subframes:
+				value.append(sub._value)
+			var color = Color(value[0], value[1], value[2], value[3]) if len(value) == 4 else Color(value[0], value[1], value[2])
+			animation.track_insert_key(track_index, keyframe._frame * animation.step - start_offset, transform_func._callable.call(color) if transform_func else color, 1)
+	# Baked
+	elif(animation_handling == 1 || !can_import_bezier):
+		var track_index = animation.add_track(Animation.TrackType.TYPE_VALUE)
+		animation.track_set_path(track_index, target)
+		match track.get("interpolation"):
+			"linear": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_LINEAR)
+			"constant": animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_NEAREST)
+			_: animation.track_set_interpolation_type(track_index, Animation.INTERPOLATION_CUBIC)
+		var keyframe_index = 0
+		for keyframe in STFAnimationImportUtil.arrange_baked_keyframes(context, track):
+			var value = []
+			for sub in keyframe:
+				value.append(sub)
+			var color = Color(value[0], value[1], value[2], value[3]) if len(value) == 4 else Color(value[0], value[1], value[2])
+			animation.track_insert_key(track_index, keyframe_index * animation.step, transform_func._callable.call(color) if transform_func else color, 1)
+			keyframe_index += 1
+	# Bezier
+	else:
+		var tracks = [animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER), animation.add_track(Animation.TYPE_BEZIER)]
+		animation.track_set_path(tracks[0], target + ":r")
+		animation.track_set_path(tracks[1], target + ":g")
+		animation.track_set_path(tracks[2], target + ":b")
+		animation.track_set_path(tracks[3], target + ":a")
+		var max_index = 0
+		for keyframe in STFAnimationImportUtil.arrange_unbaked_keyframes(track):
+			# todo check more keyframe interpolation types
+			for subframe_index in range(len(keyframe._subframes)):
+				var tangent_out := Vector2.ZERO
+				var tangent_in := Vector2.ZERO
+				if(keyframe._subframes[subframe_index]._interpolation_type == "bezier"):
+					tangent_out = Vector2(keyframe._subframes[subframe_index]._handle_right[0] * animation.step, -transform_func._callable.call(keyframe._subframes[subframe_index]._handle_right[1]) if transform_func else -keyframe._subframes[0]._handle_right[1])
+					if(keyframe._subframes[subframe_index]._handle_left): tangent_in = Vector2(keyframe._subframes[subframe_index]._handle_left[0] * animation.step, -transform_func._callable.call(keyframe._subframes[subframe_index]._handle_left[1]) if transform_func else -keyframe._subframes[subframe_index]._handle_left[1])
+				animation.bezier_track_insert_key(
+					tracks[subframe_index],
+					keyframe._frame * animation.step - start_offset,
+					transform_func._callable.call(keyframe._subframes[subframe_index]._value) if transform_func else keyframe._subframes[subframe_index]._value,
+					tangent_in,
+					tangent_out
+				)
+				if(subframe_index > max_index): max_index = subframe_index
+		for track_index in range(3 - max_index):
+			animation.remove_track(tracks[3 - track_index])
