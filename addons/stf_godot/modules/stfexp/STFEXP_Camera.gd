@@ -1,20 +1,11 @@
 class_name STFEXP_Camera
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stfexp.camera"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "instance"
-
-func _get_like_types() -> Array[String]:
-	return ["camera"]
-
-func _get_godot_type() -> String:
-	return "Camera3D"
+func _get_stf_type() -> String: return "stfexp.camera"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "instance"
+func _get_like_types() -> Array[String]: return ["camera"]
+func _get_godot_type() -> String: return "Camera3D"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Camera3D else -1
@@ -40,7 +31,17 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if("fov" in json_resource):
 				camera.fov = rad_to_deg(json_resource["fov"])
 
-	return ImportResult.new(ret)
+	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 2): return null
+		match stf_path[1]:
+			"fov":
+				if(camera.projection == Camera3D.PROJECTION_ORTHOGONAL):
+					return ImportAnimationPropertyResult.new(camera.owner.get_path_to(camera).get_concatenated_names() + ":size", STFAnimationImportUtil.import_value)
+				elif(camera.projection == Camera3D.PROJECTION_PERSPECTIVE):
+					return ImportAnimationPropertyResult.new(camera.owner.get_path_to(camera).get_concatenated_names() + ":fov", STFAnimationImportUtil.import_value, OptionalCallable.new(func (v): return rad_to_deg(v)))
+		return null
+
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

@@ -1,20 +1,11 @@
 class_name STF_Bone
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stf.bone"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "node"
-
-func _get_like_types() -> Array[String]:
-	return ["bone"]
-
-func _get_godot_type() -> String:
-	return "Bone"
+func _get_stf_type() -> String: return "stf.bone"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "node"
+func _get_like_types() -> Array[String]: return ["bone"]
+func _get_godot_type() -> String: return "Bone"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for bones

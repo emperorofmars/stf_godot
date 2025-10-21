@@ -1,20 +1,11 @@
 class_name STFEXP_Collider_Capsule
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stfexp.collider.capsule"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "component"
-
-func _get_like_types() -> Array[String]:
-	return ["collider.capsule", "collider"]
-
-func _get_godot_type() -> String:
-	return "CollisionShape3D"
+func _get_stf_type() -> String: return "stfexp.collider.capsule"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "component"
+func _get_like_types() -> Array[String]: return ["collider.capsule", "collider"]
+func _get_godot_type() -> String: return "CollisionShape3D"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is CollisionShape3D else -1

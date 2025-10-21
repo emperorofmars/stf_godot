@@ -1,20 +1,11 @@
 class_name STFEXP_Constraint_Twist
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stfexp.constraint.twist"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "component"
-
-func _get_like_types() -> Array[String]:
-	return ["constraint.rotation", "constraint"]
-
-func _get_godot_type() -> String:
-	return "CopyTransformModifier3D"
+func _get_stf_type() -> String: return "stfexp.constraint.twist"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "component"
+func _get_like_types() -> Array[String]: return ["constraint.rotation", "constraint"]
+func _get_godot_type() -> String: return "CopyTransformModifier3D"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly

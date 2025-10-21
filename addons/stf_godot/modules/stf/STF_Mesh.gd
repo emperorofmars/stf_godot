@@ -1,22 +1,11 @@
 class_name STF_Mesh
 extends STF_Module
 
-
-func _get_stf_type() -> String:
-	return "stf.mesh"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "data"
-
-func _get_like_types() -> Array[String]:
-	return ["mesh"]
-
-func _get_godot_type() -> String:
-	return "Mesh"
-
+func _get_stf_type() -> String: return "stf.mesh"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "data"
+func _get_like_types() -> Array[String]: return ["mesh"]
+func _get_godot_type() -> String: return "Mesh"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Mesh else -1
 
@@ -337,7 +326,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			else:
 				blendshape_values.append(0.0)
 
-
 	#var ret = ImporterMesh.new()
 	var ret = ArrayMesh.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Mesh")
@@ -407,7 +395,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				submesh_colors[submesh_map[submesh_index]] = godot_colors[submesh_index]
 			arrays[Mesh.ARRAY_COLOR] = submesh_colors
 
-
 		# weightpaint
 		if(len(godot_bones) == len(godot_vertices) * BONES_PER_VERTEX && len(godot_weights) == len(godot_vertices) * BONES_PER_VERTEX):
 			var submesh_bones = PackedInt32Array()
@@ -441,7 +428,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				submesh_blendshape[Mesh.ARRAY_NORMAL] = submesh_blendshape_normals
 
 			submesh_blendshapes.append(submesh_blendshape)
-
 
 		var flags = 0
 		if(BONES_PER_VERTEX == 8):

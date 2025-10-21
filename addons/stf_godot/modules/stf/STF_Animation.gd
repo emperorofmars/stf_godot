@@ -1,20 +1,11 @@
 class_name STF_Animation
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stf.animation"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "data"
-
-func _get_like_types() -> Array[String]:
-	return ["animation"]
-
-func _get_godot_type() -> String:
-	return "Animation"
+func _get_stf_type() -> String: return "stf.animation"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "data"
+func _get_like_types() -> Array[String]: return ["animation"]
+func _get_godot_type() -> String: return "Animation"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Animation else -1
@@ -36,7 +27,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	if("range" in json_resource):
 		ret.length = (json_resource["range"][1] - json_resource["range"][0]) * ret.step
 		start_offset = json_resource["range"][0] * ret.step
-
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
 	var animation_handling = context._get_import_options().get(STF_ImportOptions.AnimationHandling, 0)

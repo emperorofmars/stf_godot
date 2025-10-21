@@ -1,20 +1,11 @@
 class_name STFEXP_Lightprobe_Anchor
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stfexp.lightprobe_anchor"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "component"
-
-func _get_like_types() -> Array[String]:
-	return ["lightprobe_anchor"]
-
-func _get_godot_type() -> String:
-	return "LightmapProbe"
+func _get_stf_type() -> String: return "stfexp.lightprobe_anchor"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "component"
+func _get_like_types() -> Array[String]: return ["lightprobe_anchor"]
+func _get_godot_type() -> String: return "LightmapProbe"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is LightmapProbe else -1

@@ -1,24 +1,14 @@
 class_name STF_Prefab
 extends STF_Module
 
-func _get_stf_type() -> String:
-	return "stf.prefab"
-
-func _get_priority() -> int:
-	return 0
-
-func _get_stf_kind() -> String:
-	return "data"
-
-func _get_like_types() -> Array[String]:
-	return ["prefab"]
-
-func _get_godot_type() -> String:
-	return "SceneTree"
+func _get_stf_type() -> String: return "stf.prefab"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "data"
+func _get_like_types() -> Array[String]: return ["prefab"]
+func _get_godot_type() -> String: return "SceneTree"
 
 func _check_godot_object(godot_object: Object) -> int:
 	return 0
-
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = Node3D.new()
