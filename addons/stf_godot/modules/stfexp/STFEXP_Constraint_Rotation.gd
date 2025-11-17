@@ -1,0 +1,77 @@
+class_name STFEXP_Constraint_Rotation
+extends STF_Module
+
+func _get_stf_type() -> String: return "stfexp.constraint.rotation"
+func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "component"
+func _get_like_types() -> Array[String]: return ["constraint.rotation", "constraint"]
+func _get_godot_type() -> String: return "CopyTransformModifier3D"
+
+func _check_godot_object(godot_object: Object) -> int:
+	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly
+
+
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+	if(context_object is not STF_Bone.ArmatureBone):
+		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.rotation[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints are only supported between bones of the same armature.")
+		return
+
+	var parent: STF_Bone.ArmatureBone = context_object
+
+	var ret: CopyTransformModifier3D = null
+	for child in parent._armature_context._skeleton.get_children():
+		if(child is CopyTransformModifier3D):
+			ret = child
+			break
+	if(not ret):
+		ret = CopyTransformModifier3D.new()
+		ret.name = "STF Constraints"
+		parent._armature_context._skeleton.add_child(ret)
+		ret.set_meta("stf_composite", [])
+
+	parent._armature_context._add_task(func():
+		var constraint_indices = []
+
+		var total_weight = json_resource.get("weight", 1)
+
+		var json_axes: Array = json_resource.get("axes", [true, true, true])
+		var axes = 0
+		if(json_axes[0] == true): axes |= CopyTransformModifier3D.AXIS_FLAG_X
+		if(json_axes[1] == true): axes |= CopyTransformModifier3D.AXIS_FLAG_Y
+		if(json_axes[2] == true): axes |= CopyTransformModifier3D.AXIS_FLAG_Z
+
+		for json_source in json_resource.get("sources", []):
+			var source: Array = json_source.get("source", [])
+			var ref_bone: int = -1
+			if(len(source) == 1):
+				ref_bone = STF_Godot_Util.get_bone_from_skeleton(parent._armature_context._skeleton, STF_Godot_Util.get_resource_reference(json_resource, source[0]))
+			else:
+				print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.rotation[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints function only within a single Skeleton3D.")
+				return
+			if(ref_bone < 0):
+				print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.rotation[/u] with ID [u]" + stf_id + "[/u][/color]: Invalid source bone.")
+				return
+
+			var constraint_index = ret.get_setting_count()
+			constraint_indices.append(constraint_index)
+			ret.set_setting_count(constraint_index + 1)
+			ret.set_axis_flags(constraint_index, axes)
+			ret.set_copy_flags(constraint_index, CopyTransformModifier3D.TRANSFORM_FLAG_ROTATION)
+			ret.set_reference_bone(constraint_index, ref_bone)
+			ret.set_apply_bone(constraint_index, parent._bone_index)
+			ret.set_amount(constraint_index, json_source.get("weight", 0.5) * total_weight)
+			ret.set_relative(constraint_index, false)
+			ret.set_additive(constraint_index, true)
+
+		ret.get_meta("stf_composite").append({
+			"stf_type": _get_stf_type(),
+			"stf_id": stf_id,
+			"stf_name": json_resource.get("name", null),
+			"constraint_indices": constraint_indices,
+		})
+	)
+	return ImportResult.new(ret, null)
+
+
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
+	return null

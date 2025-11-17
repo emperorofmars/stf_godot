@@ -13,25 +13,28 @@ func _check_godot_object(godot_object: Object) -> int:
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	if(context_object is not STF_Bone.ArmatureBone):
-		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints are only supported on bones.")
+		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints are only supported between bones of the same armature.")
+		return
+
 	var parent: STF_Bone.ArmatureBone = context_object
 
-	# todo use RemoteTransform3D for non bone targets
-
-	var ret = CopyTransformModifier3D.new()
-	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Twist Constraint " + parent._armature_context._skeleton.get_bone_name(parent._bone_index))
-	parent._armature_context._skeleton.add_child(ret)
-
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta := {"stf_name": json_resource.get("name", null)}
-	ret.set_meta("stf", stf_meta)
+	var ret: CopyTransformModifier3D = null
+	for child in parent._armature_context._skeleton.get_children():
+		if(child is CopyTransformModifier3D):
+			ret = child
+			break
+	if(not ret):
+		ret = CopyTransformModifier3D.new()
+		ret.name = "STF Constraints"
+		parent._armature_context._skeleton.add_child(ret)
+		ret.set_meta("stf_composite", [])
 
 	parent._armature_context._add_task(func():
-		var target: Array = json_resource.get("target", [])
+		var source: Array = json_resource.get("source", [])
 		var ref_bone: int = -1
-		if(len(target) == 1):
-			ref_bone = STF_Godot_Util.get_bone_from_skeleton(parent._armature_context._skeleton, STF_Godot_Util.get_resource_reference(json_resource, target[0]))
-		elif(len(target) == 0):
+		if(len(source) == 1):
+			ref_bone = STF_Godot_Util.get_bone_from_skeleton(parent._armature_context._skeleton, STF_Godot_Util.get_resource_reference(json_resource, source[0]))
+		elif(len(source) == 0):
 			var bone_parent: int = parent._armature_context._skeleton.get_bone_parent(parent._bone_index)
 			if(bone_parent < 0):
 				print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints function only within a single Skeleton3D.")
@@ -42,19 +45,26 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			return
 
 		if(ref_bone < 0):
-			print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Invalid target bone.")
+			print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Invalid source bone.")
 			return
 
-		ret.set_setting_count(1)
-		ret.set_axis_flags(0, CopyTransformModifier3D.AXIS_FLAG_Y)
-		ret.set_copy_flags(0, CopyTransformModifier3D.TRANSFORM_FLAG_ROTATION)
-		ret.set_reference_bone(0, ref_bone)
-		ret.set_apply_bone(0, parent._bone_index)
-		ret.set_amount(0, json_resource.get("weight", 0.5))
-		ret.set_relative(0, true)
-		ret.set_additive(0, true)
-	)
+		var constraint_index = ret.get_setting_count()
+		ret.set_setting_count(constraint_index + 1)
+		ret.set_axis_flags(constraint_index, CopyTransformModifier3D.AXIS_FLAG_Y)
+		ret.set_copy_flags(constraint_index, CopyTransformModifier3D.TRANSFORM_FLAG_ROTATION)
+		ret.set_reference_bone(constraint_index, ref_bone)
+		ret.set_apply_bone(constraint_index, parent._bone_index)
+		ret.set_amount(constraint_index, json_resource.get("weight", 0.5))
+		ret.set_relative(constraint_index, false)
+		ret.set_additive(constraint_index, true)
 
+		ret.get_meta("stf_composite").append({
+			"stf_type": _get_stf_type(),
+			"stf_id": stf_id,
+			"stf_name": json_resource.get("name", null),
+			"constraint_index": constraint_index,
+		})
+	)
 	return ImportResult.new(ret, null)
 
 
