@@ -28,12 +28,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var remote_parent = target_node
 		if(len(anchor_target) == 3 && target_node is Skeleton3D):
 			var ref_bone := STF_Godot_Util.get_bone_from_skeleton(target_node, STF_Godot_Util.get_resource_reference(json_resource, anchor_target[2]))
-			var bone_attachment = BoneAttachment3D.new()
-			bone_attachment.name = ret.name + "_lightprobe_anchor_parent_binding"
-			target_node.add_child(bone_attachment)
-			bone_attachment.bone_idx = ref_bone
-			remote_parent = bone_attachment
-
+			remote_parent = BoneAttachmentUtil.ensure_attachment(target_node, ref_bone)
 
 		var remoteTransform := RemoteTransform3D.new()
 		remoteTransform.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Lightprobe Anchor")

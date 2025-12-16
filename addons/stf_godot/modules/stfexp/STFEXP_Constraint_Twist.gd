@@ -50,6 +50,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		var constraint_index = ret.get_setting_count()
 		ret.set_setting_count(constraint_index + 1)
+		ret.set_reference_type(constraint_index, CopyTransformModifier3D.REFERENCE_TYPE_BONE)
 		ret.set_axis_flags(constraint_index, CopyTransformModifier3D.AXIS_FLAG_Y)
 		ret.set_copy_flags(constraint_index, CopyTransformModifier3D.TRANSFORM_FLAG_ROTATION)
 		ret.set_reference_bone(constraint_index, ref_bone)

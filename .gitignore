@@ -12,3 +12,4 @@
 !project.godot
 !addons/stf_godot/**/*
 !readme.md
+!.vscode/extensions.json

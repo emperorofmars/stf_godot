@@ -30,13 +30,22 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
 	var animation_handling = context._get_import_options().get(STF_ImportOptions.AnimationHandling, 0)
+	var import_baked_tracks = context._get_import_options().get(STF_ImportOptions.AnimationImportBakedTracks, true)
+
+	var tracks_handled := {}
+
+	if(import_baked_tracks):
+		for stf_track in json_resource.get("tracks_baked", []):
+			var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
+			if(target && target.valid()):
+				tracks_handled[target._godot_path] = true
+				target._keyframe_converter.call(context, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
+			# todo else warn
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
-		if(target && target._godot_path && target._keyframe_converter):
-			#print("Target: ", target._godot_path, " : ", target._track_type)
+		if(target && target.valid() && target._godot_path not in tracks_handled):
 			target._keyframe_converter.call(context, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
-
 		# todo else warn
 
 	return ImportResult.new(ret)

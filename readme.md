@@ -2,7 +2,7 @@
 **Squirrel Transfer Format - Modular 3D File-Format**\
 *Intended for (not only) games-development use-cases.*
 
-**WIP implementation for Godot 4.5+. Do not use productively!**
+**WIP implementation for Godot 4.6+. Do not use productively!**
 
 **[Read the Documentation!](https://docs.stfform.at/)**
 

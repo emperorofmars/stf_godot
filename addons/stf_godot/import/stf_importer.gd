@@ -21,6 +21,7 @@ func _get_import_options(path: String):
 	add_import_option_advanced(TYPE_BOOL, STF_ImportOptions.UseAssetName, false)
 	add_import_option_advanced(TYPE_INT, STF_ImportOptions.MaxWeights, 1, PROPERTY_HINT_ENUM, "4,8")
 	add_import_option_advanced(TYPE_INT, STF_ImportOptions.AnimationHandling, 1, PROPERTY_HINT_ENUM, "Prefer Bezier -> Baked -> Simplified,Prefer Baked -> Simplified,Prefer Simplified")
+	add_import_option_advanced(TYPE_BOOL, STF_ImportOptions.AnimationImportBakedTracks, true)
 	add_import_option_advanced(TYPE_BOOL, STF_ImportOptions.EnableDebugLog, false)
 	#add_import_option_advanced(TYPE_DICTIONARY, "target_materials", {}, PROPERTY_HINT_RESOURCE_TYPE, "Material")
 
@@ -39,7 +40,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 		print_rich("Importing STF asset: [u]", path, "[/u]")
 
 	var time_start := Time.get_ticks_usec()
-	
+
 	var stf_file = STF_File.read(path)
 	if(not stf_file):
 		return null

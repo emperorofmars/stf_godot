@@ -17,10 +17,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var collider_body_name: String = "STF Collider Body " + context_object._armature_context._skeleton.get_bone_name(context_object._bone_index)
 		node = context_object._armature_context._skeleton.find_child(collider_body_name)
 		if(!node):
-			node = BoneAttachment3D.new()
-			node.name = collider_body_name
-			context_object._armature_context._skeleton.add_child(node)
-			node.bone_idx = context_object._bone_index
+			node = BoneAttachmentUtil.ensure_attachment(context_object._armature_context._skeleton, context_object._bone_index)
 	else:
 		node = context_object
 
