@@ -100,15 +100,15 @@ static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionar
 
 static func determine_handling_method(animation_handling: int, can_import_bezier: bool, stf_track: Dictionary) -> int:
 	# Fully baked track
-	if(!stf_track.get("timepoints")):
-		return 1
-	# Unbaked Simplified
+	if(stf_track.get("track_baked", false) == true):
+		return 2
+	# Unbaked simplified keyframes
 	elif(animation_handling == 2 || stf_track.get("interpolation") not in ["bezier", "mixed"]):
 		return 2
-	# Baked
+	# Baked keyframes
 	elif(animation_handling == 1 || !can_import_bezier):
 		return 1
-	# Bezier or Mixed
+	# Bezier or Mixed keyframes
 	else:
 		return 0
 
