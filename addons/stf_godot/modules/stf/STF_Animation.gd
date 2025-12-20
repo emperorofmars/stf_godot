@@ -30,7 +30,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	# Depending on user setting return rotation, position etc types, or make everything its own bezier track
 	var animation_handling = context._get_import_options().get(STF_ImportOptions.AnimationHandling, 0)
-	var import_baked_tracks = context._get_import_options().get(STF_ImportOptions.AnimationImportBakedTracks, true)
+	var import_baked_tracks = context._get_import_options().get(STF_ImportOptions.AnimationBakedTracks, true)
 
 	var tracks_handled := {}
 

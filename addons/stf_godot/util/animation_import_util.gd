@@ -103,7 +103,7 @@ static func determine_handling_method(animation_handling: int, can_import_bezier
 	if(stf_track.get("track_baked", false) == true):
 		return 2
 	# Unbaked simplified keyframes
-	elif(animation_handling == 2 || stf_track.get("interpolation") not in ["bezier", "mixed"]):
+	elif(animation_handling == 1 || stf_track.get("interpolation") not in ["bezier", "mixed"]):
 		return 2
 	# Baked keyframes
 	elif(animation_handling == 1 || !can_import_bezier):
