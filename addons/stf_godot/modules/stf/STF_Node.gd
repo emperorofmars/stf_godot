@@ -10,6 +10,7 @@ func _get_godot_type() -> String: return "Node3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Node3D else -1
 
+
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
 	var ret = null
 	if("instance" in json_resource):
@@ -55,7 +56,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	if("enabled" in json_resource && json_resource["enabled"] == false):
 		ret.visible = false
 
-	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
+	var animation_property_resolve_func := func(stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
 		var node: Node3D = godot_object
 		var path = node.owner.get_path_to(node).get_concatenated_names()
@@ -77,6 +78,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
+
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
