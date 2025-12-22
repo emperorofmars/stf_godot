@@ -19,7 +19,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var target: STF_Bone.ArmatureBone = context_object
 
 	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(target._armature_context._skeleton)
-	print(ret, " : ", ret.get_setting_count())
 
 	var constraint_indices = []
 	var total_weight = json_resource.get("weight", 1)
@@ -47,8 +46,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.set_amount(constraint_index, handle_context * total_weight)
 		ret.set_relative(constraint_index, true)
 		ret.set_additive(constraint_index, true)
-
-		print(constraint_index, ": ", target._armature_context._skeleton.get_bone_name(ret.get_apply_bone(constraint_index)), " - ", target._armature_context._skeleton.get_bone_name(reference))
 
 	target._armature_context._add_task(func():
 		for json_source in json_resource.get("sources", []):

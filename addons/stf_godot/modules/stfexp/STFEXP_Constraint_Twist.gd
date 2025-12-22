@@ -19,7 +19,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var target: STF_Bone.ArmatureBone = context_object
 
 	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(target._armature_context._skeleton)
-	print(ret, " : ", ret.get_setting_count())
 
 	var finalize_source_func := func(ref_type: int, reference: Variant, context: Variant):
 		var constraint_index = ret.get_setting_count()
@@ -35,8 +34,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.set_amount(constraint_index, json_resource.get("weight", 0.5))
 		ret.set_relative(constraint_index, true)
 		ret.set_additive(constraint_index, true)
-
-		print(constraint_index, ": ", target._armature_context._skeleton.get_bone_name(ret.get_apply_bone(constraint_index)), " - ", target._armature_context._skeleton.get_bone_name(reference))
 
 		ret.get_meta("stf_composite").append({
 			"stf_type": _get_stf_type(),
