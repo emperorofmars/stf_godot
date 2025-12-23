@@ -35,10 +35,19 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 						if(component_ret):
 							_state.register_imported_resource(stf_id, component_ret)
 						else:
-							print_rich("[color=red]Error: Failed to import component resource [u]" + stf_id + "[/u][/color]")
+							print_rich("[color=red]Error: Failed to import component resource [u]" + component_id + "[/u][/color]")
 			return ret._godot_object
 		else:
 			print_rich("[color=red]Error: Failed to import resource [u]" + stf_id + "[/u][/color]")
+	return null
+
+
+func import_instance_mod(stf_id: String, mod_json: Dictionary, context_object: Variant) -> Variant:
+	var json_resource = _state.get_json_resource(stf_id)
+	var module = _state.determine_module(json_resource, "component")
+	if(module && module is STF_ModuleComponent):
+		var component_module: STF_ModuleComponent = module
+		component_module._import_instance_mod(self, stf_id, mod_json, context_object)
 	return null
 
 

@@ -31,7 +31,21 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var transform = STF_TRS_Util.parse_transform(json_resource["pose"][bone_id])
 			ret.set_bone_pose(bone_index, transform)
 
-	# todo instance component, component mods
+	if("added_components" in json_resource):
+		var armature_context = STF_Armature.ArmatureImportContext.new(ret)
+		for bone_id in json_resource["added_components"]:
+			var bone_context = STF_Bone.ArmatureBone.new(armature_context, STF_Godot_Util.get_bone_from_skeleton(ret, bone_id))
+			for resource_id in json_resource["added_components"][bone_id]:
+				context.import(resource_id, "component", bone_context)
+		armature_context._run_tasks()
+
+	if("modified_components" in json_resource):
+		var armature_context = STF_Armature.ArmatureImportContext.new(ret)
+		for bone_id in json_resource["modified_components"]:
+			var bone_context = STF_Bone.ArmatureBone.new(armature_context, STF_Godot_Util.get_bone_from_skeleton(ret, bone_id))
+			for component_id in json_resource["modified_components"][bone_id]:
+				context.import_instance_mod(component_id, json_resource["modified_components"][bone_id][component_id], bone_context)
+		armature_context._run_tasks()
 
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
