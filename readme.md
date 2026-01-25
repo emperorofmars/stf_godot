@@ -4,10 +4,10 @@
 
 **WIP implementation for Godot 4.6+. Do not use productively!**
 
-**[Read the Documentation!](https://docs.stfform.at/)**
+🌰 **[Read the User Guide!](https://docs.stfform.at/guide/godot.html)** 🌰 **[Report Issues](https://codeberg.org/emperorofmars/stf_godot/issues)** 🌰 **[STF Website](https://docs.stfform.at/)**
 
 ## Installation
-* Download the [latest release](https://github.com/emperorofmars/stf_godot/releases/latest)
+* Download the [latest release](https://codeberg.org/emperorofmars/stf_godot/releases/latest)
 * Unpack the `addons/stf_godot` directory into the `addons` directory of your godot project.
 * Enable it under `Project` -> `Project Settings` -> `Plugins` -> `stf_godot`
 
