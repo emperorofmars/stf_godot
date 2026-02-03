@@ -9,7 +9,7 @@
 ## Installation
 * Download the [latest release](https://codeberg.org/emperorofmars/stf_godot/releases/latest)
 * Unpack the `addons/stf_godot` directory into the `addons` directory of your godot project.
-* Enable it under `Project` -> `Project Settings` -> `Plugins` -> `stf_godot`
+* Enable it under `Project` → `Project Settings` → `Plugins` → `stf_godot`
 
 ## License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:

@@ -11,7 +11,7 @@ func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly
 
 
-func __create_finalize_source_func(ret: CopyTransformModifier3D, target: STF_Bone.ArmatureBone, stf_id: String, json_resource: Dictionary, constraint_indices: Array, axes: int) -> Callable:
+func __create_finalize_source_func(ret: CopyTransformModifier3D, bone_index: int, stf_id: String, json_resource: Dictionary, constraint_indices: Array, axes: int) -> Callable:
 	return func(ref_type: int, reference: Variant, handle_context: Variant):
 		var constraint_index = ret.get_setting_count()
 		ret.set_setting_count(constraint_index + 1)
@@ -23,20 +23,21 @@ func __create_finalize_source_func(ret: CopyTransformModifier3D, target: STF_Bon
 			ret.set_reference_bone(constraint_index, reference)
 		else:
 			ret.set_reference_node(constraint_index, reference)
-		ret.set_apply_bone(constraint_index, target._bone_index)
+		ret.set_apply_bone(constraint_index, bone_index)
 		ret.set_amount(constraint_index, handle_context)
 		ret.set_relative(constraint_index, false)
 		ret.set_additive(constraint_index, true)
 
 
-
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
-	if(context_object is not STF_Bone.ArmatureBone):
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
+	if(instance_context is not Skeleton3D):
 		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.rotation[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets. Context object: ", context_object)
 		return
 
-	var target: STF_Bone.ArmatureBone = context_object
-	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(target._armature_context._skeleton)
+	var armature: Skeleton3D = instance_context
+	var bone_index: int = context_object
+
+	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(armature)
 
 	var constraint_indices = []
 	var total_weight = json_resource.get("weight", 1)
@@ -49,27 +50,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var error_message = "[color=orange]Warning: Can't import resource [u]" + _get_stf_type() + "[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints can't represent this STF constraint"
 
-	var finalize_source_func := __create_finalize_source_func(ret, target, stf_id, json_resource, constraint_indices, axes)
-	"""var finalize_source_func := func(ref_type: int, reference: Variant, handle_context: Variant):
-		var constraint_index = ret.get_setting_count()
-		ret.set_setting_count(constraint_index + 1)
-		constraint_indices.append(constraint_index)
-		ret.set_axis_flags(constraint_index, axes)
-		ret.set_copy_flags(constraint_index, CopyTransformModifier3D.TRANSFORM_FLAG_ROTATION)
-		ret.set_reference_type(constraint_index, ref_type)
-		if(ref_type == CopyTransformModifier3D.REFERENCE_TYPE_BONE):
-			ret.set_reference_bone(constraint_index, reference)
-		else:
-			ret.set_reference_node(constraint_index, reference)
-		ret.set_apply_bone(constraint_index, target._bone_index)
-		ret.set_amount(constraint_index, handle_context * total_weight)
-		ret.set_relative(constraint_index, false)
-		ret.set_additive(constraint_index, true)"""
+	var finalize_source_func := __create_finalize_source_func(ret, bone_index, stf_id, json_resource, constraint_indices, axes)
 
-	target._armature_context._add_task(func():
-		for json_source in json_resource.get("sources", []):
-			NodepathUtils.handle_stf_source(context, ret, target, json_resource, json_source.get("source", []), error_message, finalize_source_func, json_source.get("weight", 0.5) * total_weight)
-	)
+	for json_source in json_resource.get("sources", []):
+		NodepathUtils.handle_stf_source(context, ret, armature, bone_index, json_resource, json_source.get("source", []), error_message, finalize_source_func, json_source.get("weight", 0.5) * total_weight)
 
 	ret.get_meta("stf_composite").append({
 		"stf_type": _get_stf_type(),
@@ -80,35 +64,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	return ImportResult.new(ret, null)
 
 
-func _import_instance_mod(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
-	var target: STF_Bone.ArmatureBone = context_object
-	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(target._armature_context._skeleton)
-
-	var constraint_indices = []
-	var total_weight = json_resource.get("weight", 1)
-
-	var json_axes: Array = json_resource.get("axes", [true, true, true])
-	var axes = 0
-	if(json_axes[0] == true): axes |= CopyTransformModifier3D.AXIS_FLAG_X
-	if(json_axes[1] == true): axes |= CopyTransformModifier3D.AXIS_FLAG_Y
-	if(json_axes[2] == true): axes |= CopyTransformModifier3D.AXIS_FLAG_Z
-
-	var finalize_source_func := __create_finalize_source_func(ret, target, stf_id, json_resource, constraint_indices, axes)
-	var error_message = "[color=orange]Warning: Can't import resource [u]" + _get_stf_type() + "[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints can't represent this STF constraint"
-
-	for meta in ret.get_meta("stf_composite", []):
-		if(meta.get("stf_id") == stf_id):
-			for constraint_index in meta.get("constraint_indices"):
-				ret.set_amount(constraint_index, 0) # todo remove replaced constraints
-
-			var json_source: Array = json_resource.get("source", [])
-			NodepathUtils.handle_stf_source(context, ret, target, json_resource, json_source, error_message, finalize_source_func)
-			break
-	return null
-
-
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null
 
-func _export_instance_mod(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
-	return null

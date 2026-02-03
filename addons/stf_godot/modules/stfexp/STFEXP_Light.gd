@@ -1,5 +1,5 @@
 class_name STFEXP_Light
-extends STF_Module
+extends STF_ModuleComponent
 
 func _get_stf_type() -> String: return "stfexp.light"
 func _get_priority() -> int: return 0
@@ -18,7 +18,7 @@ func _convert_temperature(temperature: float) -> Color:
 	var temp_b = 1.0 if temp >= 66 else (0.0 if temp <= 19 else (138.5177312231 * log(temp) - 305.0447927307) / 255)
 	return Color(clamp(temp_r, 0, 1), clamp(temp_g, 0, 1), clamp(temp_b, 0, 1))
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret: Node3D = null
 	var light: Light3D = null
 	match json_resource.get("light_type", "point"):
@@ -26,7 +26,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			light = OmniLight3D.new()
 			ret = light
 			if("range" in json_resource): light.omni_range = json_resource["range"]
-			
+
 		"directional":
 			light = DirectionalLight3D.new()
 			light.name = STF_Godot_Util.get_name_or_default(json_resource, "STF DirectionalLight")

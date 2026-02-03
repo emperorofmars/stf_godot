@@ -1,5 +1,5 @@
 class_name STFEXP_Collider_Sphere
-extends STF_Module
+extends STF_ModuleComponent
 
 func _get_stf_type() -> String: return "stfexp.collider.sphere"
 func _get_priority() -> int: return 0
@@ -10,14 +10,14 @@ func _get_godot_type() -> String: return "CollisionShape3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is CollisionShape3D else -1
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var node: Node3D = null
 	var collider_body: PhysicsBody3D = null
-	if(context_object is STF_Bone.ArmatureBone):
-		var collider_body_name: String = "STF Collider Body " + context_object._armature_context._skeleton.get_bone_name(context_object._bone_index)
-		node = context_object._armature_context._skeleton.find_child(collider_body_name)
+	if(instance_context is Skeleton3D):
+		var collider_body_name: String = "STF Collider Body " + instance_context.get_bone_name(context_object)
+		node = instance_context.find_child(collider_body_name)
 		if(!node):
-			node = BoneAttachmentUtil.ensure_attachment(context_object._armature_context._skeleton, context_object._bone_index)
+			node = BoneAttachmentUtil.ensure_attachment(instance_context, context_object)
 	else:
 		node = context_object
 

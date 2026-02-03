@@ -10,7 +10,7 @@ func _get_godot_type() -> String: return "Skeleton3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for armatures vs armature instances
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var armature: Skeleton3D = context.import(json_resource["armature"], "data")
 	var ret: Skeleton3D = armature.duplicate(true)
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Armature")
@@ -31,21 +31,20 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var transform = STF_TRS_Util.parse_transform(json_resource["pose"][bone_id])
 			ret.set_bone_pose(bone_index, transform)
 
+
+	context._add_task(context.PROCESS_STEPS.COMPONENTS, func():
+		context.handle_instance(armature, ret)
+	)
+
 	if("added_components" in json_resource):
-		var armature_context = STF_Armature.ArmatureImportContext.new(ret)
 		for bone_id in json_resource["added_components"]:
-			var bone_context = STF_Bone.ArmatureBone.new(armature_context, STF_Godot_Util.get_bone_from_skeleton(ret, bone_id))
 			for resource_id in json_resource["added_components"][bone_id]:
-				context.import(resource_id, "component", bone_context)
-		armature_context._run_tasks()
+				context.import_component(resource_id, STF_Godot_Util.get_bone_from_skeleton(ret, bone_id), ret)
 
 	if("modified_components" in json_resource):
-		var armature_context = STF_Armature.ArmatureImportContext.new(ret)
 		for bone_id in json_resource["modified_components"]:
-			var bone_context = STF_Bone.ArmatureBone.new(armature_context, STF_Godot_Util.get_bone_from_skeleton(ret, bone_id))
 			for component_id in json_resource["modified_components"][bone_id]:
-				context.import_instance_mod(component_id, json_resource["modified_components"][bone_id][component_id], bone_context)
-		armature_context._run_tasks()
+				context.import_component_instance_mod(ret, component_id, json_resource["modified_components"][bone_id][component_id])
 
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null

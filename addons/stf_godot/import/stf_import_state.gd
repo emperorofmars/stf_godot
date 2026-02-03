@@ -17,6 +17,16 @@ var _animation_converters: Dictionary[String, Callable] = {}
 
 var _import_options: Dictionary
 
+# IDs of components that should be ignored
+var _overrides: Array[String] = []
+
+# Array of tasks that can be run for each instance of a resource (i.e. components of an armature or its bones)
+#	Dictionary[resource: Variant, Array[Callable[[resource_instance: Variant], null]]]
+var _component_instance_context: Dictionary[Variant, Array] = {}
+
+# Dictionary[resource_instance: Variant, Dictionary[component_id: String, json_mod: Dictionary]]
+var _component_instance_mods: Dictionary[Variant, Dictionary] = {}
+
 
 func _init(stf_file: STF_File, modules: Dictionary[String, STF_Module], import_options: Dictionary = {}) -> void:
 	_stf_file = stf_file

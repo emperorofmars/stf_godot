@@ -18,7 +18,7 @@ func __get_texture(image: Image) -> Texture2D:
 	else:
 		return ImageTexture.create_from_image(image)
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	# todo make target materials hot-loadable & select target material/shader based on best match or user override
 
 	var ret = StandardMaterial3D.new()
@@ -40,7 +40,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			elif(key == "metallic.texture" && type == "image" && len(values) == 1):
 				ret.metallic = 1
 				ret.metallic_texture = __get_texture(context.import(values[0].get("image")))
-			
+
 			elif(key == "normal.texture" && type == "image" && len(values) == 1):
 				ret.normal_enabled = true
 				ret.normal_texture = __get_texture(context.import(values[0].get("image")))

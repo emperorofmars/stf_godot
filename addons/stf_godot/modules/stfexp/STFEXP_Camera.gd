@@ -1,5 +1,5 @@
 class_name STFEXP_Camera
-extends STF_Module
+extends STF_ModuleComponent
 
 func _get_stf_type() -> String: return "stfexp.camera"
 func _get_priority() -> int: return 0
@@ -10,7 +10,7 @@ func _get_godot_type() -> String: return "Camera3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Camera3D else -1
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = Node3D.new()
 	ret.set_meta("stf", {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name", null)})
 

@@ -48,7 +48,7 @@ class ImportResult:
 		self._property_converter = property_converter
 
 ## The main star for import.
-@abstract func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult
+@abstract func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult
 
 
 class ExportResult:

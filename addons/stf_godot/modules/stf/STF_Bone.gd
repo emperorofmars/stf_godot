@@ -11,18 +11,8 @@ func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for bones
 
 
-class ArmatureBone:
-	extends RefCounted
-	var _armature_context: STF_Armature.ArmatureImportContext
-	var _bone_index: int
-	func _init(armature_context: STF_Armature.ArmatureImportContext, bone_index: int):
-		_armature_context = armature_context
-		_bone_index = bone_index
-
-
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
-	var armature_context: STF_Armature.ArmatureImportContext = context_object
-	var armature: Skeleton3D = armature_context._skeleton
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
+	var armature: Skeleton3D = instance_context
 	var bone_index := armature.add_bone(STF_Godot_Util.get_name_or_default(json_resource, stf_id))
 
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
@@ -34,9 +24,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	armature.set_bone_rest(bone_index, rest_pose)
 
 	for child_id in json_resource.get("children", []):
-		var child: ArmatureBone = context.import(child_id, "node", context_object)
-		armature.set_bone_parent(child._bone_index, bone_index)
-		armature.set_bone_rest(child._bone_index, rest_pose.inverse() * armature.get_bone_rest(child._bone_index))
+		var child_index: int = context.import(child_id, "node", context_object, instance_context)
+		armature.set_bone_parent(child_index, bone_index)
+		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 
 
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
@@ -49,7 +39,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				break
 
 		if(anim_bone_index >= 0):
-			match stf_path[1]: # todo no clue if this works
+			match stf_path[1]:
 				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, null, false)
 				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, null, false)
 				"r_euler": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_euler_rotation_3d, null, false)
@@ -60,7 +50,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 						return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)
 		return null
 
-	return ImportResult.new(ArmatureBone.new(context_object, bone_index), OptionalCallable.new(animation_property_resolve_func))
+	return ImportResult.new(bone_index, OptionalCallable.new(animation_property_resolve_func))
 
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:

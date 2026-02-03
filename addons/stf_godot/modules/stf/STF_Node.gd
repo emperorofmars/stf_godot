@@ -11,10 +11,10 @@ func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is Node3D else -1
 
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = null
 	if("instance" in json_resource):
-		ret = context.import(json_resource["instance"], "instance", context_object)
+		ret = context.import(json_resource["instance"], "instance", context_object, instance_context)
 		if(not ret):
 			ret = Node3D.new()
 	else:
@@ -25,7 +25,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
 
 	for child_id in json_resource.get("children", []):
-		var child: Node3D = context.import(child_id, "node", context_object)
+		var child: Node3D = context.import(child_id, "node", context_object, instance_context)
 		ret.add_child(child)
 
 	if("trs" in json_resource):

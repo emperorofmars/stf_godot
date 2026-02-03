@@ -10,13 +10,13 @@ func _get_godot_type() -> String: return "SceneTree"
 func _check_godot_object(godot_object: Object) -> int:
 	return 0
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Prefab")
 	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
 
 	for child_id in json_resource.get("root_nodes", []):
-		var child: Node3D = context.import(child_id, "node", ret)
+		var child: Node3D = context.import(child_id, "node", ret, ret)
 		ret.add_child(child)
 
 	context._add_task(context.PROCESS_STEPS.BEFORE_ANIMATION, func(): __set_owner(ret, ret))
@@ -33,7 +33,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			animation_player.add_animation_library("STF", animation_library)
 
 			for animation_id in json_resource["animations"]:
-				var animation: Animation = context.import(animation_id, "data", ret)
+				var animation: Animation = context.import(animation_id, "data")
 				if(animation):
 					animation_library.add_animation(animation.resource_name, animation)
 		)

@@ -10,7 +10,7 @@ func _get_godot_type() -> String: return "MeshInstance3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is MeshInstance3D else -1
 
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> ImportResult:
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	#var ret = ImporterMeshInstance3D.new()
 	var ret = MeshInstance3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Mesh")
