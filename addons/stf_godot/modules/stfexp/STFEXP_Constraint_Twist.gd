@@ -9,8 +9,8 @@ func _get_godot_type() -> String: return "CopyTransformModifier3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly
 
-func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> PreImportResult:
-	if(context_object is not Skeleton3D):
+func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> PreImportResult:
+	if(instance_context is not Skeleton3D):
 		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets.")
 		return null
 	return PreImportResult.new(json_resource)
@@ -24,11 +24,11 @@ func __create_finalize_source_func(constraint_holder: CopyTransformModifier3D, b
 		constraint_holder.set_reference_type(constraint_index, ref_type)
 		if(ref_type == CopyTransformModifier3D.REFERENCE_TYPE_BONE):
 			constraint_holder.set_reference_bone(constraint_index, reference)
+			constraint_holder.set_relative(constraint_index, true)
 		else:
 			constraint_holder.set_reference_node(constraint_index, reference)
 		constraint_holder.set_apply_bone(constraint_index, bone_index)
 		constraint_holder.set_amount(constraint_index, json_resource.get("weight", 0.5))
-		constraint_holder.set_relative(constraint_index, false)
 		constraint_holder.set_additive(constraint_index, true)
 
 		constraint_holder.get_meta("stf_composite").append({
@@ -41,9 +41,6 @@ func __create_finalize_source_func(constraint_holder: CopyTransformModifier3D, b
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
-	if(instance_context is not Skeleton3D):
-		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets.")
-		return null
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 

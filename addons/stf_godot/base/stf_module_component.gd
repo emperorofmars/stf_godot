@@ -12,5 +12,5 @@ class PreImportResult:
 		_success = true
 		_overrides = json_resource.get("overrides", [])
 
-func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant) -> PreImportResult:
+func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> PreImportResult:
 	return PreImportResult.new(json_resource)

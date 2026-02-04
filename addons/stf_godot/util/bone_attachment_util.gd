@@ -24,3 +24,17 @@ static func ensure_copy_transform_modifier(skeleton: Skeleton3D) -> CopyTransfor
 		skeleton.add_child(ret)
 		ret.set_meta("stf_composite", [])
 	return ret
+
+
+static func ensure_spring_bone_simulator(skeleton: Skeleton3D) -> SpringBoneSimulator3D:
+	var ret: SpringBoneSimulator3D = null
+	for child in skeleton.get_children():
+		if(child is SpringBoneSimulator3D):
+			ret = child
+			break
+	if(not ret):
+		ret = SpringBoneSimulator3D.new()
+		ret.name = "STF SpringBones"
+		skeleton.add_child(ret)
+		ret.set_meta("stf_composite", [])
+	return ret

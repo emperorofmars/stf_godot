@@ -46,6 +46,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			for component_id in json_resource["modified_components"][bone_id]:
 				context.import_component_instance_mod(ret, component_id, json_resource["modified_components"][bone_id][component_id])
 
+
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 2): return null
 		var node: Skeleton3D = godot_object

@@ -10,6 +10,12 @@ func _get_godot_type() -> String: return "CopyTransformModifier3D"
 func _check_godot_object(godot_object: Object) -> int:
 	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly
 
+func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> PreImportResult:
+	if(instance_context is not Skeleton3D):
+		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.rotation[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets.")
+		return null
+	return PreImportResult.new(json_resource)
+
 
 func __create_finalize_source_func(ret: CopyTransformModifier3D, bone_index: int, stf_id: String, json_resource: Dictionary, constraint_indices: Array, axes: int) -> Callable:
 	return func(ref_type: int, reference: Variant, handle_context: Variant):
@@ -21,19 +27,15 @@ func __create_finalize_source_func(ret: CopyTransformModifier3D, bone_index: int
 		ret.set_reference_type(constraint_index, ref_type)
 		if(ref_type == CopyTransformModifier3D.REFERENCE_TYPE_BONE):
 			ret.set_reference_bone(constraint_index, reference)
+			ret.set_relative(constraint_index, true)
 		else:
 			ret.set_reference_node(constraint_index, reference)
 		ret.set_apply_bone(constraint_index, bone_index)
 		ret.set_amount(constraint_index, handle_context)
-		ret.set_relative(constraint_index, false)
 		ret.set_additive(constraint_index, true)
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
-	if(instance_context is not Skeleton3D):
-		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.rotation[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets. Context object: ", context_object)
-		return
-
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 

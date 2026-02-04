@@ -54,21 +54,15 @@ func import_component(component_id: String, context_object: Variant = null, inst
 	var json_component_resource = _state.get_json_resource(component_id)
 	var component_module: STF_ModuleComponent  = _state.determine_module(json_component_resource, "component")
 	if(component_module and component_module is STF_ModuleComponent):
-		var component_pre_import_ret: = component_module._component_pre_import(self, component_id, json_component_resource, context_object)
+		var component_pre_import_ret: = component_module._component_pre_import(self, component_id, json_component_resource, context_object, instance_context)
 		if(component_pre_import_ret and component_pre_import_ret._success == true):
 			for override in component_pre_import_ret._overrides:
 				if(override not in _state._overrides):
 					_state._overrides.append(override)
 			if(instance_context not in _state._component_instance_context): _state._component_instance_context[instance_context] = []
-			_state._component_instance_context[instance_context].append(__create_handle_component_instance_func(component_id, component_module, json_component_resource, context_object))
-			_add_task(PROCESS_STEPS.COMPONENTS, func():
-				if(component_id not in _state._overrides):
-					var component_ret: = component_module._import(self, component_id, json_component_resource, context_object, instance_context)
-					if(component_ret):
-						_state.register_imported_resource(component_id, component_ret)
-					else:
-						print_rich("[color=red]Error: Failed to import component resource [u]" + component_id + "[/u][/color]")
-			)
+			var component_handle_func: Callable = __create_handle_component_instance_func(component_id, component_module, json_component_resource, context_object)
+			_state._component_instance_context[instance_context].append(component_handle_func)
+			_add_task(PROCESS_STEPS.COMPONENTS, func(): component_handle_func.call(instance_context))
 
 
 func import_component_instance_mod(instantiated_resource: Variant, component_id: String, mod_json: Dictionary):
@@ -86,7 +80,7 @@ func __create_handle_component_instance_func(component_id: String, component_mod
 		if(component_id not in _state._overrides):
 			var mod_json = _state._component_instance_mods.get(component_instance_context, {}).get(component_id)
 			var json = mod_json if mod_json else json_component_resource
-			var component_ret: = component_module._import(self, component_id, json_component_resource, context_object, component_instance_context)
+			var component_ret: = component_module._import(self, component_id, json, context_object, component_instance_context)
 			if(component_ret):
 				_state.register_imported_resource(component_id, component_ret)
 			else:
