@@ -104,8 +104,8 @@ func get_buffer(stf_id: String) -> PackedByteArray:
 
 
 func _add_task(step: int, task: Callable):
-	if(step < self._current_step):
-		step = self._current_step
+	if(step <= self._current_step):
+		step = self._current_step + 1
 	if(step not in _tasks):
 		_tasks[step] = [task]
 	else:
@@ -116,6 +116,7 @@ func _run_tasks():
 	self._current_step = 0
 	self._tasks.sort()
 	for task_step in self._tasks:
+		self._current_step = task_step
 		var iter: = 0
 		while(len(_tasks) > 0 && iter < max_depth):
 			var tmp = self._tasks[task_step]
