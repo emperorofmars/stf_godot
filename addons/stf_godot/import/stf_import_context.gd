@@ -56,9 +56,8 @@ func import_component(component_id: String, context_object: Variant = null, inst
 	if(component_module and component_module is STF_ModuleComponent):
 		var component_pre_import_ret: = component_module._component_pre_import(self, component_id, json_component_resource, context_object, instance_context)
 		if(component_pre_import_ret and component_pre_import_ret._success == true):
-			for override in component_pre_import_ret._overrides:
-				if(override not in _state._overrides):
-					_state._overrides.append(override)
+			if(component_pre_import_ret._exclusion_group && component_pre_import_ret._exclusion_group.length() > 0):
+				_state.register_exclusion_group_component(component_pre_import_ret._exclusion_group, component_module._get_stf_type(), component_id)
 			if(instance_context not in _state._component_instance_context): _state._component_instance_context[instance_context] = []
 			var component_handle_func: Callable = __create_handle_component_instance_func(component_id, component_module, json_component_resource, context_object)
 			_state._component_instance_context[instance_context].append(component_handle_func)
@@ -77,7 +76,7 @@ func handle_instance(instantiated_resource: Variant, instance: Variant):
 
 func __create_handle_component_instance_func(component_id: String, component_module: STF_ModuleComponent, json_component_resource: Dictionary, context_object: Variant) -> Callable:
 	return func(component_instance_context: Variant):
-		if(component_id not in _state._overrides):
+		if(component_id not in _state._excluded_ids):
 			var mod_json = _state._component_instance_mods.get(component_instance_context, {}).get(component_id)
 			var json = mod_json if mod_json else json_component_resource
 			var component_ret: = component_module._import(self, component_id, json, context_object, component_instance_context)
@@ -115,6 +114,7 @@ func _add_task(step: int, task: Callable):
 func _run_tasks():
 	const max_depth: = 1000
 	self._current_step = 0
+	self._tasks.sort()
 	for task_step in self._tasks:
 		var iter: = 0
 		while(len(_tasks) > 0 && iter < max_depth):
