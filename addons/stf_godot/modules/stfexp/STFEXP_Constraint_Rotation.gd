@@ -7,7 +7,7 @@ func _get_stf_kind() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["constraint.rotation", "constraint"]
 func _get_godot_type() -> String: return "CopyTransformModifier3D"
 
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly
 
 func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> PreImportResult:

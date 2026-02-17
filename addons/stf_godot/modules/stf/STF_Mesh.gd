@@ -6,7 +6,7 @@ func _get_priority() -> int: return 0
 func _get_stf_kind() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["mesh"]
 func _get_godot_type() -> String: return "Mesh"
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is Mesh else -1
 
 
@@ -101,19 +101,21 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		0: BONES_PER_VERTEX = 4
 		1: BONES_PER_VERTEX = 8
 
+	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_kind())
+
 	var float_width: int = json_resource.get("float_width", 4)
 	var indices_width: int = json_resource.get("indices_width", 4)
 	var material_indices_width: int = json_resource.get("material_indices_width", 1)
 
-	var vertices := import_vec3_buffer(context.get_buffer(json_resource["vertices"]), float_width)
+	var vertices := import_vec3_buffer(stf_resource.get_buffer(json_resource["vertices"]), float_width)
 
-	var split_indices := import_uint_buffer(context.get_buffer(json_resource["splits"]), indices_width)
+	var split_indices := import_uint_buffer(stf_resource.get_buffer(json_resource["splits"]), indices_width)
 
-	var face_corners := import_uint_buffer(context.get_buffer(json_resource["face_corners"]), indices_width) if "face_corners" in json_resource else range(len(split_indices))
+	var face_corners := import_uint_buffer(stf_resource.get_buffer(json_resource["face_corners"]), indices_width) if "face_corners" in json_resource else range(len(split_indices))
 
-	var normals := import_vec3_buffer(context.get_buffer(json_resource["split_normals"]), float_width) if "split_normals" in json_resource else PackedVector3Array()
+	var normals := import_vec3_buffer(stf_resource.get_buffer(json_resource["split_normals"]), float_width) if "split_normals" in json_resource else PackedVector3Array()
 
-	var colors := import_color_buffer(context.get_buffer(json_resource["split_colors"]), float_width) if "split_colors" in json_resource else PackedColorArray()
+	var colors := import_color_buffer(stf_resource.get_buffer(json_resource["split_colors"]), float_width) if "split_colors" in json_resource else PackedColorArray()
 
 	var uv_channels = []
 	var buffers_uv: Array[PackedVector2Array] = []
@@ -121,7 +123,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		for uv_channel_index in range(min(len(json_resource["uvs"]), 2)):
 			var uv_channel = json_resource["uvs"][uv_channel_index]
 			uv_channels.append(uv_channel.get("name", "UV"))
-			var uv := import_vec2_buffer(context.get_buffer(uv_channel["uv"]), float_width)
+			var uv := import_vec2_buffer(stf_resource.get_buffer(uv_channel["uv"]), float_width)
 			buffers_uv.append(uv)
 
 
@@ -193,14 +195,14 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 
 	# topology
-	var tris = import_uint_buffer(context.get_buffer(json_resource["tris"]), indices_width)
+	var tris = import_uint_buffer(stf_resource.get_buffer(json_resource["tris"]), indices_width)
 	if("face_corners" in json_resource):
 		var tmp = tris
 		tris = []
 		for t in tmp:
 			tris.append(face_corners[t])
-	var face_lengths = import_uint_buffer(context.get_buffer(json_resource["faces"]), indices_width)
-	var face_material_indices = import_uint_buffer(context.get_buffer(json_resource["material_indices"]), material_indices_width)
+	var face_lengths = import_uint_buffer(stf_resource.get_buffer(json_resource["faces"]), indices_width)
+	var face_material_indices = import_uint_buffer(stf_resource.get_buffer(json_resource["material_indices"]), material_indices_width)
 
 
 	var sub_mesh_indices: Array[PackedInt32Array] = []
@@ -227,9 +229,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var bone_indices_width: int = json_resource.get("bone_indices_width", 1)
 		var weight_lens_width: int = json_resource.get("weight_lens_width", 1)
 
-		var buffer_weight_lens = import_uint_buffer(context.get_buffer(json_resource["weight_lens"]), weight_lens_width)
-		var buffer_bone_indices = import_uint_buffer(context.get_buffer(json_resource["bone_indices"]), bone_indices_width)
-		var buffer_weights = context.get_buffer(json_resource["weights"])
+		var buffer_weight_lens = import_uint_buffer(stf_resource.get_buffer(json_resource["weight_lens"]), weight_lens_width)
+		var buffer_bone_indices = import_uint_buffer(stf_resource.get_buffer(json_resource["bone_indices"]), bone_indices_width)
+		var buffer_weights = stf_resource.get_buffer(json_resource["weights"])
 
 		var stf_to_godot_bone_index: Dictionary[int, int] = {}
 
@@ -292,9 +294,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var blendshape_index = 0
 		for json_blendshape in json_resource["blendshapes"]:
 			var indexed = "indices" in json_blendshape
-			var blendshape_indices := PackedInt32Array(import_uint_buffer(context.get_buffer(json_blendshape["indices"]), indices_width)) if indexed else PackedInt32Array(range(len(vertices)))
+			var blendshape_indices := PackedInt32Array(import_uint_buffer(stf_resource.get_buffer(json_blendshape["indices"]), indices_width)) if indexed else PackedInt32Array(range(len(vertices)))
 
-			var blendshape_vertices := import_vec3_buffer(context.get_buffer(json_blendshape["position_offsets"]), float_width)
+			var blendshape_vertices := import_vec3_buffer(stf_resource.get_buffer(json_blendshape["position_offsets"]), float_width)
 
 			var godot_blendshape_vertices = PackedVector3Array()
 			godot_blendshape_vertices.resize(len(godot_vertices))
@@ -307,8 +309,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var godot_blendshape_normals = godot_normals.duplicate()
 
 			if(len(godot_normals) == len(godot_vertices) && "split_normals" in json_blendshape):
-				var blendshape_split_indices := PackedInt32Array(import_uint_buffer(context.get_buffer(json_blendshape["split_indices"]), indices_width)) if indexed else PackedInt32Array(range(len(normals)))
-				var blendshape_normals := import_vec3_buffer(context.get_buffer(json_blendshape["split_normals"]), float_width)
+				var blendshape_split_indices := PackedInt32Array(import_uint_buffer(stf_resource.get_buffer(json_blendshape["split_indices"]), indices_width)) if indexed else PackedInt32Array(range(len(normals)))
+				var blendshape_normals := import_vec3_buffer(stf_resource.get_buffer(json_blendshape["split_normals"]), float_width)
 				for blendshape_split_index in range(len(blendshape_split_indices)):
 					var split_index = blendshape_split_indices[blendshape_split_index]
 					godot_blendshape_normals[split_to_deduped_split_index[split_index]] = blendshape_normals[blendshape_split_index]
@@ -329,7 +331,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	#var ret = ImporterMesh.new()
 	var ret = ArrayMesh.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Mesh")
-	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
+	_set_stf_meta(stf_resource, ret)
 
 	ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
 	#ret.set_blend_shape_mode(Mesh.BLEND_SHAPE_MODE_NORMALIZED)

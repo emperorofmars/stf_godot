@@ -7,13 +7,13 @@ func _get_stf_kind() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["animation"]
 func _get_godot_type() -> String: return "Animation"
 
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is Animation else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = Animation.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Animation")
-	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
 
 	ret.step = 1 / json_resource.get("fps", 30)
 
@@ -39,13 +39,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
 			if(target && target.valid()):
 				tracks_handled[target._godot_path] = true
-				target._keyframe_converter.call(context, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
+				target._keyframe_converter.call(stf_resource, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
 			# todo else warn
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
 		if(target && target.valid() && target._godot_path not in tracks_handled):
-			target._keyframe_converter.call(context, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
+			target._keyframe_converter.call(stf_resource, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
 		# todo else warn
 
 	return ImportResult.new(ret)

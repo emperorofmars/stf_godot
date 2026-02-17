@@ -7,7 +7,7 @@ func _get_stf_kind() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["instance.mesh", "instance"]
 func _get_godot_type() -> String: return "MeshInstance3D"
 
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is MeshInstance3D else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
@@ -15,8 +15,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var ret = MeshInstance3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Mesh")
 
-	var stf_meta := {"stf_instance_id": stf_id, "stf_instance_name": json_resource.get("name")}
-	ret.set_meta("stf", stf_meta)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
 
 	ret.mesh = context.import(json_resource["mesh"], "data")
 

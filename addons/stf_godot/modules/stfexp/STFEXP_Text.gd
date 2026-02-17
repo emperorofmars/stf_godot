@@ -1,27 +1,28 @@
-class_name STF_Armature
+class_name STFEXP_Text
 extends STF_Module
 
-func _get_stf_type() -> String: return "stf.armature"
+class STFEXP_Text_Resource:
+	extends Resource
+	@export var text: String = ""
+
+func _get_stf_type() -> String: return "stfexp.text"
 func _get_priority() -> int: return 0
 func _get_stf_kind() -> String: return "data"
-func _get_like_types() -> Array[String]: return ["armature"]
-func _get_godot_type() -> String: return "Skeleton3D"
+func _get_like_types() -> Array[String]: return ["text"]
+func _get_godot_type() -> String: return "STFEXP_Text_Resource"
 
 func _check_godot_object(godot_object: Variant) -> int:
-	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for armatures vs armature instances
+	return 1 if godot_object is STFEXP_Text_Resource else -1
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
-	var ret = Skeleton3D.new()
-	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Armature")
+	var ret = STFEXP_Text_Resource.new()
 	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
 
-	for child_id in json_resource.get("root_bones", []):
-		context.import(child_id, "node", ret, ret)
-
-	ret.reset_bone_poses()
+	ret.text = json_resource.get("text")
 
 	return ImportResult.new(ret, null)
+
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

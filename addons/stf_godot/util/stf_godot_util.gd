@@ -1,5 +1,6 @@
 class_name STF_Godot_Util
 
+
 static func get_name_or_default(json_resource: Dictionary, default: String = "Unnamed") -> String:
 	if("name" in json_resource && json_resource["name"] is String && len(json_resource["name"]) > 0):
 		return StringName(json_resource["name"])
@@ -24,12 +25,16 @@ static func get_resource_reference(json_resource: Dictionary, reference_index: i
 		return ""
 
 
-static func set_stf_meta(stf_id: String, json_resource: Dictionary, godot_resource: Object):
-	godot_resource.set_meta("stf_id", stf_id)
-	var stf_meta: Dictionary = godot_resource.get_meta("stf", {})
-	stf_meta["stf_id"] = stf_id
-	stf_meta["stf_name"] = json_resource.get("name")
-	if("processed" not in stf_meta):
-		stf_meta["processed"] = []
-	godot_resource.set_meta("stf", stf_meta)
+static func ensure_animatable_body_3d(node: Node3D) -> AnimatableBody3D:
+	var ret: AnimatableBody3D = null
+	for child in node.get_children():
+		if(child is AnimatableBody3D):
+			ret = child
+			break
+	if(not ret):
+		ret = AnimatableBody3D.new()
+		ret.name = "STF Animatable Body"
+		node.add_child(ret)
+		ret.set_meta("stf", {"skip": true})
+	return ret
 

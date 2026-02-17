@@ -72,7 +72,7 @@ static func arrange_unbaked_keyframes(track: Dictionary) -> Array[STFKeyframe]:
 	return keyframes
 
 
-static func arrange_baked_keyframes(context: STF_ImportContext, track: Dictionary) -> Array[STFKeyframe]:
+static func arrange_baked_keyframes(context: STF_Resource, track: Dictionary) -> Array[STFKeyframe]:
 	var subtracks = track.get("subtracks", [])
 	var len = -1;
 	var buffers: Array[PackedFloat32Array] = []
@@ -123,7 +123,7 @@ static func create_track(animation: Animation, target: String, stf_track: Dictio
 	return track_index
 
 
-static func import_value(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling: int = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
+static func import_value(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling: int = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE):
 	var method = determine_handling_method(animation_handling, can_import_bezier, track)
 	match(method):
 		2, 1: # Unbaked Simplified or Baked
@@ -148,11 +148,11 @@ static func import_value(context: STF_ImportContext, animation: Animation, targe
 					tangent_out
 				)
 
-static func import_blendshape(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+static func import_blendshape(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	import_value(context, animation, target, track, start_offset, animation_handling, transform_func, can_import_bezier, Animation.TYPE_BLEND_SHAPE)
 
 
-static func import_position_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+static func import_position_3d(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	var method = determine_handling_method(animation_handling, can_import_bezier, track)
 	match(method):
 		2, 1: # Unbaked Simplified or Baked
@@ -200,7 +200,7 @@ static func import_position_3d(context: STF_ImportContext, animation: Animation,
 						)
 
 
-static func import_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+static func import_rotation_3d(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	var method = determine_handling_method(animation_handling, can_import_bezier, track)
 	match(method):
 		2, 1: # Unbaked Simplified or Baked
@@ -267,7 +267,7 @@ static func import_rotation_3d(context: STF_ImportContext, animation: Animation,
 					)
 
 
-static func import_euler_rotation_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+static func import_euler_rotation_3d(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	var method = determine_handling_method(animation_handling, can_import_bezier, track)
 	match(method):
 		2, 1: # Unbaked Simplified or Baked
@@ -317,7 +317,7 @@ static func import_euler_rotation_3d(context: STF_ImportContext, animation: Anim
 						)
 
 
-static func import_scale_3d(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+static func import_scale_3d(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	var method = determine_handling_method(animation_handling, can_import_bezier, track)
 	match(method):
 		2, 1: # Unbaked Simplified or Baked
@@ -365,7 +365,7 @@ static func import_scale_3d(context: STF_ImportContext, animation: Animation, ta
 						)
 
 
-static func import_color(context: STF_ImportContext, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
+static func import_color(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true):
 	var method = determine_handling_method(animation_handling, can_import_bezier, track)
 	match(method):
 		2, 1: # Unbaked Simplified or Baked

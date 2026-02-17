@@ -19,7 +19,7 @@ extends RefCounted
 @abstract func _get_godot_type() -> String
 
 ## Since Godot types will be ambiguous in many cases, objects will be checked on a case by case basis.
-@abstract func _check_godot_object(godot_object: Object) -> int
+@abstract func _check_godot_object(godot_object: Variant) -> int
 
 
 class ImportAnimationPropertyResult:
@@ -46,6 +46,18 @@ class ImportResult:
 	func _init(godot_object: Variant = null, property_converter: OptionalCallable = null) -> void:
 		self._godot_object = godot_object
 		self._property_converter = property_converter
+
+
+func _set_stf_meta(stf_resource: STF_Resource, godot_object: Object) -> STF_Resource:
+	var stf_kind := _get_stf_kind()
+	if(_get_stf_kind() == "instance"):
+		godot_object.set_meta("stf_instance_id", stf_resource._meta["stf_id"])
+		godot_object.set_meta("stf_instance", stf_resource._meta)
+	else:
+		godot_object.set_meta("stf_id", stf_resource._meta["stf_id"])
+		godot_object.set_meta("stf", stf_resource._meta)
+	return stf_resource
+
 
 ## The main star for import.
 @abstract func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult

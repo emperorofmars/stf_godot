@@ -7,12 +7,13 @@ func _get_stf_kind() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["material"]
 func _get_godot_type() -> String: return "StandardMaterial3D"
 
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is StandardMaterial3D else -1
 
 
-func __get_texture(image: Image) -> Texture2D:
+func __get_texture(stf_resource: STF_Resource, image: Image) -> Texture2D:
 	if(not image): return null
+	stf_resource.register_referenced_resource(image.get_meta("stf_id"), image)
 	if("processed" in image.get_meta("stf") && len(image.get_meta("stf")["processed"]) > 0):
 		return image.get_meta("stf")["processed"][0]
 	else:
@@ -23,7 +24,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var ret = StandardMaterial3D.new()
 	ret.resource_name = json_resource.get("name", "STF Material")
-	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
 
 	if("properties" in json_resource):
 		for key in json_resource["properties"]:
@@ -32,18 +33,18 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var values = property.get("values", [])
 
 			if(key == "albedo.texture" && type == "image" && len(values) == 1):
-				ret.albedo_texture = __get_texture(context.import(values[0].get("image")))
+				ret.albedo_texture = __get_texture(stf_resource, context.import(values[0].get("image")))
 
 			elif(key == "roughness.texture" && type == "image" && len(values) == 1):
-				ret.roughness_texture = __get_texture(context.import(values[0].get("image")))
+				ret.roughness_texture = __get_texture(stf_resource, context.import(values[0].get("image")))
 
 			elif(key == "metallic.texture" && type == "image" && len(values) == 1):
 				ret.metallic = 1
-				ret.metallic_texture = __get_texture(context.import(values[0].get("image")))
+				ret.metallic_texture = __get_texture(stf_resource, context.import(values[0].get("image")))
 
 			elif(key == "normal.texture" && type == "image" && len(values) == 1):
 				ret.normal_enabled = true
-				ret.normal_texture = __get_texture(context.import(values[0].get("image")))
+				ret.normal_texture = __get_texture(stf_resource, context.import(values[0].get("image")))
 
 	return ImportResult.new(ret)
 

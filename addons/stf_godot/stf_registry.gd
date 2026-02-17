@@ -40,6 +40,8 @@ static func get_default_modules() -> Array[STF_Module]:
 		STFEXP_Collider_Capsule.new(),
 		STFEXP_Camera.new(),
 		STFEXP_Light.new(),
+		STFEXP_Instance_Text.new(),
+		STFEXP_Text.new(),
 		AVA_SecondaryMotion.new(),
 		DEV_VRM_Springbone.new(),
 	]

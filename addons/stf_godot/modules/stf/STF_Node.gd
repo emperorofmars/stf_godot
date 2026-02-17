@@ -7,7 +7,7 @@ func _get_stf_kind() -> String: return "node"
 func _get_like_types() -> Array[String]: return ["node"]
 func _get_godot_type() -> String: return "Node3D"
 
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is Node3D else -1
 
 
@@ -20,7 +20,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	else:
 		ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Node")
-	STF_Godot_Util.set_stf_meta(stf_id, json_resource, ret)
+
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
 
 	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
 
@@ -46,7 +47,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 				var bone_attachment = BoneAttachment3D.new()
 				bone_attachment.name = ret.name + "_parent_binding"
-				bone_attachment.set_meta("stf", {"stf_parent_binding_for": stf_id})
+				bone_attachment.set_meta("stf", {"stf_parent_binding_for": stf_id, "skip": true})
 				parent.add_child(bone_attachment)
 				bone_attachment.bone_idx = bone_index
 				parent.remove_child(ret)
@@ -68,7 +69,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			"s": return ImportAnimationPropertyResult.new(path, STFAnimationImportUtil.import_scale_3d)
 			"enabled": return ImportAnimationPropertyResult.new(path + ":visible")
 			"instance":
-				var anim_ret := context.resolve_animation_path([ret.get_meta("stf").get("stf_instance_id")] + stf_path.slice(2)) # slightly dirty but it works
+				var anim_ret := context.resolve_animation_path([ret.get_meta("stf_instance_id")] + stf_path.slice(2)) # slightly dirty but it works
 				if(anim_ret):
 					return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)
 			"components":

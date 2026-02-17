@@ -7,7 +7,7 @@ func _get_stf_kind() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["collider.capsule", "collider"]
 func _get_godot_type() -> String: return "CollisionShape3D"
 
-func _check_godot_object(godot_object: Object) -> int:
+func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is CollisionShape3D else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
@@ -21,19 +21,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	else:
 		node = context_object
 
-	collider_body = node.find_child("STF Collider Body", false)
-	if(!collider_body):
-		collider_body = AnimatableBody3D.new() # todo make this user configurable
-		collider_body.name = "STF Collider Body"
-		node.add_child(collider_body)
+	collider_body = STF_Godot_Util.ensure_animatable_body_3d(node)
 
 	var ret = CollisionShape3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Collider Capsule")
-	ret.set_meta("stf_id", stf_id)
-	var stf_meta_probe := {"stf_name": json_resource.get("name")}
-	ret.set_meta("stf", stf_meta_probe)
-	ret.set_meta("stf_lightprobe_anchor", "probe")
 	collider_body.add_child(ret)
+
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
 
 	ret.position = STF_TRS_Util.parse_vec3(json_resource["offset_position"])
 	ret.rotation = STF_TRS_Util.parse_vec3(json_resource["offset_rotation"])
