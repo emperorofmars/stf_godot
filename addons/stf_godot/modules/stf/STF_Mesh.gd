@@ -303,8 +303,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 			for blendshape_vertex_index in range(len(blendshape_indices)):
 				var vertex_index = blendshape_indices[blendshape_vertex_index]
-				for split_index in verts_to_split[vertex_index]:
-					godot_blendshape_vertices[split_to_deduped_split_index[split_index]] = blendshape_vertices[blendshape_vertex_index]
+				if(vertex_index in verts_to_split):
+					for split_index in verts_to_split[vertex_index]:
+						godot_blendshape_vertices[split_to_deduped_split_index[split_index]] = blendshape_vertices[blendshape_vertex_index]
 
 			var godot_blendshape_normals = godot_normals.duplicate()
 
