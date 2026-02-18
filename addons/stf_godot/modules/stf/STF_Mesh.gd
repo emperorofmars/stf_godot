@@ -306,6 +306,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 				if(vertex_index in verts_to_split):
 					for split_index in verts_to_split[vertex_index]:
 						godot_blendshape_vertices[split_to_deduped_split_index[split_index]] = blendshape_vertices[blendshape_vertex_index]
+				# else a it affects a vertex that is not part of a triangle, e.g. a line or point
 
 			var godot_blendshape_normals = godot_normals.duplicate()
 
