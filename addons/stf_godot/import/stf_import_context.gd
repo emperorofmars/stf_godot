@@ -51,17 +51,15 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 
 
 func import_component(component_id: String, context_object: Variant = null, instance_context: Variant = null):
-	var json_component_resource = _state.get_json_resource(component_id)
-	var component_module: STF_ModuleComponent  = _state.determine_module(json_component_resource, "component")
-	if(component_module and component_module is STF_ModuleComponent):
-		var component_pre_import_ret: = component_module._component_pre_import(self, component_id, json_component_resource, context_object, instance_context)
-		if(component_pre_import_ret and component_pre_import_ret._success == true):
-			if(component_pre_import_ret._exclusion_group && component_pre_import_ret._exclusion_group.length() > 0):
-				_state.register_exclusion_group_component(component_pre_import_ret._exclusion_group, component_module._get_stf_type(), component_id)
-			if(instance_context not in _state._component_instance_context): _state._component_instance_context[instance_context] = []
-			var component_handle_func: Callable = __create_handle_component_instance_func(component_id, component_module, json_component_resource, context_object)
-			_state._component_instance_context[instance_context].append(component_handle_func)
-			_add_task(PROCESS_STEPS.COMPONENTS, func(): component_handle_func.call(instance_context))
+	var json_resource = _state.get_json_resource(component_id)
+	var component_module: STF_Module  = _state.determine_module(json_resource, "component")
+	if(component_module and component_module._get_stf_kind() == "component"):
+		if("exclusion_group" in json_resource):
+			_state.register_exclusion_group_component(json_resource.get("exclusion_group"), component_module._get_stf_type(), component_id)
+		if(instance_context not in _state._component_instance_context): _state._component_instance_context[instance_context] = []
+		var component_handle_func: Callable = __create_handle_component_instance_func(component_id, component_module, json_resource, context_object)
+		_state._component_instance_context[instance_context].append(component_handle_func)
+		_add_task(PROCESS_STEPS.COMPONENTS, func(): component_handle_func.call(instance_context))
 
 
 func import_component_instance_mod(instantiated_resource: Variant, component_id: String, mod_json: Dictionary):
@@ -74,7 +72,7 @@ func handle_instance(instantiated_resource: Variant, instance: Variant):
 		task.call(instance)
 
 
-func __create_handle_component_instance_func(component_id: String, component_module: STF_ModuleComponent, json_component_resource: Dictionary, context_object: Variant) -> Callable:
+func __create_handle_component_instance_func(component_id: String, component_module: STF_Module, json_component_resource: Dictionary, context_object: Variant) -> Callable:
 	return func(component_instance_context: Variant):
 		if(component_id not in _state._excluded_ids):
 			var mod_json = _state._component_instance_mods.get(component_instance_context, {}).get(component_id)
@@ -84,15 +82,6 @@ func __create_handle_component_instance_func(component_id: String, component_mod
 				_state.register_imported_resource(component_id, component_ret)
 			else:
 				print_rich("[color=red]Error: Failed to import component resource [u]" + component_id + "[/u][/color]")
-
-
-func import_instance_mod(stf_id: String, mod_json: Dictionary, context_object: Variant) -> Variant:
-	var json_resource = _state.get_json_resource(stf_id)
-	var module = _state.determine_module(json_resource, "component")
-	if(module && module is STF_ModuleComponent):
-		var component_module: STF_ModuleComponent = module
-		component_module._import_instance_mod(self, stf_id, mod_json, context_object)
-	return null
 
 
 func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.ImportAnimationPropertyResult:

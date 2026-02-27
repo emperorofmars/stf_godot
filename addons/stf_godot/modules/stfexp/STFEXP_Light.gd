@@ -1,5 +1,5 @@
 class_name STFEXP_Light
-extends STF_ModuleComponent
+extends STF_Module
 
 func _get_stf_type() -> String: return "stfexp.light"
 func _get_priority() -> int: return 0

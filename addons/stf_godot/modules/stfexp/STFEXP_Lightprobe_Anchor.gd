@@ -1,5 +1,5 @@
 class_name STFEXP_Lightprobe_Anchor
-extends STF_ModuleComponent
+extends STF_Module
 
 func _get_stf_type() -> String: return "stfexp.lightprobe_anchor"
 func _get_priority() -> int: return 0

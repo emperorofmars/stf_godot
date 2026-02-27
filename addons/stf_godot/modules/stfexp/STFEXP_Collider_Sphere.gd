@@ -1,5 +1,5 @@
 class_name STFEXP_Collider_Sphere
-extends STF_ModuleComponent
+extends STF_Module
 
 func _get_stf_type() -> String: return "stfexp.collider.sphere"
 func _get_priority() -> int: return 0

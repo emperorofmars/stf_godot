@@ -1,5 +1,5 @@
 class_name DEV_VRM_Springbone
-extends STF_ModuleComponent
+extends STF_Module
 
 func _get_stf_type() -> String: return "dev.vrm.springbone"
 func _get_priority() -> int: return 10
@@ -10,14 +10,11 @@ func _get_godot_type() -> String: return "SpringBoneSimulator3D"
 func _check_godot_object(godot_object: Variant) -> int:
 	return 10 if godot_object is SpringBoneSimulator3D else -1 # todo to this properly
 
-func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> PreImportResult:
+
+func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	if(instance_context is not Skeleton3D):
 		print_rich("[color=orange]Warning: Can't import resource [u]dev.vrm.springbone[/u] with ID [u]" + stf_id + "[/u][/color]: Godot only support bones as targets.")
 		return null
-	return PreImportResult.new(json_resource)
-
-
-func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 

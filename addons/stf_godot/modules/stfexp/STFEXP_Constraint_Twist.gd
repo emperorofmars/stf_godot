@@ -1,19 +1,15 @@
 class_name STFEXP_Constraint_Twist
-extends STF_ModuleComponent
+extends STF_Module
 
 func _get_stf_type() -> String: return "stfexp.constraint.twist"
 func _get_priority() -> int: return 0
+func _get_stf_kind() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["constraint.rotation", "constraint"]
 func _get_godot_type() -> String: return "CopyTransformModifier3D"
 
 func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is CopyTransformModifier3D else -1 # todo to this properly
 
-func _component_pre_import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> PreImportResult:
-	if(instance_context is not Skeleton3D):
-		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets.")
-		return null
-	return PreImportResult.new(json_resource)
 
 func __create_finalize_source_func(constraint_holder: CopyTransformModifier3D, bone_index: int, stf_id: String, json_resource: Dictionary, is_instance_mod: bool = false) -> Callable:
 	return func(ref_type: int, reference: Variant, context: Variant):
@@ -41,6 +37,9 @@ func __create_finalize_source_func(constraint_holder: CopyTransformModifier3D, b
 
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
+	if(instance_context is not Skeleton3D):
+		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.twist[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints only support bones as targets.")
+		return null
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 

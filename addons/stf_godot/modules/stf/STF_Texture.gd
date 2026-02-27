@@ -1,9 +1,9 @@
 class_name STF_Texture
-extends STF_ModuleComponent
+extends STF_Module
 
 func _get_stf_type() -> String: return "stf.texture"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "data"
+func _get_stf_kind() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["texture"]
 func _get_godot_type() -> String: return "PortableCompressedTexture2D"
 
