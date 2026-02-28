@@ -27,16 +27,24 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var pole_node: Node3D = null
 
 	if(len(target) == 1):
-		var target_bone := STF_Godot_Util.get_bone_from_skeleton(armature, STF_Godot_Util.get_resource_reference(json_resource, target[0]))
-		target_node = BoneAttachmentUtil.ensure_attachment(armature, target_bone)
+		var target_id := STF_Godot_Util.get_resource_reference(json_resource, target[0])
+		var target_bone := STF_Godot_Util.get_bone_from_skeleton(armature, target_id)
+		if(target_bone < 0): # target is Node3D
+			target_node = context.import(target_id, "node")
+		else: # target is Bone, create attachment so it can be used
+			target_node = BoneAttachmentUtil.ensure_attachment(armature, target_bone)
 	elif(len(target) == 3):
 		var target_skeleton := context.import(STF_Godot_Util.get_resource_reference(json_resource, target[0]), "node")
 		var target_bone := STF_Godot_Util.get_bone_from_skeleton(target_skeleton, STF_Godot_Util.get_resource_reference(json_resource, target[2]))
 		target_node = BoneAttachmentUtil.ensure_attachment(target_skeleton, target_bone)
 
 	if(len(pole) == 1):
-		var pole_bone := STF_Godot_Util.get_bone_from_skeleton(armature, STF_Godot_Util.get_resource_reference(json_resource, pole[0]))
-		pole_node = BoneAttachmentUtil.ensure_attachment(armature, pole_bone)
+		var pole_id := STF_Godot_Util.get_resource_reference(json_resource, pole[0])
+		var pole_bone := STF_Godot_Util.get_bone_from_skeleton(armature, pole_id)
+		if(pole_bone < 0): # pole is Node3D
+			pole_node = context.import(pole_id, "node")
+		else: # pole is Bone, create attachment so it can be used
+			pole_node = BoneAttachmentUtil.ensure_attachment(armature, pole_bone)
 	elif(len(pole) == 3):
 		var pole_skeleton := context.import(STF_Godot_Util.get_resource_reference(json_resource, pole[0]), "node")
 		var pole_bone := STF_Godot_Util.get_bone_from_skeleton(pole_skeleton, STF_Godot_Util.get_resource_reference(json_resource, pole[2]))
