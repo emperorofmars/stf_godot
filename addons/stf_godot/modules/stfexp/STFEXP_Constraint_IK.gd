@@ -18,8 +18,59 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 
-	return null
-	#return ImportResult.new(ret, null)
+	var chain_length = json_resource.get("chain_length", 1) as int
+
+	var target: Array = json_resource.get("target", [])
+	var pole: Array = json_resource.get("pole", [])
+
+	var target_node: Node3D = null
+	var pole_node: Node3D = null
+
+	if(len(target) == 1):
+		var target_bone := STF_Godot_Util.get_bone_from_skeleton(armature, STF_Godot_Util.get_resource_reference(json_resource, target[0]))
+		target_node = BoneAttachmentUtil.ensure_attachment(armature, target_bone)
+	elif(len(target) == 3):
+		var target_skeleton := context.import(STF_Godot_Util.get_resource_reference(json_resource, target[0]), "node")
+		var target_bone := STF_Godot_Util.get_bone_from_skeleton(target_skeleton, STF_Godot_Util.get_resource_reference(json_resource, target[2]))
+		target_node = BoneAttachmentUtil.ensure_attachment(target_skeleton, target_bone)
+
+	if(len(pole) == 1):
+		var pole_bone := STF_Godot_Util.get_bone_from_skeleton(armature, STF_Godot_Util.get_resource_reference(json_resource, pole[0]))
+		pole_node = BoneAttachmentUtil.ensure_attachment(armature, pole_bone)
+	elif(len(pole) == 3):
+		var pole_skeleton := context.import(STF_Godot_Util.get_resource_reference(json_resource, pole[0]), "node")
+		var pole_bone := STF_Godot_Util.get_bone_from_skeleton(pole_skeleton, STF_Godot_Util.get_resource_reference(json_resource, pole[2]))
+		pole_node = BoneAttachmentUtil.ensure_attachment(pole_skeleton, pole_bone)
+
+	if(chain_length in [1, 2] and target_node and pole_node): # This correct???
+		# Can import as TwoBoneIK3D
+
+		var ret := BoneAttachmentUtil.ensure_two_bone_ik(armature)
+		var constraint_index = ret.get_setting_count()
+		ret.set_setting_count(constraint_index + 1)
+
+		if(target_node): ret.set_target_node(constraint_index, ret.get_path_to(target_node))
+		if(pole_node): ret.set_pole_node(constraint_index, ret.get_path_to(pole_node))
+
+		ret.set_end_bone(constraint_index, bone_index)
+
+		var root_bone = -1
+		var middle_bone = -1
+		for i in range(json_resource.get("chain_length", 1)):
+			middle_bone = root_bone
+			root_bone = armature.get_bone_parent(bone_index)
+			if(root_bone < 0):
+				break
+		if(root_bone >= 0):
+			ret.set_root_bone(constraint_index, root_bone)
+		if(middle_bone >= 0):
+			ret.set_middle_bone(constraint_index, middle_bone)
+		return ImportResult.new(ret, null)
+	else:
+		# TODO handle other IK ways
+		print("fail")
+
+		return null
 
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:

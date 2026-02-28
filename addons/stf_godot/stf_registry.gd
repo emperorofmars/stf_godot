@@ -35,6 +35,7 @@ static func get_default_modules() -> Array[STF_Module]:
 		STF_Animation.new(),
 		STFEXP_Constraint_Twist.new(),
 		STFEXP_Constraint_Rotation.new(),
+		STFEXP_Constraint_IK.new(),
 		STFEXP_Lightprobe_Anchor.new(),
 		STFEXP_Collider_Sphere.new(),
 		STFEXP_Collider_Capsule.new(),

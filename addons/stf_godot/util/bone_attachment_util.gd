@@ -40,3 +40,17 @@ static func ensure_spring_bone_simulator(skeleton: Skeleton3D) -> SpringBoneSimu
 		skeleton.add_child(ret)
 		ret.set_meta("stf_composite", [])
 	return ret
+
+
+static func ensure_two_bone_ik(skeleton: Skeleton3D) -> TwoBoneIK3D:
+	var ret: TwoBoneIK3D = null
+	for child in skeleton.get_children():
+		if(child is TwoBoneIK3D):
+			ret = child
+			break
+	if(not ret):
+		ret = TwoBoneIK3D.new()
+		ret.name = "STF TwoBoneIK"
+		skeleton.add_child(ret)
+		ret.set_meta("stf_composite", [])
+	return ret
