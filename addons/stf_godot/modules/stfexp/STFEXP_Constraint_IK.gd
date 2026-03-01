@@ -55,13 +55,34 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var constraint_index = ret.get_setting_count()
 		ret.set_setting_count(constraint_index + 1)
 
-		if(target_node): ret.set_target_node(constraint_index, ret.get_path_to(target_node))
-		if(pole_node): ret.set_pole_node(constraint_index, ret.get_path_to(pole_node))
+		ret.set_target_node(constraint_index, ret.get_path_to(target_node))
+		ret.set_pole_node(constraint_index, ret.get_path_to(pole_node))
 
 		ret.set_root_bone(constraint_index, armature.get_bone_parent(bone_index))
 		ret.set_middle_bone(constraint_index, bone_index)
 		ret.set_extend_end_bone(constraint_index, true)
 		ret.set_use_virtual_end(constraint_index, true)
+		ret.set_end_bone_direction(constraint_index, SkeletonModifier3D.BONE_DIRECTION_PLUS_Y)
+		ret.set_end_bone_length(constraint_index, armature.get_bone_meta(bone_index, "stf").get("original_json", {}).get("length", 0.0))
+
+		return ImportResult.new(ret, null)
+	elif(chain_length > 0 and target_node): # Import as FABRIK3D ## TODO make this configurable to any ChainIK3D subtype
+		var ret := BoneAttachmentUtil.ensure_fabrik_3d(armature)
+		var constraint_index = ret.get_setting_count()
+		ret.set_setting_count(constraint_index + 1)
+
+		ret.set_target_node(constraint_index, ret.get_path_to(target_node))
+
+		var root_bone = bone_index
+		for i in range(chain_length):
+			root_bone = armature.get_bone_parent(root_bone)
+			if(root_bone < 0):
+				# todo warn
+				return null
+		ret.set_root_bone(constraint_index, root_bone)
+
+		ret.set_end_bone(constraint_index, bone_index)
+		ret.set_extend_end_bone(constraint_index, true)
 		ret.set_end_bone_direction(constraint_index, SkeletonModifier3D.BONE_DIRECTION_PLUS_Y)
 		ret.set_end_bone_length(constraint_index, armature.get_bone_meta(bone_index, "stf").get("original_json", {}).get("length", 0.0))
 

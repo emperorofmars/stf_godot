@@ -54,3 +54,17 @@ static func ensure_two_bone_ik(skeleton: Skeleton3D) -> TwoBoneIK3D:
 		skeleton.add_child(ret)
 		ret.set_meta("stf_composite", [])
 	return ret
+
+
+static func ensure_fabrik_3d(skeleton: Skeleton3D) -> FABRIK3D:
+	var ret: FABRIK3D = null
+	for child in skeleton.get_children():
+		if(child is FABRIK3D):
+			ret = child
+			break
+	if(not ret):
+		ret = FABRIK3D.new()
+		ret.name = "STF FABRIK3D"
+		skeleton.add_child(ret)
+		ret.set_meta("stf_composite", [])
+	return ret
