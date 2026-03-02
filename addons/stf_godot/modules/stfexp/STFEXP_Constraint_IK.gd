@@ -50,7 +50,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		var pole_bone := STF_Godot_Util.get_bone_from_skeleton(pole_skeleton, STF_Godot_Util.get_resource_reference(json_resource, pole[2]))
 		pole_node = BoneAttachmentUtil.ensure_attachment(pole_skeleton, pole_bone)
 
-	if(chain_length == 1 and target_node and pole_node): # Can import as TwoBoneIK3D
+	if(chain_length == 2 and target_node and pole_node): # Can import as TwoBoneIK3D
 		var ret := BoneAttachmentUtil.ensure_two_bone_ik(armature)
 		var constraint_index = ret.get_setting_count()
 		ret.set_setting_count(constraint_index + 1)
@@ -66,7 +66,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.set_end_bone_length(constraint_index, armature.get_bone_meta(bone_index, "stf").get("original_json", {}).get("length", 0.0))
 
 		return ImportResult.new(ret, null)
-	elif(chain_length > 0 and target_node): # Import as FABRIK3D ## TODO make this configurable to any ChainIK3D subtype
+	elif(chain_length > 1 and target_node): # Import as FABRIK3D ## TODO make this configurable to any ChainIK3D subtype
 		var ret := BoneAttachmentUtil.ensure_fabrik_3d(armature)
 		var constraint_index = ret.get_setting_count()
 		ret.set_setting_count(constraint_index + 1)
@@ -85,6 +85,17 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret.set_extend_end_bone(constraint_index, true)
 		ret.set_end_bone_direction(constraint_index, SkeletonModifier3D.BONE_DIRECTION_PLUS_Y)
 		ret.set_end_bone_length(constraint_index, armature.get_bone_meta(bone_index, "stf").get("original_json", {}).get("length", 0.0))
+
+		return ImportResult.new(ret, null)
+	elif(chain_length == 1 and target_node): # Import as LookAtModifier3D
+		var ret: = LookAtModifier3D.new()
+		ret.name = "STF LookAtModifier3D"
+		armature.add_child(ret)
+
+		ret.bone = bone_index
+		ret.target_node = ret.get_path_to(target_node)
+		ret.forward_axis = LookAtModifier3D.BONE_AXIS_PLUS_Y
+		ret.primary_rotation_axis = Vector3.AXIS_X
 
 		return ImportResult.new(ret, null)
 	else:
