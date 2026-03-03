@@ -29,7 +29,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 			var transform = STF_TRS_Util.parse_transform(json_resource["pose"][bone_id])
 			ret.set_bone_pose(bone_index, transform)
-
+			var ik_meta = ret.get_bone_meta(bone_index, "stf_ik_node")
+			if(ik_meta):
+				var ik_node := ret.get_node(ik_meta)
+				ik_node.transform = transform
 
 	context._add_task(context.PROCESS_STEPS.COMPONENTS, func():
 		context.handle_instance(armature, ret)

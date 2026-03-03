@@ -22,6 +22,18 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var rest_pose = Transform3D(Basis(STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()), STF_TRS_Util.parse_vec3(json_resource["translation"]))
 	armature.set_bone_rest(bone_index, rest_pose)
 
+	if(
+		"deform" in json_resource
+		and !json_resource["deform"]
+		and "non_deform_use" in json_resource
+		and json_resource["non_deform_use"] in ["ik_target", "ik_pole"]
+	):
+		var ik_node = BoneAttachmentUtil.ensure_attachment(armature, bone_index)
+		ik_node.name = STF_Godot_Util.get_name_or_default(json_resource, stf_id)
+		#ik_node.override_pose = true # todo convert animations to target the attachment
+		armature.set_bone_meta(bone_index, "stf_ik_node", armature.get_path_to(ik_node))
+
+
 	for child_id in json_resource.get("children", []):
 		var child_index: int = context.import(child_id, "node", context_object, instance_context)
 		armature.set_bone_parent(child_index, bone_index)
