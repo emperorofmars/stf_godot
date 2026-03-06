@@ -1,9 +1,9 @@
 class_name STF_Bone
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.bone"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "node"
+func _get_stf_category() -> String: return "node"
 func _get_like_types() -> Array[String]: return ["bone"]
 func _get_godot_type() -> String: return "Bone"
 
@@ -16,7 +16,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var bone_index := armature.add_bone(STF_Godot_Util.get_name_or_default(json_resource, stf_id))
 
 	armature.set_bone_meta(bone_index, "stf_id", stf_id)
-	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_kind())
+	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_category())
 	armature.set_bone_meta(bone_index, "stf", stf_resource._meta)
 
 	var rest_pose = Transform3D(Basis(STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()), STF_TRS_Util.parse_vec3(json_resource["translation"]))

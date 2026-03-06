@@ -1,6 +1,6 @@
-@abstract class_name STF_Module
+@abstract class_name STF_Handler
 extends RefCounted
-## Base class for every STF module to inherit
+## Base class for every STF-resource-handler to inherit
 ## Provides functionality to _import a specific STF resource `type` into a Godot construct and to serialize that Godot construct back into the STF resource
 
 ## The `type` property on STF resources to match to the stf_module.
@@ -9,8 +9,8 @@ extends RefCounted
 ## If multiple modules are registered for the same `type`, then the priority determines the match.
 @abstract func _get_priority() -> int
 
-## Can be `data`, `node`, `component`. Useful for validation.
-@abstract func _get_stf_kind() -> String
+## Can be `data`, `node`, `instance` or `component`. Useful for validation.
+@abstract func _get_stf_category() -> String
 
 ## I.e. `stf.node` would set `node`. Useful for validation.
 @abstract func _get_like_types() -> Array[String]
@@ -49,8 +49,8 @@ class ImportResult:
 
 
 func _set_stf_meta(stf_resource: STF_Resource, godot_object: Object) -> STF_Resource:
-	var stf_kind := _get_stf_kind()
-	if(_get_stf_kind() == "instance"):
+	var stf_kind := _get_stf_category()
+	if(_get_stf_category() == "instance"):
 		godot_object.set_meta("stf_instance_id", stf_resource._meta["stf_id"])
 		godot_object.set_meta("stf_instance", stf_resource._meta)
 	else:

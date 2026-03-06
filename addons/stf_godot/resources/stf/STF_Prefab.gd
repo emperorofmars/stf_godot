@@ -1,9 +1,9 @@
 class_name STF_Prefab
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.prefab"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "data"
+func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["prefab"]
 func _get_godot_type() -> String: return "SceneTree"
 
@@ -14,7 +14,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Prefab")
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	for child_id in json_resource.get("root_nodes", []):
 		var child: Node3D = context.import(child_id, "node", ret, ret)

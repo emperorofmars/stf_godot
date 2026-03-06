@@ -1,9 +1,9 @@
 class_name STF_Node
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.node"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "node"
+func _get_stf_category() -> String: return "node"
 func _get_like_types() -> Array[String]: return ["node"]
 func _get_godot_type() -> String: return "Node3D"
 
@@ -21,7 +21,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Node")
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
 

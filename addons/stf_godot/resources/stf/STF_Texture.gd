@@ -1,9 +1,9 @@
 class_name STF_Texture
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.texture"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "component"
+func _get_stf_category() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["texture"]
 func _get_godot_type() -> String: return "PortableCompressedTexture2D"
 
@@ -21,7 +21,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		image.clear_mipmaps()
 
 	var ret := PortableCompressedTexture2D.new()
-	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_kind())
+	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_category())
 	_set_stf_meta(stf_resource, ret)
 
 	ret.keep_compressed_buffer = true

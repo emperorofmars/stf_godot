@@ -5,7 +5,7 @@ var _context: STF_ImportContext
 var _meta : Dictionary
 
 
-func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, stf_kind: String) -> void:
+func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, stf_category: String) -> void:
 	self._context = context
 
 	var buffers := {}
@@ -16,7 +16,7 @@ func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary
 		"stf_id": stf_id,
 		"stf_name": json_resource.get("name"),
 		"stf_type": json_resource["type"],
-		"stf_kind": stf_kind,
+		"stf_category": stf_category,
 		"original_json": json_resource,
 		"buffers": buffers,
 		"referenced_resources": {},

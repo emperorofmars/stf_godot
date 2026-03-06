@@ -1,9 +1,9 @@
 class_name STF_Image
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.image"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "data"
+func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["image"]
 func _get_godot_type() -> String: return "Image"
 
@@ -13,7 +13,7 @@ func _check_godot_object(godot_object: Variant) -> int:
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = Image.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Image")
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	ret.get_meta("stf")["data_type"] = json_resource.get("data_type", "color")
 

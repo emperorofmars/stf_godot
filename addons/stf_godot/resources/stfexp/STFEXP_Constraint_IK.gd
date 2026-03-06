@@ -1,9 +1,9 @@
 class_name STFEXP_Constraint_IK
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stfexp.constraint.ik"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "component"
+func _get_stf_category() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["constraint.ik", "constraint"]
 func _get_godot_type() -> String: return "IKModifier3D"
 

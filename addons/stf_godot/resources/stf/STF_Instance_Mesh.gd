@@ -1,9 +1,9 @@
 class_name STF_Instance_Mesh
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.instance.mesh"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "instance"
+func _get_stf_category() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["instance.mesh", "instance"]
 func _get_godot_type() -> String: return "MeshInstance3D"
 
@@ -15,7 +15,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var ret = MeshInstance3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Mesh")
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	ret.mesh = context.import(json_resource["mesh"], "data")
 

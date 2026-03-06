@@ -1,9 +1,9 @@
 class_name STFEXP_Light
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stfexp.light"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "instance"
+func _get_stf_category() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["light"]
 func _get_godot_type() -> String: return "Light3D"
 
@@ -43,7 +43,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if("spot_angle" in json_resource): light.spot_angle = rad_to_deg(json_resource["spot_angle"]) / 2
 		_:
 			return null # invalid light type
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	var color = Color(json_resource["color"][0], json_resource["color"][1], json_resource["color"][2])
 	if("temperature" in json_resource):

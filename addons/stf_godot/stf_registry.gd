@@ -2,17 +2,17 @@ class_name STF_Registry
 ## Register STF modules here
 
 
-static var _default_stf_modules: Array[STF_Module] = []
-static var _stf_modules: Array[STF_Module] = []
+static var _default_stf_modules: Array[STF_Handler] = []
+static var _stf_modules: Array[STF_Handler] = []
 
 
-static func register_module(module: STF_Module):
+static func register_module(module: STF_Handler):
 	if(_stf_modules.find(module) < 0):
 		_stf_modules.append(module)
 	else:
 		printerr("STF Module '%s' is already registered!" % str(module))
 
-static func unregister_module(module: STF_Module):
+static func unregister_module(module: STF_Handler):
 	var index = _stf_modules.find(module)
 	if(index >= 0):
 		_stf_modules.remove_at(index)
@@ -20,7 +20,7 @@ static func unregister_module(module: STF_Module):
 		printerr("Cannot remove STF Module. '%s' is not registered!" % str(module))
 
 
-static func get_default_modules() -> Array[STF_Module]:
+static func get_default_modules() -> Array[STF_Handler]:
 	return [
 		STF_Prefab.new(),
 		STF_Node.new(),
@@ -48,8 +48,8 @@ static func get_default_modules() -> Array[STF_Module]:
 	]
 
 
-static func get_modules_by_stf_type() -> Dictionary[String, STF_Module]:
-	var ret: Dictionary[String, STF_Module] = {}
+static func get_modules_by_stf_type() -> Dictionary[String, STF_Handler]:
+	var ret: Dictionary[String, STF_Handler] = {}
 	for module in get_default_modules():
 		ret[module._get_stf_type()] = module
 	for module in _stf_modules:

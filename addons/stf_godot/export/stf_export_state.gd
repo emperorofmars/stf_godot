@@ -24,12 +24,12 @@ func _init(modules: Dictionary[String, Array]) -> void:
 	_modules = modules
 
 
-func determine_module(godot_object: Object, expected_kind: String = "data") -> STF_Module:
+func determine_module(godot_object: Object, expected_kind: String = "data") -> STF_Handler:
 	if(godot_object.get_class() in _modules):
 		var candidates := _modules[godot_object.get_class()]
 
 		var highest_score = -1
-		var selected: STF_Module = null
+		var selected: STF_Handler = null
 		for candidate in candidates:
 			var score = candidate._check_godot_object(godot_object)
 			if(score > highest_score):
@@ -42,7 +42,7 @@ func determine_module(godot_object: Object, expected_kind: String = "data") -> S
 	return null
 
 
-func register_exported_resource(godot_object: Variant, exported_resource: STF_Module.ExportResult):
+func register_exported_resource(godot_object: Variant, exported_resource: STF_Handler.ExportResult):
 	_exported_resources[godot_object] = exported_resource._stf_id
 	_resources[exported_resource._stf_id] = exported_resource._json_resource
 

@@ -1,9 +1,9 @@
 class_name STF_Mesh
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stf.mesh"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "data"
+func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["mesh"]
 func _get_godot_type() -> String: return "Mesh"
 func _check_godot_object(godot_object: Variant) -> int:
@@ -101,7 +101,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		0: BONES_PER_VERTEX = 4
 		1: BONES_PER_VERTEX = 8
 
-	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_kind())
+	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_category())
 
 	var float_width: int = json_resource.get("float_width", 4)
 	var indices_width: int = json_resource.get("indices_width", 4)

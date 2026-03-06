@@ -4,7 +4,7 @@ extends RefCounted
 
 
 var _stf_file: STF_File
-var _modules: Dictionary[String, STF_Module]
+var _handlers: Dictionary[String, STF_Handler]
 
 var _meta: STF_Info
 
@@ -34,9 +34,9 @@ var _component_instance_context: Dictionary[Variant, Array] = {}
 var _component_instance_mods: Dictionary[Variant, Dictionary] = {}
 
 
-func _init(stf_file: STF_File, modules: Dictionary[String, STF_Module], import_options: Dictionary = {}) -> void:
+func _init(stf_file: STF_File, handlers: Dictionary[String, STF_Handler], import_options: Dictionary = {}) -> void:
 	_stf_file = stf_file
-	_modules = modules
+	_handlers = handlers
 	_meta = STF_Info.parse(_stf_file.json_definition)
 	_import_options = import_options
 
@@ -45,16 +45,16 @@ func get_json_resource(stf_id: String) -> Dictionary:
 	return _stf_file.json_definition["resources"][stf_id]
 
 
-func determine_module(json_resource: Dictionary, expected_kind: String = "data") -> STF_Module:
-	if(json_resource["type"] in _modules):
-		return _modules[json_resource["type"]]
+func determine_handler(json_resource: Dictionary, expected_kind: String = "data") -> STF_Handler:
+	if(json_resource["type"] in _handlers):
+		return _handlers[json_resource["type"]]
 	else:
 		if(_import_options.get("enable_debug_log", false)):
 			print_rich("[color=orange]STF Warning: Unrecognized resource: [b]", json_resource["type"], "[/b][/color]")
 		return null # todo fallback
 
 
-func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Module.ImportAnimationPropertyResult:
+func resolve_animation_path(stf_path: Array, context_object: Variant = null) -> STF_Handler.ImportAnimationPropertyResult:
 	if(len(stf_path) < 2): return null
 	if(stf_path[0] in _imported_resources && stf_path[0] in _animation_converters):
 		var resolver := _animation_converters[stf_path[0]]
@@ -68,7 +68,7 @@ func register_exclusion_group_component(group: String, stf_type: String, stf_id:
 	else: _exclusion_groups[group][stf_type].append(stf_id)
 
 
-func register_imported_resource(stf_id: String, result: STF_Module.ImportResult):
+func register_imported_resource(stf_id: String, result: STF_Handler.ImportResult):
 	_imported_resources[stf_id] = result._godot_object
 	if(result._property_converter):
 		_animation_converters[stf_id] = result._property_converter._callable
@@ -78,7 +78,7 @@ func resolve_exclusion_groups():
 	for group in _exclusion_groups:
 		var highest_module = null
 		for group_type in _exclusion_groups[group]:
-			var group_module = _modules[group_type]
+			var group_module = _handlers[group_type]
 			if(highest_module == null || group_module._get_priority() > highest_module._get_priority()):
 				highest_module = group_module
 		_exclusion_winners[group] = [highest_module._get_stf_type()]

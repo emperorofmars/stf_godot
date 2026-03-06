@@ -1,9 +1,9 @@
 class_name STFEXP_Lightprobe_Anchor
-extends STF_Module
+extends STF_Handler
 
 func _get_stf_type() -> String: return "stfexp.lightprobe_anchor"
 func _get_priority() -> int: return 0
-func _get_stf_kind() -> String: return "component"
+func _get_stf_category() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["lightprobe_anchor"]
 func _get_godot_type() -> String: return "LightmapProbe"
 
@@ -15,7 +15,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Lightprobe")
 	context_object.add_child(ret)
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_kind()), ret)
+	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	var anchor_target: Array = json_resource.get("anchor", [])
 	if(len(anchor_target) == 0): return null
