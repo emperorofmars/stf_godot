@@ -11,7 +11,17 @@
 * Unpack the `addons/stf_godot` directory into the `addons` directory of your godot project.
 * Enable it under `Project` → `Project Settings` → `Plugins` → `stf_godot`
 
-## Development
+Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
+
+## Contributing
+Human made contributions via pull-requests are welcome.
+
+### Guidelines
+* Any form of LLM contribution is prohibited, this also includes issues and PRs.
+* Please open an issue first for larger changes.
+* For changes to the format itself, please open an issue first in the [STF Documentation](https://codeberg.org/emperorofmars/stf_documentation) repository.
+
+### Development
 Open the repository folder as a Godot project.\
 Preferably use VSCode with the [recommended extensions](./.vscode/extensions.json).
 
