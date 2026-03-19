@@ -28,6 +28,16 @@ func _init(state: STF_ImportState) -> void:
 	_state = state
 
 
+func import_from_reference(parent_json: Dictionary, resource_id: Variant, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
+	var actual_resource_id = null
+	if(resource_id is int or resource_id is float):
+		var ref: Array = parent_json.get("referenced_resources", [])
+		if(len(ref) > resource_id):
+			actual_resource_id = ref[int(resource_id)]
+	else:
+		actual_resource_id = resource_id
+	return import(actual_resource_id, expected_kind, context_object, instance_context)
+
 func import(stf_id: String, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
 	if(stf_id in _state._imported_resources):
 		return _state._imported_resources[stf_id]

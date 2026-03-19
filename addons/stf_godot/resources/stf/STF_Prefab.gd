@@ -17,7 +17,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	for child_id in json_resource.get("root_nodes", []):
-		var child: Node3D = context.import(child_id, "node", ret, ret)
+		var child: Node3D = stf_resource.import(child_id, "node", ret, ret)
 		ret.add_child(child)
 
 	context._add_task(context.PROCESS_STEPS.BEFORE_ANIMATION, func(): __set_owner(ret, ret))
@@ -34,7 +34,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			animation_player.add_animation_library("STF", animation_library)
 
 			for animation_id in json_resource["animations"]:
-				var animation: Animation = context.import(animation_id, "data")
+				var animation: Animation = stf_resource.import(animation_id, "data")
 				if(animation):
 					animation_library.add_animation(animation.resource_name, animation)
 		)

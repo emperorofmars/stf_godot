@@ -10,8 +10,9 @@ func _get_godot_type() -> String: return "Skeleton3D"
 func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for armatures vs armature instances
 
+
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
-	var armature: Skeleton3D = context.import(json_resource["armature"], "data")
+	var armature: Skeleton3D = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["armature"]), "data")
 	var ret: Skeleton3D = armature.duplicate(true)
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Armature")
 	ret.reset_bone_poses()
@@ -41,7 +42,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	if("added_components" in json_resource):
 		for bone_id in json_resource["added_components"]:
 			for resource_id in json_resource["added_components"][bone_id]:
-				context.import_component(resource_id, STF_Godot_Util.get_bone_from_skeleton(ret, bone_id), ret)
+				context.import_component(STF_Godot_Util.get_resource_reference(json_resource, resource_id), STF_Godot_Util.get_bone_from_skeleton(ret, bone_id), ret)
 
 	if("modified_components" in json_resource):
 		for bone_id in json_resource["modified_components"]:

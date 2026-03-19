@@ -35,7 +35,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 
 	for child_id in json_resource.get("children", []):
-		var child_index: int = context.import(child_id, "node", context_object, instance_context)
+		var child_index: int = stf_resource.import(child_id, "node", context_object, instance_context)
 		armature.set_bone_parent(child_index, bone_index)
 		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 

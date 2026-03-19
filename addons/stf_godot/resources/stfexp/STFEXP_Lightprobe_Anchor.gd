@@ -20,10 +20,10 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var anchor_target: Array = json_resource.get("anchor", [])
 	if(len(anchor_target) == 0): return null
 
-	var target_node := context.import(STF_Godot_Util.get_resource_reference(json_resource, anchor_target[0]), "node")
+	var target_node := context.import(STF_Godot_Util.get_resource_reference(json_resource, int(anchor_target[0])), "node")
 	var remote_parent = target_node
 	if(len(anchor_target) == 3 && target_node is Skeleton3D):
-		var ref_bone := STF_Godot_Util.get_bone_from_skeleton(target_node, STF_Godot_Util.get_resource_reference(json_resource, anchor_target[2]))
+		var ref_bone := STF_Godot_Util.get_bone_from_skeleton(target_node, STF_Godot_Util.get_resource_reference(json_resource, int(anchor_target[2])))
 		remote_parent = BoneAttachmentUtil.ensure_attachment(target_node, ref_bone)
 
 	var remoteTransform := RemoteTransform3D.new()

@@ -17,13 +17,12 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
-	ret.mesh = context.import(json_resource["mesh"], "data")
+	ret.mesh = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["mesh"]), "data")
 
 	if("armature_instance" in json_resource):
 		context._add_task(context.PROCESS_STEPS.DEFAULT, func():
-			var armature_instance = context.import(json_resource["armature_instance"], "instance")
+			var armature_instance = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["armature_instance"]), "instance")
 			if(armature_instance):
-				#ret.skeleton_path = ret.get_path_to(armature_instance)
 				ret.skeleton = ret.get_path_to(armature_instance)
 				ret.skin = armature_instance.create_skin_from_rest_transforms()
 		)
@@ -36,8 +35,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	if("materials" in json_resource):
 		for material_index in range(min(len(json_resource["materials"]), ret.mesh.get_surface_count())):
-			if(json_resource["materials"][material_index]):
-				var material = context.import(json_resource["materials"][material_index], "data")
+			if(json_resource["materials"][material_index] != null):
+				var material = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["materials"][material_index]), "data")
 				if(material):
 					ret.set_surface_override_material(material_index, material)
 

@@ -17,7 +17,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	for child_id in json_resource.get("root_bones", []):
-		context.import(child_id, "node", ret, ret)
+		stf_resource.import(child_id, "node", ret, ret)
 
 	ret.reset_bone_poses()
 

@@ -223,7 +223,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var godot_bones := PackedInt32Array()
 	var godot_weights := PackedFloat32Array()
 	if("armature" in json_resource && "bones" in json_resource && "weights" in json_resource):
-		var armature: Skeleton3D = context.import(json_resource["armature"])
+		var armature: Skeleton3D = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["armature"]))
 
 		var bones_ids: Array = json_resource["bones"]
 		var bone_indices_width: int = json_resource.get("bone_indices_width", 1)
@@ -443,8 +443,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	if("material_slots" in json_resource):
 		for material_index in range(len(json_resource["material_slots"])):
 			var material_id = json_resource["material_slots"][material_index]
-			if(material_id):
-				var material = context.import(material_id, "data")
+			if(material_id != null):
+				var material = context.import(STF_Godot_Util.get_resource_reference(json_resource, material_id), "data")
 				if(material):
 					ret.surface_set_material(material_index, material)
 					#ret.set_surface_material(material_index, material)

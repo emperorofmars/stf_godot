@@ -24,13 +24,30 @@ func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary
 	}
 
 
-func get_buffer(stf_id: String) -> PackedByteArray:
-	if(stf_id in _meta["buffers"]):
-		return _meta["buffers"][stf_id]
+func import(resource_id: Variant, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
+	var actual_resource_id = null
+	if(resource_id is int or resource_id is float):
+		var ref: Array = _meta["original_json"].get("referenced_resources", [])
+		if(len(ref) > resource_id):
+			actual_resource_id = ref[int(resource_id)]
+		else:
+			return null
 	else:
-		var ret := _context.get_buffer(stf_id)
-		_meta["buffers"][stf_id] = ret
-		return ret
+		actual_resource_id = resource_id
+	return _context.import(actual_resource_id, expected_kind, context_object, instance_context)
+
+
+func get_buffer(buffer_id: Variant) -> PackedByteArray:
+	if(buffer_id is int or buffer_id is float):
+		var ref: Array = _meta["original_json"].get("referenced_buffers", [])
+		if(len(ref) > buffer_id):
+			return _meta["buffers"][ref[int(buffer_id)]]
+	elif(buffer_id is String):
+		if(buffer_id in _meta["buffers"]):
+			return _meta["buffers"][buffer_id]
+		else:
+			return _context.get_buffer(buffer_id)
+	return PackedByteArray()
 
 
 func register_referenced_resource(stf_id: String, resource: Variant):
