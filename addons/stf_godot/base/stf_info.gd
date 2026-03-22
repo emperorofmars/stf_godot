@@ -4,7 +4,7 @@ extends Resource
 
 var root: String
 var definition_version_major: int = 0
-var definition_version_minor: int = 0
+var definition_version_minor: int = 1
 
 var generator: String = "stf_godot"
 var generator_version: String = "0.0.1"
@@ -29,14 +29,26 @@ static func parse(json_definition: Dictionary) -> STF_Info:
 	if("root" not in stf):
 		return null
 	ret.root = stf["root"]
-	ret.definition_version_major = stf.get("version_major")
-	ret.definition_version_minor = stf.get("version_minor")
+	ret.definition_version_major = stf.get("version", [0, 1])[0]
+	ret.definition_version_minor = stf.get("version", [0, 1])[1]
 	ret.generator = stf.get("generator")
 	ret.generator_version = stf.get("generator_version")
 	ret.timestamp = stf.get("timestamp")
 	ret.metric_multiplier = stf.get("metric_multiplier")
 
-	# todo more
+	if("asset_info" in stf):
+		var asset_info: Dictionary = stf["asset_info"]
+		ret.asset_name = asset_info.get("asset_name", "")
+		ret.asset_version = asset_info.get("asset_version", "")
+		ret.asset_url = asset_info.get("asset_url", "")
+		ret.asset_author = asset_info.get("asset_author", "")
+		ret.asset_license = asset_info.get("asset_license", "")
+		ret.asset_license_url = asset_info.get("asset_license_url", "")
+		ret.asset_documentation_url = asset_info.get("asset_documentation_url", "")
+
+	if("user_properties" in stf):
+		ret.user_properties = stf["user_properties"]
+
 	return ret
 
 
