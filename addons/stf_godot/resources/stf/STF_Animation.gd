@@ -40,13 +40,16 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if(target && target.valid()):
 				tracks_handled[target._godot_path] = true
 				target._keyframe_converter.call(stf_resource, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
-			# todo else warn
+			else:
+				print_rich("[color=orange]Error: Failed to convert baked track on animation resource [u]" + stf_id + "[/u][/color]: " + str(stf_track["target"]))
 
 	for stf_track in json_resource.get("tracks", []):
 		var target: ImportAnimationPropertyResult = context.resolve_animation_path(stf_track["target"])
-		if(target && target.valid() && target._godot_path not in tracks_handled):
-			target._keyframe_converter.call(stf_resource, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
-		# todo else warn
+		if(target && target.valid()):
+			if(target._godot_path not in tracks_handled):
+				target._keyframe_converter.call(stf_resource, ret, target._godot_path, stf_track, start_offset, animation_handling, target._value_transform_func, target._can_import_bezier)
+		else:
+			print_rich("[color=orange]Error: Failed to convert track on animation resource [u]" + stf_id + "[/u][/color]: " + str(stf_track["target"]))
 
 	return ImportResult.new(ret)
 
