@@ -37,8 +37,9 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var parent_binding: Array = json_resource["parent_binding"]
 			var parent: Node = ret.get_parent()
 			if(parent.is_class("Skeleton3D")):
-				var bone_id = parent_binding[2]
-				var bone_index = -1
+				var bone_id_index := int(parent_binding[2])
+				var bone_id := STF_Godot_Util.get_resource_reference(json_resource, bone_id_index)
+				var bone_index := -1
 				for i in range(parent.get_bone_count()):
 					if(parent.get_bone_meta(i, "stf_id") == bone_id):
 						bone_index = i

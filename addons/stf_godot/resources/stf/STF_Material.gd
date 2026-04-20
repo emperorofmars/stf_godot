@@ -32,17 +32,17 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var type = property.get("type")
 			var values = property.get("values", [])
 
-			if(key == "albedo.texture" && type == "image" && len(values) == 1):
+			if(key == "albedo.texture" && type == "image" && len(values) == 1 && values[0].get("image") != null):
 				ret.albedo_texture = __get_texture(stf_resource, stf_resource.import(values[0].get("image")))
 
-			elif(key == "roughness.texture" && type == "image" && len(values) == 1):
+			elif(key == "roughness.texture" && type == "image" && len(values) == 1 && values[0].get("image") != null):
 				ret.roughness_texture = __get_texture(stf_resource, stf_resource.import(values[0].get("image")))
 
-			elif(key == "metallic.texture" && type == "image" && len(values) == 1):
+			elif(key == "metallic.texture" && type == "image" && len(values) == 1 && values[0].get("image") != null):
 				ret.metallic = 1
 				ret.metallic_texture = __get_texture(stf_resource, stf_resource.import(values[0].get("image")))
 
-			elif(key == "normal.texture" && type == "image" && len(values) == 1):
+			elif(key == "normal.texture" && type == "image" && len(values) == 1 && values[0].get("image") != null):
 				ret.normal_enabled = true
 				ret.normal_texture = __get_texture(stf_resource, stf_resource.import(values[0].get("image")))
 

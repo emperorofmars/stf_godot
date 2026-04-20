@@ -26,11 +26,17 @@ func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary
 
 func import(resource_id: Variant, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
 	var actual_resource_id = null
+	if(resource_id == null):
+		print("Invalid resource reference")
+		print_stack()
+		return null
 	if(resource_id is int or resource_id is float):
 		var ref: Array = _meta["original_json"].get("referenced_resources", [])
 		if(len(ref) > resource_id):
 			actual_resource_id = ref[int(resource_id)]
 		else:
+			print("Invalid resource reference index")
+			print_stack()
 			return null
 	else:
 		actual_resource_id = resource_id
