@@ -4,7 +4,7 @@
 
 **WIP implementation for Godot 4.6+. Do not use productively!**
 
-🌰 **[Read the User Guide!](https://docs.stfform.at/guide/godot.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_godot/issues)** 🌰 **[STF Website](https://docs.stfform.at/)**
+🌰 **[Read the User Guide!](https://docs.stfform.at/guide/godot.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_godot/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ## Installation
 * Download the [latest release](https://codeberg.org/stf_format/stf_godot/releases/latest)
@@ -13,17 +13,14 @@
 
 Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
 
-## Contributing
-Human made contributions via pull-requests are welcome.
-
-### Guidelines
-* Any form of LLM contribution is prohibited, this also includes issues and PRs.
-* Please open an issue first for larger changes.
-* For changes to the format itself, please open an issue first in the [STF Documentation](https://codeberg.org/stf_format/stf_documentation) repository.
-
-### Development
+## Development Setup
 Open the repository folder as a Godot project.\
 Preferably use VSCode with the [recommended extensions](./.vscode/extensions.json).
+
+## Contributing
+Human made contributions via pull-requests are very welcome.
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines and development environment setup.
 
 ## License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
