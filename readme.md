@@ -20,7 +20,7 @@ Preferably use VSCode with the [recommended extensions](./.vscode/extensions.jso
 ## Contributing
 Human made contributions via pull-requests are very welcome.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines and development environment setup.
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for guidelines.
 
 ## License
 All source-code in this repository, except when noted in individual files and/or directories, is licensed under either:
