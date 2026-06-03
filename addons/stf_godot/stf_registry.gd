@@ -34,6 +34,7 @@ static func get_default_handlers() -> Array[STF_Handler]:
 		STF_Animation.new(),
 		STFEXP_Constraint_Twist.new(),
 		STFEXP_Constraint_Rotation.new(),
+		STFEXP_Constraint_Parent.new(),
 		STFEXP_Constraint_IK.new(),
 		STFEXP_Lightprobe_Anchor.new(),
 		STFEXP_Collider_Sphere.new(),
