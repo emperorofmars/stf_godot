@@ -1,26 +1,25 @@
 class_name STF_Registry
-## Register STF modules here
+## Register [STF_Handler] implementations here
 
 
-static var _default_stf_modules: Array[STF_Handler] = []
-static var _stf_modules: Array[STF_Handler] = []
+static var _stf_handlers: Array[STF_Handler] = []
 
 
-static func register_module(module: STF_Handler):
-	if(_stf_modules.find(module) < 0):
-		_stf_modules.append(module)
+static func register_module(handler: STF_Handler):
+	if(_stf_handlers.find(handler) < 0):
+		_stf_handlers.append(handler)
 	else:
-		printerr("STF Module '%s' is already registered!" % str(module))
+		printerr("STF Handler '%s' is already registered!" % str(handler))
 
-static func unregister_module(module: STF_Handler):
-	var index = _stf_modules.find(module)
+static func unregister_module(handler: STF_Handler):
+	var index = _stf_handlers.find(handler)
 	if(index >= 0):
-		_stf_modules.remove_at(index)
+		_stf_handlers.remove_at(index)
 	else:
-		printerr("Cannot remove STF Module. '%s' is not registered!" % str(module))
+		printerr("Can not remove STF Handler. '%s' is not registered!" % str(handler))
 
 
-static func get_default_modules() -> Array[STF_Handler]:
+static func get_default_handlers() -> Array[STF_Handler]:
 	return [
 		STF_Prefab.new(),
 		STF_Node.new(),
@@ -43,30 +42,31 @@ static func get_default_modules() -> Array[STF_Handler]:
 		STFEXP_Light.new(),
 		STFEXP_Instance_Text.new(),
 		STFEXP_Text.new(),
+		STFEXP_Node_Ethereal.new(),
 		AVA_SecondaryMotion.new(),
 		DEV_VRM_Springbone.new(),
 	]
 
 
-static func get_modules_by_stf_type() -> Dictionary[String, STF_Handler]:
+static func get_handlers_by_stf_type() -> Dictionary[String, STF_Handler]:
 	var ret: Dictionary[String, STF_Handler] = {}
-	for module in get_default_modules():
-		ret[module._get_stf_type()] = module
-	for module in _stf_modules:
-		if(module._get_stf_type() not in ret || module._get_priority() > ret[module._get_stf_type()]._get_priority()):
-			ret[module._get_stf_type()] = module
+	for handler in get_default_handlers():
+		ret[handler._get_stf_type()] = handler
+	for handler in _stf_handlers:
+		if(handler._get_stf_type() not in ret || handler._get_priority() > ret[handler._get_stf_type()]._get_priority()):
+			ret[handler._get_stf_type()] = handler
 	return ret
 
-static func get_modules_by_godot_type() -> Dictionary[String, Array]:
+static func get_handlers_by_godot_type() -> Dictionary[String, Array]:
 	var ret: Dictionary[String, Array] = {}
-	for module in get_default_modules():
-		if(module._get_godot_type() not in ret):
-			ret[module._get_godot_type()] = [module]
+	for handler in get_default_handlers():
+		if(handler._get_godot_type() not in ret):
+			ret[handler._get_godot_type()] = [handler]
 		else:
-			ret[module._get_godot_type()].append(module)
-	for module in _stf_modules:
-		if(module._get_godot_type() not in ret):
-			ret[module._get_godot_type()] = [module]
+			ret[handler._get_godot_type()].append(handler)
+	for handler in _stf_handlers:
+		if(handler._get_godot_type() not in ret):
+			ret[handler._get_godot_type()] = [handler]
 		else:
-			ret[module._get_godot_type()].append(module)
+			ret[handler._get_godot_type()].append(handler)
 	return ret

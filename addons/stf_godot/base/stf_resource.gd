@@ -1,5 +1,6 @@
 class_name STF_Resource
 extends RefCounted
+## Helper class that wraps an STF resource dict.
 
 var _context: STF_ImportContext
 var _meta : Dictionary
@@ -21,6 +22,7 @@ func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary
 		"buffers": buffers,
 		"referenced_resources": {},
 		"processed": [],
+		"components": [],
 	}
 
 

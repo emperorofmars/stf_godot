@@ -35,7 +35,16 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	shape.radius = json_resource["radius"]
 	ret.shape = shape
 
-	return ImportResult.new(ret)
+	var animation_property_resolve_func := func(stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 2): return null
+		var anim_target: CollisionShape3D = godot_object
+		var path = node.get_path_to(anim_target).get_concatenated_names()
+
+		match stf_path[1]:
+			"enabled": return ImportAnimationPropertyResult.new("/" + path + ":disabled")
+		return null
+
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
 	return null

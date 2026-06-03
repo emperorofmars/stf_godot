@@ -1,18 +1,20 @@
 @abstract class_name STF_Handler
 extends RefCounted
-## Base class for every STF-resource-handler to inherit
-## Provides functionality to _import a specific STF resource `type` into a Godot construct and to serialize that Godot construct back into the STF resource
+## Base class for every STF-resource-handler to inherit.
+## Provides functionality to import a specific STF resource `type` into a Godot construct and to serialize that Godot construct back into the STF resource
+##
+## [url]https://docs.stfform.at/format/stf_format.html#resources-object[/url]
 
-## The `type` property on STF resources to match to the stf_module.
+## The `type` property on STF resources to match to the stf_handler.
 @abstract func _get_stf_type() -> String
 
-## If multiple modules are registered for the same `type`, then the priority determines the match.
+## If multiple handlers are registered for the same `type`, then the priority determines the match.
 @abstract func _get_priority() -> int
 
 ## Can be `data`, `node`, `instance` or `component`. Useful for validation.
 @abstract func _get_stf_category() -> String
 
-## I.e. `stf.node` would set `node`. Useful for validation.
+## I.e. `stf.node` would set `["node"]`. Useful for validation.
 @abstract func _get_like_types() -> Array[String]
 
 ## Godot type to match for export
@@ -22,13 +24,25 @@ extends RefCounted
 @abstract func _check_godot_object(godot_object: Variant) -> int
 
 
+## Holds the information needed to convert an STF animation track to a Godot animation track.
 class ImportAnimationPropertyResult:
 	extends RefCounted
+
 	var _godot_path: String
 	var _keyframe_converter: Callable
 	var _value_transform_func: OptionalCallable
 	var _can_import_bezier: bool
 
+	## [param godot_path] Path to the Node in the scene.[br]
+	## [param keyframe_converter] Function which converts an stf keyframe and inserts it into a Godot animation track:
+	## [codeblock]
+	## func(context: STF_Resource, animation: Animation, target: String, track: Dictionary, start_offset: float, animation_handling: int = 0, transform_func: OptionalCallable = null, can_import_bezier: bool = true, track_type = Animation.TYPE_VALUE)
+	## [/codeblock][br]
+	## [param value_transform_func] Optional function that converts an stf keyframes value into Godot values:
+	## [codeblock]
+	## func(value: Variant) -> Variant
+	## [/codeblock][br]
+	## [param can_import_bezier] Whether bezier interpolation is supported for this Godot track. I.e. Godot bones do not support bezier.[br]
 	func _init(godot_path: String, keyframe_converter: Callable = STFAnimationImportUtil.import_value, value_transform_func: OptionalCallable = null, can_import_bezier = true) -> void:
 		self._godot_path = godot_path
 		self._keyframe_converter = keyframe_converter
@@ -42,7 +56,13 @@ class ImportAnimationPropertyResult:
 class ImportResult:
 	extends RefCounted
 	var _godot_object: Variant
-	var _property_converter: OptionalCallable # (stf_path: Array, godot_object: Object) -> ImportAnimationPropertyResult
+	var _property_converter: OptionalCallable ## [code]func(stf_path: Array, godot_object: Object) -> ImportAnimationPropertyResult[/code]
+
+	## [param godot_object] The resulting Godot object[br]
+	## [param property_converter] Optional function to convert stf animations:
+	## [codeblock]
+	## func(stf_path: Array, godot_object: Object) -> ImportAnimationPropertyResult
+	## [/codeblock][br]
 	func _init(godot_object: Variant = null, property_converter: OptionalCallable = null) -> void:
 		self._godot_object = godot_object
 		self._property_converter = property_converter

@@ -1,5 +1,9 @@
 class_name STF_Node
 extends STF_Handler
+## Representation of a node in 3d space.
+## Imports into Node3D.
+##
+## [url]https://docs.stfform.at/resources/stf/stf_node.html[/url]
 
 func _get_stf_type() -> String: return "stf.node"
 func _get_priority() -> int: return 0

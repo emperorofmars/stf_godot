@@ -37,7 +37,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 
-	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(armature)
+	#var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(armature)
+	var ret: = CopyTransformModifier3D.new()
+	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Constraint Rotation - " + armature.get_bone_name(bone_index))
+	armature.add_child(ret)
+	ret.set_meta("stf_composite", [])
 
 	var constraint_indices = []
 	var total_weight = json_resource.get("weight", 1)
@@ -61,7 +65,18 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		"stf_name": json_resource.get("name", null),
 		"constraint_indices": constraint_indices,
 	})
-	return ImportResult.new(ret, null)
+
+	var animation_property_resolve_func := func(stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 2): return null
+		var node: CopyTransformModifier3D = godot_object
+		var path = armature.get_path_to(node).get_concatenated_names()
+
+		match stf_path[1]:
+			"enabled": return ImportAnimationPropertyResult.new("/" + path + ":active")
+		# todo weight per source
+		return null
+
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:

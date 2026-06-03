@@ -10,7 +10,7 @@ var _tasks: Dictionary[int, Array] = {}
 var _current_step := 0
 
 enum PROCESS_STEPS {
-	DEFAULT = 10000, # Node Hierarchy / Resources / Instances
+	DEFAULT = 10000, ## Node Hierarchy / Resources / Instances
 	BEFORE_COMPONENTS = 20000,
 	COMPONENTS = 21000,
 	AFTER_COMPONENTS = 22000,
@@ -28,14 +28,16 @@ func _init(state: STF_ImportState) -> void:
 	_state = state
 
 
-func import_from_reference(parent_json: Dictionary, resource_id: Variant, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
+## Retrieve the stf_id of the wanted resource, from the [code]referenced_resource[/code] array of the current resource, based on the [param reference_index].[br]
+## Then import the wanted resource.
+func import_from_reference(parent_json: Dictionary, reference_index: Variant, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
 	var actual_resource_id = null
-	if(resource_id is int or resource_id is float):
+	if(reference_index is int or reference_index is float):
 		var ref: Array = parent_json.get("referenced_resources", [])
-		if(len(ref) > resource_id):
-			actual_resource_id = ref[int(resource_id)]
+		if(len(ref) > reference_index):
+			actual_resource_id = ref[int(reference_index)]
 	else:
-		actual_resource_id = resource_id
+		actual_resource_id = reference_index
 	return import(actual_resource_id, expected_kind, context_object, instance_context)
 
 func import(stf_id: String, expected_kind: String = "data", context_object: Variant = null, instance_context: Variant = null) -> Variant:
@@ -102,6 +104,8 @@ func get_buffer(stf_id: String) -> PackedByteArray:
 	return _state.get_buffer(stf_id)
 
 
+## [param step]: [code]int[/code] or [member STF_ImportContext.PROCESS_STEPS].[br]
+## [param task]: Function with no parameters and no return.
 func _add_task(step: int, task: Callable):
 	if(step <= self._current_step):
 		step = self._current_step + 1
@@ -125,5 +129,6 @@ func _run_tasks():
 			iter += 1
 
 
+## Valid keys are defined in [STF_ImportOptions]
 func _get_import_options() -> Dictionary:
 	return _state._import_options

@@ -51,11 +51,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 		if(anim_bone_index >= 0):
 			match stf_path[1]:
-				"t": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, null, false)
-				"r": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, null, false)
-				"r_euler": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_euler_rotation_3d, null, false)
-				"s": return ImportAnimationPropertyResult.new(node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d, null, false)
-				"components":
+				"t": return ImportAnimationPropertyResult.new(":" + node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_position_3d, null, false)
+				"r": return ImportAnimationPropertyResult.new(":" + node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_rotation_3d, null, false)
+				"r_euler": return ImportAnimationPropertyResult.new(":" + node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_euler_rotation_3d, null, false)
+				"s": return ImportAnimationPropertyResult.new(":" + node.get_bone_name(anim_bone_index), STFAnimationImportUtil.import_scale_3d, null, false)
+				"components", "component_mods":
 					var anim_ret := context.resolve_animation_path(stf_path.slice(2))
 					if(anim_ret):
 						return ImportAnimationPropertyResult.new(anim_ret._godot_path, anim_ret._keyframe_converter, anim_ret._value_transform_func, anim_ret._can_import_bezier)

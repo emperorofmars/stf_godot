@@ -14,15 +14,15 @@ static func ensure_attachment(skeleton: Skeleton3D, bone_index: int) -> BoneAtta
 	return bone_attachment
 
 
-static func ensure_copy_transform_modifier(skeleton: Skeleton3D) -> CopyTransformModifier3D:
+static func ensure_copy_transform_modifier(skeleton: Skeleton3D, name: String = "STF Constraints") -> CopyTransformModifier3D:
 	var ret: CopyTransformModifier3D = null
 	for child in skeleton.get_children():
-		if(child is CopyTransformModifier3D):
+		if(child is CopyTransformModifier3D && child.name == name):
 			ret = child
 			break
 	if(not ret):
 		ret = CopyTransformModifier3D.new()
-		ret.name = "STF Constraints"
+		ret.name = name
 		skeleton.add_child(ret)
 		ret.set_meta("stf_composite", [])
 	return ret

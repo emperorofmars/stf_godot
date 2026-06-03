@@ -32,7 +32,7 @@ func __create_finalize_source_func(constraint_holder: CopyTransformModifier3D, b
 			"stf_id": stf_id,
 			"stf_name": json_resource.get("name", null),
 			"is_instance_mod": is_instance_mod,
-			"constraint_indices": [constraint_index],
+			"constraint_index": constraint_index,
 		})
 
 
@@ -43,13 +43,29 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var armature: Skeleton3D = instance_context
 	var bone_index: int = context_object
 
-	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(armature)
+	var ret := BoneAttachmentUtil.ensure_copy_transform_modifier(armature, "STF Twist Constraints")
 	var finalize_source_func := __create_finalize_source_func(ret, context_object, stf_id, json_resource)
 	var error_message = "[color=orange]Warning: Can't import resource [u]" + _get_stf_type() + "[/u] with ID [u]" + stf_id + "[/u][/color]: Godot constraints can't represent this STF constraint"
 
 	NodepathUtils.handle_stf_source(context, ret, armature, bone_index, json_resource, json_resource.get("source", []), error_message, finalize_source_func)
 
-	return ImportResult.new(ret, null)
+	var animation_property_resolve_func := func(stf_path: Array, godot_object: Object):
+		if(len(stf_path) < 2): return null
+		var node: CopyTransformModifier3D = godot_object
+		var path = armature.get_path_to(node).get_concatenated_names()
+
+		var index = -1
+		for e in node.get_meta("stf_composite"):
+			if(e["stf_id"] == stf_id):
+				index = e["constraint_index"]
+
+		if(index >= 0):
+			match stf_path[1]:
+				"enabled": return ImportAnimationPropertyResult.new("/" + path + ":settings/" + str(index) + "/copy", STFAnimationImportUtil.import_value, OptionalCallable.new(func(v): return CopyTransformModifier3D.AXIS_FLAG_Y if v else 0))
+				"weight": return ImportAnimationPropertyResult.new("/" + path + ":settings/" + str(index) + "/amount", STFAnimationImportUtil.import_value)
+		return null
+
+	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 
 func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:

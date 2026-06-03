@@ -1,5 +1,9 @@
 class_name STF_Prefab
 extends STF_Handler
+## Representation of an STF asset.
+## Imports into a Godot Scene and its root Node3D.
+##
+## [url]https://docs.stfform.at/resources/stf/stf_prefab.html[/url]
 
 func _get_stf_type() -> String: return "stf.prefab"
 func _get_priority() -> int: return 0
@@ -11,7 +15,17 @@ func _check_godot_object(godot_object: Variant) -> int:
 	return 0
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
-	var ret = Node3D.new()
+	var ret: Node3D = null
+	var root_type = context._get_import_options().get("nodes/root_type")
+	if(root_type && len(root_type) > 0):
+		if(ClassDB.can_instantiate(root_type) && ClassDB.is_parent_class(root_type, "Node3D")):
+			ret = ClassDB.instantiate(root_type)
+		else:
+			print_rich("[color=red]Can not instantiate " + root_type + "! Falling back to Node3D[/color]")
+			ret = Node3D.new()
+	else:
+		ret = Node3D.new()
+
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Prefab")
 
 	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)

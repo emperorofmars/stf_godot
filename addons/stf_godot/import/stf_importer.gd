@@ -1,5 +1,6 @@
 class_name STF_Importer
 extends EditorSceneFormatImporter
+## Importer for STF files [url]https://docs.stfform.at[/url]
 
 func _get_importer_name():
 	return "STF - Squirrel Transfer Format"
@@ -17,7 +18,7 @@ func _get_import_flags() -> int:
 func _get_import_options(path: String):
 	if(path and path.get_extension() != "stf"): return
 
-	add_import_option_advanced(TYPE_BOOL, STF_ImportOptions.AuthoringMode, false)
+	add_import_option_advanced(TYPE_BOOL, STF_ImportOptions.AuthoringMode, false) ## Whether to preserve original information
 	add_import_option_advanced(TYPE_BOOL, STF_ImportOptions.UseAssetName, false)
 	add_import_option_advanced(TYPE_INT, STF_ImportOptions.MaxWeights, 1, PROPERTY_HINT_ENUM, "4,8")
 	add_import_option_advanced(TYPE_INT, STF_ImportOptions.AnimationHandling, 0, PROPERTY_HINT_ENUM, "Prefer Simplified & Baked,Prefer Bezier & Mixed")
@@ -32,7 +33,12 @@ func _get_option_visibility(path: String, for_animation: bool, option: String):
 		else:
 			return null
 
-	return option not in ["nodes/import_as_skeleton_bones", "nodes/use_node_type_suffixes"]
+	return option not in [
+		"nodes/import_as_skeleton_bones",
+		"nodes/use_node_type_suffixes",
+		"nodes/use_name_suffixes",
+		"nodes/apply_root_scale",
+	]
 
 
 func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
@@ -45,16 +51,16 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	if(not stf_file):
 		return null
 
-	var import_state = STF_ImportState.new(stf_file, STF_Registry.get_modules_by_stf_type(), options)
+	var import_state = STF_ImportState.new(stf_file, STF_Registry.get_handlers_by_stf_type(), options)
 	var import_context = STF_ImportContext.new(import_state)
 	var ret: Node3D = import_context.import(import_state.get_root_id())
 	import_context._add_task(STF_ImportContext.PROCESS_STEPS.BEFORE_COMPONENTS, func(): import_state.resolve_exclusion_groups())
 	import_context._run_tasks()
 
-	if(options.get(STF_ImportOptions.UseAssetName)):
-		ret.name = path.get_file().get_basename()
-	elif(options["nodes/root_name"]):
+	if(options["nodes/root_name"]):
 		ret.name = options["nodes/root_name"]
+	elif(options.get(STF_ImportOptions.UseAssetName)):
+		ret.name = path.get_file().get_basename()
 
 	if(options.get(STF_ImportOptions.AuthoringMode)):
 		var stf_meta = ret.get_meta("stf", {})
@@ -64,7 +70,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 
 	var time_end := Time.get_ticks_usec()
 
-	print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000.0, " ms.[/color]")
+	print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000000.0, " s.[/color]")
 	return ret
 
 
