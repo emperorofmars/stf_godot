@@ -108,6 +108,12 @@ func _export(context: STF_ExportContext, godot_object: Variant, context_object: 
 
 	var children = []
 	for child in godot_node.get_children():
+		if(child is BoneAttachment3D):
+			for attach_child in child.get_children():
+				var child_id_index = context.export_set_reference(ret, attach_child, "node", godot_node, instance_context)
+				if(child_id_index >= 0):
+					children.append(child_id_index)
+			continue
 		if(child is not Node3D):
 			continue
 
@@ -115,5 +121,14 @@ func _export(context: STF_ExportContext, godot_object: Variant, context_object: 
 		if(child_id_index >= 0):
 			children.append(child_id_index)
 	ret["children"] = children
+
+	if(godot_node.get_parent() && godot_node.get_parent() is BoneAttachment3D):
+		print("ATTACHMENT: " + str(godot_node.get_parent()))
+		pass # todo
+
+	if(godot_node.get_class() != "Node3D"):
+		var instance_id_index = context.export_set_reference(ret, godot_node, "instance", godot_node, instance_context)
+		if(instance_id_index >= 0):
+			ret["instance"] = instance_id_index
 
 	return ExportResult.new(stf_id, ret)

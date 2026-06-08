@@ -37,8 +37,6 @@ func export(godot_object: Variant, expected_kind: String = "data", context_objec
 						if("components" not in ret._json_resource): ret._json_resource["components"] = []
 					ret._json_resource["components"].append(component_id)
 			return ret._stf_id
-		elif(!handler._is_transient()):
-			return ""
 		else:
 			print_rich("[color=red]Error: Failed to export Godot object [u]" + str(godot_object) + "[/u][/color]")
 			return ""

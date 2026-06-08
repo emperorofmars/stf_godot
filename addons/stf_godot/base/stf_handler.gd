@@ -23,9 +23,6 @@ extends RefCounted
 ## Since Godot types will be ambiguous in many cases, objects will be checked on a case by case basis.
 @abstract func _check_godot_object(godot_object: Variant) -> int
 
-## Set true only for export only handlers which handle Godot resources that should not become STF resources, but instead their children should. I.e. `BoneAttachment3D`
-func _is_transient() -> bool: return false
-
 
 ## Holds the information needed to convert an STF animation track to a Godot animation track.
 class ImportAnimationPropertyResult:
