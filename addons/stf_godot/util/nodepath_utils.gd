@@ -24,7 +24,7 @@ static func handle_stf_source(context: STF_ImportContext, constraint_holder: Cop
 		var source_id = STF_Godot_Util.get_resource_reference(json_resource, json_source[0])
 		var bone_id = STF_Godot_Util.get_resource_reference(json_resource, json_source[2])
 		var _handle = func():
-			var source_node = context.import(source_id, "node")
+			var source_node: Skeleton3D = context.import(source_id, "node")
 			var ref_bone = STF_Godot_Util.get_bone_from_skeleton(source_node, source_id)
 			var attachment = BoneAttachmentUtil.ensure_attachment(source_node, ref_bone)
 			handle_func.call(CopyTransformModifier3D.REFERENCE_TYPE_BONE, constraint_holder.get_path_to(attachment), handle_context)

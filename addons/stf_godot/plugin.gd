@@ -2,6 +2,7 @@
 extends EditorPlugin
 
 var import_plugin = null
+var post_import_plugin = null
 var export_button_index = -1
 var file_export_dialog: EditorFileDialog = null
 var notification_dialog: AcceptDialog = null
@@ -9,11 +10,13 @@ var notification_dialog: AcceptDialog = null
 func _enter_tree() -> void:
 	import_plugin = STF_Importer.new()
 	add_scene_format_importer_plugin(import_plugin, true)
-	
+	post_import_plugin = STF_ImporterPost.new()
+	add_scene_post_import_plugin(post_import_plugin)
+
 	get_export_as_menu().add_item("STF")
 	export_button_index = get_export_as_menu().item_count - 1
 	get_export_as_menu().set_item_metadata(export_button_index, _open_export_dialog)
-	
+
 	file_export_dialog = EditorFileDialog.new()
 	get_editor_interface().get_base_control().add_child(file_export_dialog)
 	file_export_dialog.file_selected.connect(_export_dialog_action)
@@ -23,7 +26,7 @@ func _enter_tree() -> void:
 	file_export_dialog.clear_filters()
 	file_export_dialog.add_filter("*.stf")
 	file_export_dialog.set_title("Export Scene to STF File")
-	
+
 	notification_dialog = AcceptDialog.new()
 
 
@@ -34,6 +37,10 @@ func _exit_tree() -> void:
 	if(import_plugin):
 		remove_scene_format_importer_plugin(import_plugin)
 		import_plugin = null
+
+	if(post_import_plugin):
+		remove_scene_post_import_plugin(post_import_plugin)
+		post_import_plugin = null
 
 	if(export_button_index >= 0):
 		get_export_as_menu().remove_item(export_button_index)

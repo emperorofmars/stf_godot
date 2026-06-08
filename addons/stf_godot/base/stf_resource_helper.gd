@@ -1,4 +1,4 @@
-class_name STF_Resource
+class_name STF_ResourceHelper
 extends RefCounted
 ## Helper class that wraps an STF resource dict.
 

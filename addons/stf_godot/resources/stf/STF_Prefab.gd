@@ -9,7 +9,7 @@ func _get_stf_type() -> String: return "stf.prefab"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["prefab"]
-func _get_godot_type() -> String: return "SceneTree"
+func _get_godot_types() -> Array[String]: return ["SceneTree"]
 
 func _check_godot_object(godot_object: Variant) -> int:
 	return 0
@@ -28,7 +28,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Prefab")
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
+	var stf_resource := _set_stf_meta(STF_ResourceHelper.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	for child_id in json_resource.get("root_nodes", []):
 		var child: Node3D = stf_resource.import(child_id, "node", ret, ret)
@@ -61,24 +61,36 @@ func __set_owner(root: Node, owner: Node):
 		__set_owner(child, owner)
 
 
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
 	var scene: SceneTree = godot_object
 	var root_node := scene.edited_scene_root
 
 	var stf_id := ""
-	if(root_node.has_meta("stf_id")):
-		stf_id = root_node.get_meta("stf_id")
+	if(root_node.has_meta("stf")):
+		stf_id = root_node.get_meta("stf")["stf_id"]
 	else:
 		stf_id = GodotUUID.v4()
-		root_node.set_meta("stf_id", stf_id)
+		root_node.set_meta("stf", {"stf_id": stf_id})
 
 	var ret = {
 		"type": _get_stf_type()
 	}
 
-	var stf_name = root_node.name
-	if(root_node.has_meta("stf") && root_node.get_meta("stf").has_meta("stf_name")):
+	var stf_name = str(root_node.name)
+	if(root_node.has_meta("stf") && root_node.get_meta("stf").has("stf_name")):
 		stf_name = root_node.get_meta("stf")["stf_name"]
 	ret["name"] = stf_name
+
+	var root_nodes = []
+
+
+	for child in root_node.get_children():
+		if(child is AnimationPlayer || child is AnimationTree || child is not Node3D):
+			continue
+
+		var child_id_index = context.export_set_reference(ret, child, "node", root_node, root_node)
+		if(child_id_index >= 0):
+			root_nodes.append(child_id_index)
+	ret["root_nodes"] = root_nodes
 
 	return ExportResult.new(stf_id, ret)

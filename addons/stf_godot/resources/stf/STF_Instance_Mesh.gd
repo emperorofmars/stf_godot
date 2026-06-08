@@ -5,17 +5,17 @@ func _get_stf_type() -> String: return "stf.instance.mesh"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["instance.mesh", "instance"]
-func _get_godot_type() -> String: return "MeshInstance3D"
+func _get_godot_types() -> Array[String]: return ["MeshInstance3D"]
 
 func _check_godot_object(godot_object: Variant) -> int:
-	return 1 if godot_object is MeshInstance3D else -1
+	return 1000 if godot_object is MeshInstance3D else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
-	#var ret = ImporterMeshInstance3D.new()
-	var ret = MeshInstance3D.new()
+	#var ret = MeshInstance3D.new()
+	var ret = ImporterMeshInstance3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Instance Mesh")
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
+	var stf_resource := _set_stf_meta(STF_ResourceHelper.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	ret.mesh = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["mesh"]), "data")
 
@@ -23,15 +23,20 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		context._add_task(context.PROCESS_STEPS.DEFAULT, func():
 			var armature_instance = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["armature_instance"]), "instance")
 			if(armature_instance):
-				ret.skeleton = ret.get_path_to(armature_instance)
+				#ret.skeleton = ret.get_path_to(armature_instance)
+				ret.skeleton_path = ret.get_path_to(armature_instance)
 				ret.skin = armature_instance.create_skin_from_rest_transforms()
 		)
 
-	for i in range(ret.get_blend_shape_count()):
+	# Set blendshape values to a meta property, so they can be applied in `_import_post`
+	var stf_blendshape_values: Array[float] = []
+	stf_blendshape_values.resize(ret.mesh.get_blend_shape_count())
+	for i in range(ret.mesh.get_blend_shape_count()):
 		if("blendshape_values" in json_resource && len(json_resource["blendshape_values"]) > i && json_resource["blendshape_values"][i]):
-			ret.set_blend_shape_value(i, json_resource["blendshape_values"][i])
+			stf_blendshape_values[i] = json_resource["blendshape_values"][i]
 		elif("blendshape_values" in ret.mesh.get_meta("stf", {}) && len(ret.mesh.get_meta("stf")["blendshape_values"]) > i):
-			ret.set_blend_shape_value(i, ret.mesh.get_meta("stf")["blendshape_values"][i])
+			stf_blendshape_values[i] = ret.mesh.get_meta("stf")["blendshape_values"][i]
+	ret.set_meta("stf_blendshape_values", stf_blendshape_values)
 
 	if("materials" in json_resource):
 		for material_index in range(min(len(json_resource["materials"]), ret.mesh.get_surface_count())):
@@ -48,7 +53,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	var animation_property_resolve_func = func (stf_path: Array, godot_object: Object):
 		if(len(stf_path) < 4): return null
-		var anim_target: MeshInstance3D = godot_object
+		#var anim_target: MeshInstance3D = godot_object
+		var anim_target: ImporterMeshInstance3D = godot_object
 
 		match stf_path[1]:
 			"blendshape":
@@ -60,6 +66,15 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
+func _import_post(root: Node) -> void:
+	for mesh_instance in root.find_children("*", "MeshInstance3D"):
+		if(mesh_instance.has_meta("stf_blendshape_values")):
+			var blendshape_values: Array[float] = mesh_instance.get_meta("stf_blendshape_values")
+			for i in range(len(blendshape_values)):
+				mesh_instance.set_blend_shape_value(i, blendshape_values[i])
+			mesh_instance.remove_meta("stf_blendshape_values")
+
+
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
 	return null
 

@@ -3,7 +3,7 @@ extends RefCounted
 ## Convert a Godot Scene into an STF_File
 
 
-var _modules: Dictionary[String, Array]
+var _handlers: Dictionary[String, Array]
 
 var _meta := STF_Info.new()
 
@@ -20,13 +20,31 @@ var _root_id: String
 var _tasks: Array[Callable] = []
 
 
-func _init(modules: Dictionary[String, Array]) -> void:
-	_modules = modules
+func _init(handlers: Dictionary[String, Array]) -> void:
+	_handlers = handlers
 
 
-func determine_module(godot_object: Object, expected_kind: String = "data") -> STF_Handler:
-	if(godot_object.get_class() in _modules):
-		var candidates := _modules[godot_object.get_class()]
+func determine_handler(godot_object: Object, expected_kind: String = "data") -> STF_Handler:
+	var best_match: STF_Handler = null
+	var best_score = -1
+	for godot_type in _handlers:
+		#if(ClassDB.is_parent_class(godot_object.get_class(), godot_type)):
+		if(godot_object.get_class() == godot_type):
+			for handler: STF_Handler in _handlers[godot_type]:
+				if(handler._get_stf_category() == expected_kind):
+					var score = handler._check_godot_object(godot_object)
+					if(score > best_score || best_match == null):
+						best_match = handler
+
+	if(best_match):
+		return best_match
+	else:
+		print_rich("[color=orange]STF Warning: Can't determine handler for: %s[/color]" % godot_object)
+		return null
+
+
+	"""if(godot_object.get_class() in _handlers):
+		var candidates := _handlers[godot_object.get_class()]
 
 		var highest_score = -1
 		var selected: STF_Handler = null
@@ -38,8 +56,8 @@ func determine_module(godot_object: Object, expected_kind: String = "data") -> S
 		if(selected):
 			return selected
 
-	print("STF Warning: Unrecognized object: %s" % godot_object)
-	return null
+	print_rich("[color=orange]STF Warning: Unrecognized object: %s[/color]" % godot_object)
+	return null"""
 
 
 func register_exported_resource(godot_object: Variant, exported_resource: STF_Handler.ExportResult):
@@ -47,8 +65,8 @@ func register_exported_resource(godot_object: Variant, exported_resource: STF_Ha
 	_resources[exported_resource._stf_id] = exported_resource._json_resource
 
 
-func add_buffer(buffer: PackedByteArray) -> String:
-	var id = GodotUUID.v4()
+func add_buffer(buffer: PackedByteArray, stf_id: String = "") -> String:
+	var id = stf_id if stf_id else GodotUUID.v4()
 	_buffers[id] = buffer
 	return id
 

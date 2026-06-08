@@ -13,10 +13,11 @@ static func export(path: String, root: SceneTree):
 	if(root_id):
 		export_state.set_root_id(root_id)
 		export_state.get_stf_file().write(path)
+		print(export_state.get_stf_file().json_definition)
 
 		var time_end := Time.get_ticks_usec()
 
-		print_rich("[color=green]Successfully exported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000.0, " ms.[/color]")
+		print_rich("[color=green]Successfully exported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000000.0, " s.[/color]")
 	else:
 		print_rich("[color=red]Failed to export STF asset [u]", path, "[/u][/color]")
 

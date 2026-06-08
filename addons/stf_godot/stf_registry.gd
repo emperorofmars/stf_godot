@@ -46,28 +46,32 @@ static func get_default_handlers() -> Array[STF_Handler]:
 		STFEXP_Node_Ethereal.new(),
 		AVA_SecondaryMotion.new(),
 		DEV_VRM_Springbone.new(),
+		#BoneAttachment3D_TransientHandler.new(),
 	]
 
 
 static func get_handlers_by_stf_type() -> Dictionary[String, STF_Handler]:
 	var ret: Dictionary[String, STF_Handler] = {}
 	for handler in get_default_handlers():
-		ret[handler._get_stf_type()] = handler
+		if(handler._get_stf_type()):
+			ret[handler._get_stf_type()] = handler
 	for handler in _stf_handlers:
 		if(handler._get_stf_type() not in ret || handler._get_priority() > ret[handler._get_stf_type()]._get_priority()):
 			ret[handler._get_stf_type()] = handler
 	return ret
 
+
 static func get_handlers_by_godot_type() -> Dictionary[String, Array]:
 	var ret: Dictionary[String, Array] = {}
 	for handler in get_default_handlers():
-		if(handler._get_godot_type() not in ret):
-			ret[handler._get_godot_type()] = [handler]
-		else:
-			ret[handler._get_godot_type()].append(handler)
+		__check_godot_types(ret, handler)
 	for handler in _stf_handlers:
-		if(handler._get_godot_type() not in ret):
-			ret[handler._get_godot_type()] = [handler]
-		else:
-			ret[handler._get_godot_type()].append(handler)
+		__check_godot_types(ret, handler)
 	return ret
+
+static func __check_godot_types(ret: Dictionary[String, Array], handler: STF_Handler) -> void:
+	for godot_type in handler._get_godot_types():
+		if(godot_type not in ret):
+			ret[godot_type] = [handler]
+		else:
+			ret[godot_type].append(handler)

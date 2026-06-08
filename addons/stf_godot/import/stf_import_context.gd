@@ -44,7 +44,7 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	if(stf_id in _state._imported_resources):
 		return _state._imported_resources[stf_id]
 	var json_resource = _state.get_json_resource(stf_id)
-	var handler = _state.determine_handler(json_resource, expected_kind)
+	var handler := _state.determine_handler(json_resource, expected_kind)
 	if(handler && handler._get_stf_category() == expected_kind):
 		var ret := handler._import(self, stf_id, json_resource, context_object, instance_context if handler._get_stf_category() != "data" else null)
 		if(ret):
@@ -54,7 +54,7 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 				var component_instance_context = instance_context if handler._get_stf_category() != "data" else ret._godot_object
 
 				for component_id in json_resource["components"]:
-					import_component(component_id, ret._godot_object, component_instance_context)
+					import_component(component_id, ret._godot_object, component_instance_context, ret._set_component_meta)
 
 			return ret._godot_object
 		else:
@@ -62,13 +62,18 @@ func import(stf_id: String, expected_kind: String = "data", context_object: Vari
 	return null
 
 
-func import_component(component_id: String, context_object: Variant = null, instance_context: Variant = null):
+func import_component(component_id: String, context_object: Variant = null, instance_context: Variant = null, set_component_meta: OptionalCallable = null):
 	var json_resource = _state.get_json_resource(component_id)
+
+	if(set_component_meta != null):
+		set_component_meta._callable.call(json_resource)
+
 	var component_handler: STF_Handler  = _state.determine_handler(json_resource, "component")
 	if(component_handler and component_handler._get_stf_category() == "component"):
 		if("exclusion_group" in json_resource):
 			_state.register_exclusion_group_component(json_resource.get("exclusion_group"), component_handler._get_stf_type(), component_id)
-		if(instance_context not in _state._component_instance_context): _state._component_instance_context[instance_context] = []
+		if(instance_context not in _state._component_instance_context):
+			_state._component_instance_context[instance_context] = []
 		var component_handle_func: Callable = __create_handle_component_instance_func(component_id, component_handler, json_resource, context_object)
 		_state._component_instance_context[instance_context].append(component_handle_func)
 		_add_task(PROCESS_STEPS.COMPONENTS, func(): component_handle_func.call(instance_context))

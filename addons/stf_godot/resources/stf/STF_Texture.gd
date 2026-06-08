@@ -5,7 +5,7 @@ func _get_stf_type() -> String: return "stf.texture"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["texture"]
-func _get_godot_type() -> String: return "PortableCompressedTexture2D"
+func _get_godot_types() -> Array[String]: return ["PortableCompressedTexture2D"]
 
 func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is PortableCompressedTexture2D else -1
@@ -13,15 +13,13 @@ func _check_godot_object(godot_object: Variant) -> int:
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var image: Image = context_object
 
-	#image.resize(json_resource.get("width", image.get_width()), json_resource.get("height", image.get_height()))
-
 	if(json_resource.get("mipmaps", true)):
 		image.generate_mipmaps()
 	else:
 		image.clear_mipmaps()
 
 	var ret := PortableCompressedTexture2D.new()
-	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_category())
+	var stf_resource = STF_ResourceHelper.new(context, stf_id, json_resource, _get_stf_category())
 	_set_stf_meta(stf_resource, ret)
 
 	ret.keep_compressed_buffer = true
@@ -41,6 +39,6 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 
 	return ImportResult.new(ret)
 
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
 	return null
 

@@ -5,7 +5,7 @@ func _get_stf_type() -> String: return "stf.mesh"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["mesh"]
-func _get_godot_type() -> String: return "Mesh"
+func _get_godot_types() -> Array[String]: return ["Mesh"]
 func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is Mesh else -1
 
@@ -101,7 +101,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		0: BONES_PER_VERTEX = 4
 		1: BONES_PER_VERTEX = 8
 
-	var stf_resource = STF_Resource.new(context, stf_id, json_resource, _get_stf_category())
+	var stf_resource = STF_ResourceHelper.new(context, stf_id, json_resource, _get_stf_category())
 
 	var float_width: int = json_resource.get("float_width", 4)
 	var indices_width: int = json_resource.get("indices_width", 4)
@@ -239,7 +239,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			var bone_id = bones_ids[stf_bone_index]
 			var godot_bone_index = -1
 			for i in range(armature.get_bone_count()):
-				if(armature.get_bone_meta(i, "stf_id") == bone_id):
+				if(armature.get_bone_meta(i, "stf")["stf_id"] == bone_id):
 					godot_bone_index = i
 					break
 			stf_to_godot_bone_index[stf_bone_index] = godot_bone_index
@@ -330,13 +330,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			else:
 				blendshape_values.append(0.0)
 
-	#var ret = ImporterMesh.new()
-	var ret = ArrayMesh.new()
+	var ret = ImporterMesh.new()
+	#var ret = ArrayMesh.new()
 	ret.resource_name = STF_Godot_Util.get_name_or_default(json_resource, "STF Mesh")
 	_set_stf_meta(stf_resource, ret)
 
-	ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
-	#ret.set_blend_shape_mode(Mesh.BLEND_SHAPE_MODE_NORMALIZED)
+	#ret.blend_shape_mode = Mesh.BLEND_SHAPE_MODE_NORMALIZED
+	ret.set_blend_shape_mode(Mesh.BLEND_SHAPE_MODE_NORMALIZED)
 
 	for name in blendshape_names:
 		ret.add_blend_shape(name)
@@ -437,8 +437,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		if(BONES_PER_VERTEX == 8):
 			flags |= Mesh.ARRAY_FLAG_USE_8_BONE_WEIGHTS
 
-		#ret.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, null, "", flags)
-		ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, flags)
+		ret.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, null, "", flags)
+		#ret.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays, submesh_blendshapes, {}, flags)
 
 	if("material_slots" in json_resource):
 		for material_index in range(len(json_resource["material_slots"])):
@@ -446,13 +446,13 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			if(material_id != null):
 				var material = context.import(STF_Godot_Util.get_resource_reference(json_resource, material_id), "data")
 				if(material):
-					ret.surface_set_material(material_index, material)
-					#ret.set_surface_material(material_index, material)
+					#ret.surface_set_material(material_index, material)
+					ret.set_surface_material(material_index, material)
 
 	#ret.generate_lods(60, 60, [])
 
 	return ImportResult.new(ret)
 
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
 	return null
 

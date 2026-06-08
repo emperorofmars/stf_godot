@@ -9,7 +9,7 @@ func _get_stf_type() -> String: return "stf.node"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "node"
 func _get_like_types() -> Array[String]: return ["node"]
-func _get_godot_type() -> String: return "Node3D"
+func _get_godot_types() -> Array[String]: return ["Node3D", "Skeleton3D", "MeshInstance3D"]
 
 func _check_godot_object(godot_object: Variant) -> int:
 	return 1 if godot_object is Node3D else -1
@@ -25,7 +25,7 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		ret = Node3D.new()
 	ret.name = STF_Godot_Util.get_name_or_default(json_resource, "STF Node")
 
-	var stf_resource := _set_stf_meta(STF_Resource.new(context, stf_id, json_resource, _get_stf_category()), ret)
+	var stf_resource := _set_stf_meta(STF_ResourceHelper.new(context, stf_id, json_resource, _get_stf_category()), ret)
 
 	ret.rotation_edit_mode = Node3D.ROTATION_EDIT_MODE_QUATERNION
 
@@ -86,5 +86,34 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
 
 
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant) -> ExportResult:
-	return null
+func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
+	var godot_node: Node3D = godot_object
+	var ret = {
+		"type": _get_stf_type(),
+		"trs": STF_TRS_Util.serialize_transform(godot_node.transform),
+		"enabled": godot_node.visible,
+	}
+
+	var stf_name = str(godot_node.name)
+	if(godot_node.has_meta("stf") && godot_node.get_meta("stf").has("stf_name")):
+		stf_name = godot_node.get_meta("stf")["stf_name"]
+	ret["name"] = stf_name
+
+	var stf_id := ""
+	if(godot_node.has_meta("stf")):
+		stf_id = godot_node.get_meta("stf")["stf_id"]
+	else:
+		stf_id = GodotUUID.v4()
+		godot_node.set_meta("stf", {"stf_id": stf_id})
+
+	var children = []
+	for child in godot_node.get_children():
+		if(child is not Node3D):
+			continue
+
+		var child_id_index = context.export_set_reference(ret, child, "node", godot_node, instance_context)
+		if(child_id_index >= 0):
+			children.append(child_id_index)
+	ret["children"] = children
+
+	return ExportResult.new(stf_id, ret)

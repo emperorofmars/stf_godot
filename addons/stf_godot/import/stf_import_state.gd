@@ -49,7 +49,7 @@ func determine_handler(json_resource: Dictionary, expected_kind: String = "data"
 	if(json_resource["type"] in _handlers):
 		return _handlers[json_resource["type"]]
 	else:
-		if(_import_options.get("enable_debug_log", false)):
+		if(_import_options.get(STF_ImportOptions.EnableDebugLog, false)):
 			print_rich("[color=orange]STF Warning: Unrecognized resource: [b]", json_resource["type"], "[/b][/color]")
 		return null # todo fallback
 

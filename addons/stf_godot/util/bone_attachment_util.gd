@@ -1,7 +1,7 @@
 class_name BoneAttachmentUtil
 
 
-static func ensure_attachment(skeleton: Skeleton3D, bone_index: int) -> BoneAttachment3D:
+static func ensure_attachment(skeleton: Node3D, bone_index: int) -> BoneAttachment3D:
 	for child in skeleton.get_children():
 		if(child is BoneAttachment3D && child.bone_idx == bone_index):
 			return child
@@ -14,7 +14,7 @@ static func ensure_attachment(skeleton: Skeleton3D, bone_index: int) -> BoneAtta
 	return bone_attachment
 
 
-static func ensure_copy_transform_modifier(skeleton: Skeleton3D, name: String = "STF Constraints") -> CopyTransformModifier3D:
+static func ensure_copy_transform_modifier(skeleton: Node3D, name: String = "STF Constraints") -> CopyTransformModifier3D:
 	var ret: CopyTransformModifier3D = null
 	for child in skeleton.get_children():
 		if(child is CopyTransformModifier3D && child.name == name):

@@ -65,17 +65,9 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 	if(options.get(STF_ImportOptions.AuthoringMode)):
 		var stf_meta = ret.get_meta("stf", {})
 		stf_meta["import_meta"] = import_state._stf_file.json_definition["stf"]
-	else:
-		__clean_stf_meta(ret)
 
 	var time_end := Time.get_ticks_usec()
 
 	print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000000.0, " s.[/color]")
 	return ret
 
-
-func __clean_stf_meta(node: Node):
-	if(node.has_meta("stf_id")): node.remove_meta("stf_id")
-	if(node.has_meta("stf")): node.remove_meta("stf")
-	for child in node.get_children(true):
-		__clean_stf_meta(child)
