@@ -46,7 +46,6 @@ static func get_default_handlers() -> Array[STF_Handler]:
 		STFEXP_Node_Ethereal.new(),
 		AVA_SecondaryMotion.new(),
 		DEV_VRM_Springbone.new(),
-		#BoneAttachment3D_TransientHandler.new(),
 	]
 
 
