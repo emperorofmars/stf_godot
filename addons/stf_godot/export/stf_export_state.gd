@@ -20,8 +20,9 @@ var _root_id: String
 var _tasks: Array[Callable] = []
 
 
-func _init(handlers: Dictionary[String, Array]) -> void:
+func _init(handlers: Dictionary[String, Array], meta: STF_Info = null) -> void:
 	_handlers = handlers
+	_meta = meta if meta else STF_Info.new()
 
 
 func determine_handler(godot_object: Object, expected_kind: String = "data") -> STF_Handler:
@@ -41,23 +42,6 @@ func determine_handler(godot_object: Object, expected_kind: String = "data") -> 
 	else:
 		print_rich("[color=orange]STF Warning: Can't determine handler for: %s[/color]" % godot_object)
 		return null
-
-
-	"""if(godot_object.get_class() in _handlers):
-		var candidates := _handlers[godot_object.get_class()]
-
-		var highest_score = -1
-		var selected: STF_Handler = null
-		for candidate in candidates:
-			var score = candidate._check_godot_object(godot_object)
-			if(score > highest_score):
-				highest_score = score
-				selected = candidate
-		if(selected):
-			return selected
-
-	print_rich("[color=orange]STF Warning: Unrecognized object: %s[/color]" % godot_object)
-	return null"""
 
 
 func register_exported_resource(godot_object: Variant, exported_resource: STF_Handler.ExportResult):
@@ -83,13 +67,16 @@ func set_root_id(root_id):
 func get_stf_file() -> STF_File:
 	var ret = STF_File.new()
 
+	print(_meta)
+
 	ret.json_definition["stf"] = {
 		"version_major": 0,
-		"version_minor": 0,
+		"version_minor": 1,
 		"root": _root_id,
-		"asset_info": {}, # todo
+		"asset_info": STF_Info.serialize_asset_info(_meta),
+		"asset_properties": _meta.asset_properties,
 		"generator": "stf_godot",
-		"generator_version": "0.0.6", # todo
+		"generator_version": "0.1.3", # todo
 		"timestamp": Time.get_datetime_string_from_system(true),
 		"metric_multiplier": 1 # todo
 	}
@@ -103,7 +90,5 @@ func get_stf_file() -> STF_File:
 			"index": ret.add_buffer(_buffers[buffer_id])
 		}
 	ret.json_definition["buffers"] = buffers_object
-
-	#print(ret.json_definition)
 
 	return ret

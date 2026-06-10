@@ -2,16 +2,16 @@ class_name STF_ImporterPost
 extends EditorScenePostImportPlugin
 
 
-func _post_process(scene: Node):
-	if(scene.has_meta("stf")):
+func _post_process(root: Node):
+	if(root.has_meta("stf")):
 		var time_start := Time.get_ticks_usec()
 
 		var handlers = STF_Registry.get_handlers_by_stf_type()
 		for handler_type in handlers:
-			handlers[handler_type]._import_post(scene)
+			handlers[handler_type]._import_post(root)
 
 		if(!get_option_value(STF_ImportOptions.AuthoringMode)):
-			__clean_stf_meta(scene)
+			__clean_stf_meta(root)
 
 		var time_end := Time.get_ticks_usec()
 

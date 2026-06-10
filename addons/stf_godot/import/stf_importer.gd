@@ -64,7 +64,7 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 
 	if(options.get(STF_ImportOptions.AuthoringMode)):
 		var stf_meta = ret.get_meta("stf", {})
-		stf_meta["import_meta"] = import_state._stf_file.json_definition["stf"]
+		stf_meta["import_meta"] = import_state._meta
 
 	var time_end := Time.get_ticks_usec()
 
