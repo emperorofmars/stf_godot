@@ -4,7 +4,9 @@ extends EditorScenePostImportPlugin
 
 func _post_process(root: Node):
 	if(root.has_meta("stf")):
-		var time_start := Time.get_ticks_usec()
+		var time_start: int = root.get_meta("stf_post_import_data_tmp")["time_start"]
+		var path: String = root.get_meta("stf_post_import_data_tmp")["path"]
+		root.remove_meta("stf_post_import_data_tmp")
 
 		var handlers = STF_Registry.get_handlers_by_stf_type()
 		for handler_type in handlers:
@@ -15,7 +17,7 @@ func _post_process(root: Node):
 
 		var time_end := Time.get_ticks_usec()
 
-		print_rich("[color=green]Successfully post-processed STF asset in ", (time_end - time_start) / 1000000.0, " s.[/color]")
+		print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000000.0, " s.[/color]")
 
 
 func __clean_stf_meta(node: Node):

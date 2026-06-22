@@ -7,15 +7,29 @@ var export_button_index = -1
 var file_export_dialog: EditorFileDialog = null
 var notification_dialog: AcceptDialog = null
 
+const stf_export_enabled_setting := "editor/export/experimental_stf_export_enabled"
+
+func _enable_plugin():
+	_register_stf_settings()
+
+func _disable_plugin():
+	ProjectSettings.set_setting(stf_export_enabled_setting, null)
+
+func _register_stf_settings():
+	if(!ProjectSettings.has_setting(stf_export_enabled_setting)):
+		ProjectSettings.set_setting(stf_export_enabled_setting, false)
+		ProjectSettings.set_initial_value(stf_export_enabled_setting, false)
+		ProjectSettings.add_property_info({
+			"name": stf_export_enabled_setting,
+			"type": TYPE_BOOL,
+		})
+
+
 func _enter_tree() -> void:
 	import_plugin = STF_Importer.new()
 	add_scene_format_importer_plugin(import_plugin, true)
 	post_import_plugin = STF_ImporterPost.new()
 	add_scene_post_import_plugin(post_import_plugin)
-
-	get_export_as_menu().add_item("STF")
-	export_button_index = get_export_as_menu().item_count - 1
-	get_export_as_menu().set_item_metadata(export_button_index, _open_export_dialog)
 
 	file_export_dialog = EditorFileDialog.new()
 	get_editor_interface().get_base_control().add_child(file_export_dialog)
@@ -29,21 +43,45 @@ func _enter_tree() -> void:
 
 	notification_dialog = AcceptDialog.new()
 
+	_register_stf_settings()
+	if(ProjectSettings.get_setting(stf_export_enabled_setting, false)):
+		_enable_export()
+	ProjectSettings.settings_changed.connect(_toggle_export)
+
 
 func _exit_tree() -> void:
-	file_export_dialog.queue_free()
-	notification_dialog.queue_free()
-
 	if(import_plugin):
 		remove_scene_format_importer_plugin(import_plugin)
 		import_plugin = null
-
 	if(post_import_plugin):
 		remove_scene_post_import_plugin(post_import_plugin)
 		post_import_plugin = null
 
+	ProjectSettings.settings_changed.disconnect(_toggle_export)
+	_disable_export()
+	if(file_export_dialog):
+		file_export_dialog.queue_free()
+		file_export_dialog = null
+	if(notification_dialog):
+		notification_dialog.queue_free()
+		notification_dialog = null
+
+
+func _toggle_export():
+	if(ProjectSettings.get_setting(stf_export_enabled_setting, false) && export_button_index < 0):
+		_enable_export()
+	elif(!ProjectSettings.get_setting(stf_export_enabled_setting, false) && export_button_index >= 0):
+		_disable_export()
+
+func _enable_export():
+	get_export_as_menu().add_item("STF")
+	export_button_index = get_export_as_menu().item_count - 1
+	get_export_as_menu().set_item_metadata(export_button_index, _open_export_dialog)
+
+func _disable_export():
 	if(export_button_index >= 0):
 		get_export_as_menu().remove_item(export_button_index)
+		export_button_index = -1
 
 
 func _open_export_dialog():

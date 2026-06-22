@@ -15,8 +15,12 @@ compatibility/default_parent_skeleton_in_mesh_instance_3d=true
 [application]
 
 config/name="stf_godot"
-config/features=PackedStringArray("4.6", "Forward Plus")
+config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
+
+[editor]
+
+export/experimental_stf_export_enabled=true
 
 [editor_plugins]
 

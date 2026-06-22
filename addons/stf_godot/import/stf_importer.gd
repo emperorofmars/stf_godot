@@ -66,8 +66,10 @@ func _import_scene(path: String, flags: int, options: Dictionary) -> Object:
 		var stf_meta = ret.get_meta("stf", {})
 		stf_meta["import_meta"] = import_state._meta
 
-	var time_end := Time.get_ticks_usec()
-
-	print_rich("[color=green]Successfully imported STF asset [u]", path, "[/u] in ", (time_end - time_start) / 1000000.0, " s.[/color]")
+	# Info for STF_ImporterPost
+	ret.set_meta("stf_post_import_data_tmp", {
+		"time_start": time_start,
+		"path": path,
+	})
 	return ret
 
