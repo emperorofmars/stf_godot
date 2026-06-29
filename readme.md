@@ -7,9 +7,8 @@
 🌰 **[Read the User Guide!](https://docs.stfform.at/guide/godot.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_godot/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ## Installation
-* Download the [latest release](https://codeberg.org/stf_format/stf_godot/releases/latest)
-* Unpack the `addons/stf_godot` directory into the `addons` directory of your godot project.
-* Enable it under `Project` → `Project Settings` → `Plugins` → `stf_godot`
+* Install it from the [Godot Asset Store](https://store.godotengine.org/asset/mars/stf-godot/)
+* Enable the addon under `Project` → `Project Settings` → `Plugins` → `stf_godot`
 
 Please open issues for any bugs or misbehavior you notice. Feel free to open issues for feature requests.
 
