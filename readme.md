@@ -4,7 +4,7 @@
 
 **WIP implementation for Godot 4.6+. Do not use productively!**
 
-🌰 **[Read the User Guide!](https://docs.stfform.at/guide/godot.html)** 🌰 **[Report Issues](https://codeberg.org/stf_format/stf_godot/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
+🌰 **[Report Issues](https://codeberg.org/stf_format/stf_godot/issues)** 🌰 **[STF Documentation](https://docs.stfform.at/)**
 
 ## Installation
 * Install it from the [Godot Asset Store](https://store.godotengine.org/asset/mars/stf-godot/)
