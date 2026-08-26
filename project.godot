@@ -18,10 +18,6 @@ config/name="stf_godot"
 config/features=PackedStringArray("4.7", "Forward Plus")
 config/icon="res://icon.svg"
 
-[editor]
-
-export/experimental_stf_export_enabled=true
-
 [editor_plugins]
 
 enabled=PackedStringArray("res://addons/stf_godot/plugin.cfg")
