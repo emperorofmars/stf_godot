@@ -44,6 +44,8 @@ static func get_default_handlers() -> Array[STF_Handler]:
 		STFEXP_Instance_Text.new(),
 		STFEXP_Text.new(),
 		STFEXP_Node_Ethereal.new(),
+		STFEXP_Instance_Curve.new(),
+		STFEXP_Curve.new(),
 		AVA_SecondaryMotion.new(),
 		DEV_VRM_Springbone.new(),
 	]

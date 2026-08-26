@@ -1,5 +1,8 @@
+![](https://codeberg.org/stf_format/stf_godot/badges/release.svg)
+![](https://codeberg.org/stf_format/stf_godot/badges/stars.svg)
+
 # STF Godot
-**Squirrel Transfer Format - Modular 3D File-Format**\
+**Squirrel Transfer Format - Modular 3D Interchange-Format**\
 *Intended for (not only) games-development use-cases.*
 
 **WIP implementation for Godot 4.6+. Do not use productively!**

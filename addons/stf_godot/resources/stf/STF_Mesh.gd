@@ -5,10 +5,6 @@ func _get_stf_type() -> String: return "stf.mesh"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["mesh"]
-func _get_godot_types() -> Array[String]: return ["Mesh"]
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1 if godot_object is Mesh else -1
-
 
 func import_uint_buffer(buffer: PackedByteArray, width: int) -> Array:
 	var ret = []
@@ -452,7 +448,3 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	#ret.generate_lods(60, 60, [])
 
 	return ImportResult.new(ret)
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null
-

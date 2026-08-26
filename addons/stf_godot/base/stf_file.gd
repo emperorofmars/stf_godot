@@ -1,7 +1,8 @@
 class_name STF_File
 extends RefCounted
-## Deconstructed representation of an STF file
-## Provides convenient access to get or add buffers
+## Deconstructed representation of an STF file.
+##
+## Provides convenient access to get or add buffers.
 
 
 var binary_version: int = 0

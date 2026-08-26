@@ -5,11 +5,6 @@ func _get_stf_type() -> String: return "stf.instance.armature"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["instance.armature", "instance"]
-func _get_godot_types() -> Array[String]: return ["Skeleton3D"]
-
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1 if godot_object is Skeleton3D else -1 # todo this is wrong, devise a way to check for armatures vs armature instances
-
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var armature: Skeleton3D = context.import(STF_Godot_Util.get_resource_reference(json_resource, json_resource["armature"]), "data")
@@ -60,7 +55,3 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null
-

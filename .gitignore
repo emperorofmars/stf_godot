@@ -13,4 +13,5 @@
 !addons/stf_godot/**/*
 !readme.md
 !CONTRIBUTING.md
+!changelog.md
 !.vscode/extensions.json

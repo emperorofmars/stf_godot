@@ -5,11 +5,6 @@ func _get_stf_type() -> String: return "stfexp.constraint.ik"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["constraint.ik", "constraint"]
-func _get_godot_types() -> Array[String]: return ["IKModifier3D"]
-
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1000 if godot_object is IKModifier3D else -1 # todo to this properly
-
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	if(instance_context is not Skeleton3D):
@@ -110,7 +105,3 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		# TODO handle other IK ways
 		print_rich("[color=orange]Warning: Can't import resource [u]stfexp.constraint.ik[/u] with ID [u]" + stf_id + "[/u][/color]: Godot can't represent this resources settings.")
 		return null
-
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null

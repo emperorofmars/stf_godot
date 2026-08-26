@@ -15,8 +15,8 @@ func _init(context: STF_ImportContext, stf_id: String, json_resource: Dictionary
 
 	self._meta = {
 		"stf_id": stf_id,
-		"stf_name": json_resource.get("name"),
-		"stf_type": json_resource["type"],
+		"stf_name": json_resource.get("name"), # Can be undefined in case of instance override
+		"stf_type": json_resource.get("type"), # Can be undefined in case of instance override
 		"stf_category": stf_category,
 		"original_json": json_resource,
 		"buffers": buffers,

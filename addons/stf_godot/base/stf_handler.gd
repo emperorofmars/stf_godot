@@ -1,7 +1,7 @@
 @abstract class_name STF_Handler
 extends RefCounted
 ## Base class for every STF-resource-handler to inherit.
-## Provides functionality to import a specific STF resource `type` into a Godot construct and to serialize that Godot construct back into the STF resource
+## Provides functionality to import a specific STF resource `type` into a Godot construct.
 ##
 ## [url]https://docs.stfform.at/format/stf_format.html#resources-object[/url]
 
@@ -16,12 +16,6 @@ extends RefCounted
 
 ## I.e. `stf.node` would set `["node"]`. Useful for validation.
 @abstract func _get_like_types() -> Array[String]
-
-## Godot type to match for export
-@abstract func _get_godot_types() -> Array[String]
-
-## Since Godot types will be ambiguous in many cases, objects will be checked on a case by case basis.
-@abstract func _check_godot_object(godot_object: Variant) -> int
 
 
 ## Holds the information needed to convert an STF animation track to a Godot animation track.
@@ -96,17 +90,3 @@ func _set_stf_meta(stf_resource: STF_ResourceHelper, godot_object: Object) -> ST
 ## Function to run post import.
 func _import_post(root: Node) -> void:
 	pass
-
-
-class ExportResult:
-	extends RefCounted
-	var _stf_id: String
-	var _json_resource: Dictionary
-	var _components: Array[Variant]
-	func _init(stf_id: String, json_resource: Dictionary, components: Array[Variant] = []) -> void:
-		self._stf_id = stf_id
-		self._json_resource = json_resource
-		self._components = components
-
-## The main star for export.
-@abstract func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult

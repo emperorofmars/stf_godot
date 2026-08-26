@@ -5,10 +5,6 @@ func _get_stf_type() -> String: return "stfexp.lightprobe_anchor"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "component"
 func _get_like_types() -> Array[String]: return ["lightprobe_anchor"]
-func _get_godot_types() -> Array[String]: return ["LightmapProbe"]
-
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1000 if godot_object is LightmapProbe else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = LightmapProbe.new()
@@ -35,7 +31,3 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	stf_resource.add_meta("anchor_remote_transform", ret.get_path_to(remoteTransform))
 
 	return ImportResult.new(ret)
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null
-

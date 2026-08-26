@@ -5,10 +5,6 @@ func _get_stf_type() -> String: return "stf.instance.mesh"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["instance.mesh", "instance"]
-func _get_godot_types() -> Array[String]: return ["MeshInstance3D"]
-
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1000 if godot_object is MeshInstance3D else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	#var ret = MeshInstance3D.new()
@@ -73,8 +69,4 @@ func _import_post(root: Node) -> void:
 			for i in range(len(blendshape_values)):
 				mesh_instance.set_blend_shape_value(i, blendshape_values[i])
 			mesh_instance.remove_meta("stf_blendshape_values")
-
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null
 

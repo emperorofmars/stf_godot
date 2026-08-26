@@ -5,10 +5,6 @@ func _get_stf_type() -> String: return "stf.animation"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "data"
 func _get_like_types() -> Array[String]: return ["animation"]
-func _get_godot_types() -> Array[String]: return ["Animation"]
-
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1 if godot_object is Animation else -1
 
 func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictionary, context_object: Variant, instance_context: Variant) -> ImportResult:
 	var ret = Animation.new()
@@ -52,7 +48,3 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 			print_rich("[color=orange]Error: Failed to convert track on animation resource [u]" + stf_id + "[/u][/color]: " + str(stf_track["target"]))
 
 	return ImportResult.new(ret)
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null
-

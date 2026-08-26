@@ -5,10 +5,6 @@ func _get_stf_type() -> String: return "stfexp.light"
 func _get_priority() -> int: return 0
 func _get_stf_category() -> String: return "instance"
 func _get_like_types() -> Array[String]: return ["light"]
-func _get_godot_types() -> Array[String]: return ["Light3D"]
-
-func _check_godot_object(godot_object: Variant) -> int:
-	return 1000 if godot_object is Light3D else -1
 
 func _convert_temperature(temperature: float) -> Color:
 	# reference: https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
@@ -80,7 +76,3 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 		return null
 
 	return ImportResult.new(ret, OptionalCallable.new(animation_property_resolve_func))
-
-func _export(context: STF_ExportContext, godot_object: Variant, context_object: Variant, instance_context: Variant) -> ExportResult:
-	return null
-
