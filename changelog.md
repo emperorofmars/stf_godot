@@ -2,7 +2,7 @@
 
 ## v0.1.4
 * Removed export functionality
-* Implemented `stfexp.curve`
+* Implemented `stfexp.curve` and `stfexp.instance.curve`
 * Fixed instance override import error due to missing `stf_type` property
 
 ## v0.1.3
