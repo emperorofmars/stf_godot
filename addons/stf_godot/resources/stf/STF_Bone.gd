@@ -15,19 +15,31 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	var stf_resource := STF_ResourceHelper.new(context, stf_id, json_resource, _get_stf_category())
 	armature.set_bone_meta(bone_index, "stf", stf_resource._meta)
 
-	var rest_pose := Transform3D(Basis(STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()), STF_TRS_Util.parse_vec3(json_resource["translation"]))
-	armature.set_bone_rest(bone_index, rest_pose)
-
 	var stf_bone = STF_Bone_Model.new()
 	stf_bone.resource_name = bone_name
 	stf_bone._bone_index = bone_index
 	stf_bone.set_meta("stf", stf_resource._meta)
-	if("translation" in json_resource): stf_bone.translation = STF_TRS_Util.parse_vec3(json_resource["translation"])
-	if("rotation" in json_resource): stf_bone.rotation = STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()
+	"""if("tr" in json_resource):
+		stf_bone.translation = STF_TRS_Util.parse_vec3(json_resource["tr_armature"][0])
+		stf_bone.rotation = STF_TRS_Util.parse_quat(json_resource["tr_armature"][1]).normalized()
+		stf_bone.tr_relative_to_armature = false"""
+	if("tr_armature" in json_resource):
+		stf_bone.translation = STF_TRS_Util.parse_vec3(json_resource["tr_armature"][0])
+		stf_bone.rotation = STF_TRS_Util.parse_quat(json_resource["tr_armature"][1]).normalized()
+		stf_bone.tr_relative_to_armature = true
+	else:
+		# TODO remove deprecated properties for stf format version 0.2
+		if("translation" in json_resource): stf_bone.translation = STF_TRS_Util.parse_vec3(json_resource["translation"])
+		if("rotation" in json_resource): stf_bone.rotation = STF_TRS_Util.parse_quat(json_resource["rotation"]).normalized()
+		stf_bone.tr_relative_to_armature = true
 	if("length" in json_resource): stf_bone.length = json_resource["length"]
 	if("connected" in json_resource): stf_bone.connected = json_resource["connected"]
 	if("deform" in json_resource): stf_bone.deform = json_resource["deform"]
 	if("non_deform_use" in json_resource): stf_bone.non_deform_use = json_resource["non_deform_use"]
+
+	var rest_pose := Transform3D(Basis(stf_bone.rotation), stf_bone.translation)
+	armature.set_bone_rest(bone_index, rest_pose)
+
 	armature.set_bone_meta(bone_index, "stf_resource", stf_bone)
 
 	if(
@@ -45,7 +57,8 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	for child_id in json_resource.get("children", []):
 		var child_index: int = stf_resource.import(child_id, "node", context_object, instance_context)
 		armature.set_bone_parent(child_index, bone_index)
-		armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
+		if(stf_bone.tr_relative_to_armature):
+			armature.set_bone_rest(child_index, rest_pose.inverse() * armature.get_bone_rest(child_index))
 
 		stf_bone.children.append(armature.get_bone_meta(child_index, "stf_resource"))
 

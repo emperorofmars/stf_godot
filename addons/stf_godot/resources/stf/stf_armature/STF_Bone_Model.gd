@@ -5,6 +5,9 @@ extends Resource
 var children: Array[STF_Bone_Model] = []
 
 @export
+var tr_relative_to_armature: bool = false
+
+@export
 var translation: Vector3 = Vector3.ZERO
 @export
 var rotation: Quaternion = Quaternion.IDENTITY
