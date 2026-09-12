@@ -19,10 +19,11 @@ func _import(context: STF_ImportContext, stf_id: String, json_resource: Dictiona
 	stf_bone.resource_name = bone_name
 	stf_bone._bone_index = bone_index
 	stf_bone.set_meta("stf", stf_resource._meta)
-	"""if("tr" in json_resource):
+
+	if("tr" in json_resource):
 		stf_bone.translation = STF_TRS_Util.parse_vec3(json_resource["tr_armature"][0])
 		stf_bone.rotation = STF_TRS_Util.parse_quat(json_resource["tr_armature"][1]).normalized()
-		stf_bone.tr_relative_to_armature = false"""
+		stf_bone.tr_relative_to_armature = false
 	if("tr_armature" in json_resource):
 		stf_bone.translation = STF_TRS_Util.parse_vec3(json_resource["tr_armature"][0])
 		stf_bone.rotation = STF_TRS_Util.parse_quat(json_resource["tr_armature"][1]).normalized()
